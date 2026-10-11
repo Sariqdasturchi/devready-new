@@ -4,6 +4,7 @@ import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
 import { blogApi } from "../../api/api";
 import { formatDate, mediaUrl } from "../../lib/format";
 import type { Blogs } from "../../types/type";
+import { stripMarkdown } from "../../components/Markdown";
 
 export default function BlogPage() {
   const [blogs, setBlogs] = useState<Blogs[]>([]);
@@ -67,14 +68,20 @@ export default function BlogPage() {
         </div>
       ) : visible.length ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12">
-          {visible.map((b) => (
+          {visible.map((b, i) => (
             <Link key={b._id} to={`/blogs/${b._id}`} className="group flex flex-col">
-              <div className="aspect-[16/10] rounded-2xl overflow-hidden bg-mist border border-line">
+              <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-mist border border-line">
                 {b.image ? (
                   <img src={mediaUrl(b.image)} alt="" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
                 ) : (
-                  <div className="w-full h-full flex items-end p-5">
-                    <span className="text-2xl font-extrabold tracking-tight text-ink/15">devready</span>
+                  // Rasm yo'q — tegdan tipografik muqova (uch xil rang navbatma-navbat)
+                  <div
+                    className={`w-full h-full flex flex-col justify-between p-6 ${
+                      ["bg-ink text-white", "bg-brand text-white", "bg-mist text-ink"][i % 3]
+                    }`}
+                  >
+                    <span className="text-[13px] font-semibold opacity-60">devready / blog</span>
+                    <span className="text-[34px] leading-none font-extrabold tracking-[-0.04em]">{b.tags[0] || "Maqola"}</span>
                   </div>
                 )}
               </div>
@@ -83,7 +90,7 @@ export default function BlogPage() {
                 {formatDate(b.createdAt)}
               </p>
               <h2 className="mt-2 text-xl font-bold tracking-[-0.02em] leading-snug text-ink group-hover:text-brand transition-colors">{b.title}</h2>
-              <p className="mt-2 text-[15px] text-ink-2 leading-relaxed line-clamp-3">{b.text}</p>
+              <p className="mt-2 text-[15px] text-ink-2 leading-relaxed line-clamp-3">{stripMarkdown(b.text)}</p>
             </Link>
           ))}
         </div>

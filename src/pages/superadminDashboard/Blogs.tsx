@@ -6,6 +6,7 @@ import { Badge, Button, Card, ConfirmModal, EmptyState, ErrorState, Field, Input
 import { useToast } from "../../components/ui/toast";
 import { formatDate, mediaUrl } from "../../lib/format";
 import type { Blogs } from "../../types/type";
+import { stripMarkdown } from "../../components/Markdown";
 
 type Form = { title: string; text: string; tags: string; published: boolean; image: File | null; currentImage: string; removeImage: boolean };
 const EMPTY: Form = { title: "", text: "", tags: "", published: true, image: null, currentImage: "", removeImage: false };
@@ -113,7 +114,7 @@ export default function SuperadminBlogs() {
                   <span className="text-[11px] text-muted">{formatDate(b.createdAt)}</span>
                 </div>
                 <p className="text-sm font-bold text-ink line-clamp-2">{b.title}</p>
-                <p className="text-xs text-muted line-clamp-2">{b.text}</p>
+                <p className="text-xs text-muted line-clamp-2">{stripMarkdown(b.text)}</p>
                 <div className="flex gap-2 mt-auto pt-2">
                   <Button size="sm" variant="secondary" onClick={() => openEdit(b)}>
                     Tahrirlash
@@ -148,7 +149,7 @@ export default function SuperadminBlogs() {
           <Field label="Sarlavha">
             <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} maxLength={200} />
           </Field>
-          <Field label="Matn">
+          <Field label="Matn" hint="## sarlavha, - ro'yxat, **qalin**, `kod`, ``` kod bloki, > iqtibos">
             <Textarea rows={10} value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} />
           </Field>
           <Field label="Teglar" hint="Vergul bilan: Frontend, AI, Karyera">
