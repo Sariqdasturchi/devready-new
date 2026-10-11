@@ -7,6 +7,8 @@ import { Alert, Badge, Button, Card, CardHeader, EmptyState, ErrorState, Modal, 
 import { useToast } from "../../components/ui/toast";
 import { formatDate, formatPrice, limitLabel } from "../../lib/format";
 import type { Plan } from "../../types/type";
+import { isTopPlan, planAudience, planLines, pricePerTask } from "../../lib/plans";
+import PlanCompare from "../../components/home/pricingHome/PlanCompare";
 
 const PAY_STATUS = {
   pending: { label: "Tekshirilmoqda", tone: "warning" as const },
@@ -74,27 +76,29 @@ export default function Plans() {
         {paid.map((p) => {
           const current = String(my._id) === String(p._id);
           return (
-            <Card key={p._id} className={cx("p-6 flex flex-col gap-5", p.isPopular && "border-brand/30 ")}>
-              <div className="flex items-center justify-between">
+            <Card key={p._id} className={cx("p-6 flex flex-col gap-5", p.isPopular && "border-brand/40 ring-1 ring-brand/20")}>
+              <div className="flex items-center justify-between gap-2">
                 <h3 className="text-lg font-bold text-ink">{p.name}</h3>
-                {p.isPopular && <Badge tone="success">Ommabop</Badge>}
-                {current && <Badge tone="info">Joriy</Badge>}
+                <div className="flex gap-1.5">
+                  {current && <Badge tone="info">Joriy</Badge>}
+                  {p.isPopular ? <Badge tone="success">Tavsiya etiladi</Badge> : isTopPlan(p, paid) ? <Badge>Eng to'liq</Badge> : null}
+                </div>
               </div>
+              <p className="text-[13px] text-muted leading-relaxed -mt-2">{planAudience(p, info.data!.plans)}</p>
               <div>
                 <span className="text-3xl font-extrabold text-ink">{formatPrice(p.price)}</span>
                 <span className="text-xs text-muted"> / {p.duration} kun</span>
-                {p.description && <p className="text-xs text-muted mt-2">{p.description}</p>}
+                <p className="text-[12px] text-muted mt-1">{pricePerTask(p) || "Task soni cheklanmagan"}</p>
               </div>
-              <ul className="flex flex-col gap-2 text-sm text-ink-2 flex-1">
-                <li className="flex gap-2"><HiCheck className="text-brand mt-0.5 shrink-0" /> Tasklar: {limitLabel(p.taskLimit)}</li>
-                <li className="flex gap-2"><HiCheck className="text-brand mt-0.5 shrink-0" /> Mentor tekshiruvi: {limitLabel(p.mentorReviewsIncluded)}</li>
-                {p.aiReviewEnabled && <li className="flex gap-2"><HiCheck className="text-brand mt-0.5 shrink-0" /> AI kod tahlili</li>}
-                {p.features?.map((f) => (
-                  <li key={f} className="flex gap-2"><HiCheck className="text-brand mt-0.5 shrink-0" /> {f}</li>
+              <ul className="flex flex-col gap-2 text-sm flex-1">
+                {planLines(p).map((f) => (
+                  <li key={f.text} className={cx("flex gap-2", f.included ? "text-ink-2" : "text-muted/70 line-through decoration-line")}>
+                    <HiCheck className={cx("mt-0.5 shrink-0", f.included ? "text-brand" : "text-line")} /> {f.text}
+                  </li>
                 ))}
               </ul>
               <Button variant={p.isPopular ? "primary" : "secondary"} disabled={!!pending} onClick={() => setSelected(p)}>
-                {current ? "Uzaytirish" : "Tanlash"}
+                {current ? "Muddatni uzaytirish" : `${p.name} tarifini tanlash`}
               </Button>
             </Card>
           );
@@ -105,6 +109,13 @@ export default function Plans() {
           </Card>
         )}
       </div>
+
+      {info.data.plans.length > 1 && (
+        <div className="flex flex-col gap-3">
+          <h2 className="text-lg font-bold text-ink">Tariflarni taqqoslash</h2>
+          <PlanCompare plans={info.data.plans} currentId={String(my._id)} />
+        </div>
+      )}
 
       <Card>
         <CardHeader title="To'lovlar tarixi" />

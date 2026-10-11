@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { HiOutlineInboxStack } from "react-icons/hi2";
-import { mentorApi } from "../../api/api";
+import { errorMessage, mentorApi, submissionApi } from "../../api/api";
+import { useToast } from "../../components/ui/toast";
 import { useCachedQuery, invalidateCache } from "../../hooks/useCachedQuery";
 import { Card, EmptyState, ErrorState, PageHeader, PageLoader, Tabs } from "../../components/ui";
 import ReviewModal from "../../components/review/ReviewModal";
@@ -13,6 +15,22 @@ export default function MentorSubmissions() {
   const [tab, setTab] = useState<Tab>("pending");
   const [open, setOpen] = useState<Submission | null>(null);
   const query = useCachedQuery(`mentor:subs:${tab}`, () => mentorApi.submissions(tab), { staleTime: 10_000 });
+  const [params, setParams] = useSearchParams();
+  const toast = useToast();
+
+  // Telegram yoki bildirishnomadagi havola: ?open=<submissionId> — yechim darhol ochiladi
+  const openId = params.get("open");
+  useEffect(() => {
+    if (!openId) return;
+    submissionApi
+      .get(openId)
+      .then((s) => {
+        if (s.status !== "under_review") setTab("reviewed");
+        setOpen(s);
+      })
+      .catch((e) => toast.error(errorMessage(e, "Yechim topilmadi")))
+      .finally(() => setParams({}, { replace: true }));
+  }, [openId, setParams, toast]);
 
   return (
     <div className="flex flex-col gap-5">
