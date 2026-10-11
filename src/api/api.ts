@@ -20,7 +20,9 @@ import type {
 } from "../types/type";
 
 // VITE_API_URL=https://api.devready.uz/api (productionda .env orqali beriladi)
-export const API_URL = (import.meta.env.VITE_API_URL?.trim() || "http://localhost:3000/api").replace(/\/$/, "");
+const RAW_API_URL = import.meta.env.VITE_API_URL?.trim() || "https://devreadyapi-production.up.railway.app/api";
+// "https://" yozilmay qolsa ham ishlaydi (aks holda so'rov frontend domeniga ketib qoladi)
+export const API_URL = (/^https?:\/\//.test(RAW_API_URL) ? RAW_API_URL : `https://${RAW_API_URL}`).replace(/\/$/, "");
 export const API_ORIGIN = API_URL.replace(/\/api$/, "");
 
 const api = axios.create({ baseURL: API_URL });
