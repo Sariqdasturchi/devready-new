@@ -49,7 +49,7 @@ export default function UserDashboard() {
 
       {/* Umumiy ko'rsatkichlar */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <StatCard label="Jami XP" value={o.totalScore.toLocaleString()} icon={<HiOutlineSparkles />} tone="warning" hint={`XP darajasi: ${o.xpLevel}`} />
+        <StatCard label="Jami XP" value={o.totalScore.toLocaleString()} icon={<HiOutlineSparkles />} tone="warning" hint={`Daraja: ${o.xpLevel}`} />
         <StatCard label="Reyting" value={o.rank ? `#${o.rank}` : "—"} icon={<HiOutlineTrophy />} tone="violet" hint="Umumiy liderboard" />
         <StatCard label="Bajarilgan" value={o.completedTasks} icon={<HiOutlineCheckCircle />} tone="success" hint={`${o.statusCounts.inReview} ta tekshiruvda`} />
         <StatCard label="Streak" value={`${o.streak} kun`} icon={<HiOutlineFire />} tone="danger" hint="Ketma-ket faol kunlar" />

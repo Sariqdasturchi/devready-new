@@ -1,4 +1,4 @@
-import { useEffect, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
+import { useEffect, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
 import { createPortal } from "react-dom";
 import { HiOutlineXMark } from "react-icons/hi2";
 import { STATUS, TONE_CLASS, type Tone } from "../../lib/constants";
@@ -324,7 +324,10 @@ export function ConfirmModal({
 // ─── Avatar ──────────────────────────────────────────────────────────────
 export function Avatar({ name, src, size = 36 }: { name?: string; src?: string | null; size?: number }) {
   const style = { width: size, height: size, fontSize: Math.max(10, size / 2.8) };
-  if (src) return <img src={mediaUrl(src)} alt={name || ""} style={style} className="rounded-full object-cover ring-1 ring-line shrink-0" />;
+  const [broken, setBroken] = useState(false);
+  // Rasm yuklanmasa (fayl o'chgan, server ko'chgan) — bosh harflar ko'rsatiladi
+  if (src && !broken)
+    return <img src={mediaUrl(src)} alt={name || ""} onError={() => setBroken(true)} style={style} className="rounded-full object-cover ring-1 ring-line shrink-0" />;
   return (
     <span style={style} className="rounded-full bg-ink text-white font-semibold flex items-center justify-center shrink-0">
       {initials(name)}

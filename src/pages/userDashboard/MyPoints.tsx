@@ -21,9 +21,11 @@ export default function MyPoints() {
 
   const s = stats.data;
   const xp = s.totalPoints;
-  const idx = LEVELS.reduce((acc, l, i) => (xp >= l.from ? i : acc), 0);
+  // Daraja serverda hisoblanadi: test natijasi va XP ning yuqorisi
+  const idx = s.level ? Math.max(0, LEVELS.findIndex((l) => l.name === s.level!.level)) : LEVELS.reduce((acc, l, i) => (xp >= l.from ? i : acc), 0);
   const current = LEVELS[idx];
   const next = LEVELS[idx + 1];
+  const left = Math.max(0, next ? next.from - xp : 0);
   const breakdown = Object.entries(s.categoryBreakdown).map(([track, value]) => ({ track, xp: value }));
 
   return (
@@ -47,11 +49,14 @@ export default function MyPoints() {
             <p className="text-xs text-muted text-right">
               {next.name} gacha
               <br />
-              <span className="text-ink font-semibold">{next.from - xp} XP</span> qoldi
+              <span className="text-ink font-semibold">{left.toLocaleString()} XP</span> qoldi
             </p>
           )}
         </div>
-        <ProgressBar value={next ? xp - current.from : 1} max={next ? next.from - current.from : 1} />
+        <ProgressBar value={next ? Math.max(0, xp - current.from) : 1} max={next ? next.from - current.from : 1} />
+        {current.from > xp && (
+          <p className="text-[12px] text-muted mt-2">Daraja kirish testi natijasida berilgan. XP to'plab keyingi darajaga chiqasiz.</p>
+        )}
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

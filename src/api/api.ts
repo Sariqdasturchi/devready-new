@@ -2,7 +2,6 @@ import axios, { AxiosError } from "axios";
 import type {
   AdminStats,
   Blogs,
-  LeaderboardRow,
   Mentor,
   MentorStats,
   MyPlan,
@@ -17,10 +16,12 @@ import type {
   Task,
   User,
   UserTask,
+  LevelInfo,
+  LeaderboardResponse,
 } from "../types/type";
 
 // VITE_API_URL=https://api.devready.uz/api (productionda .env orqali beriladi)
-const RAW_API_URL = import.meta.env.VITE_API_URL?.trim() || "https://devreadyapi-production.up.railway.app/api";
+const RAW_API_URL = import.meta.env.VITE_API_URL?.trim() || "http://localhost:3000/api";
 // "https://" yozilmay qolsa ham ishlaydi (aks holda so'rov frontend domeniga ketib qoladi)
 export const API_URL = (/^https?:\/\//.test(RAW_API_URL) ? RAW_API_URL : `https://${RAW_API_URL}`).replace(/\/$/, "");
 export const API_ORIGIN = API_URL.replace(/\/api$/, "");
@@ -115,6 +116,7 @@ export const taskApi = {
     data<{
       completedTasks: number;
       totalPoints: number;
+      level?: LevelInfo;
       averageScore: number;
       averageTime: number;
       categoryBreakdown: Record<string, number>;
@@ -155,11 +157,9 @@ export const analyticsApi = {
 };
 
 export const leaderboardApi = {
-  get: (type: "overall" | "weekly" | "monthly", track?: string) =>
+  get: (type: "overall" | "weekly" | "monthly", track?: string, page: number | "me" = 1, limit = 20) =>
     api
-      .get<{ success: boolean; data: LeaderboardRow[]; me: LeaderboardRow | null }>(`/leaderboard/${type}`, {
-        params: track ? { track } : undefined,
-      })
+      .get<LeaderboardResponse>(`/leaderboard/${type}`, { params: { page, limit, ...(track ? { track } : {}) } })
       .then((r) => r.data),
 };
 

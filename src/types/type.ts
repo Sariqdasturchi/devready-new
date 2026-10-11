@@ -208,6 +208,21 @@ export interface LeaderboardRow {
   points: number;
 }
 
+export interface LevelInfo {
+  level: string;
+  next: string | null;
+  nextXp: number | null;
+  xpToNext: number;
+}
+
+export interface LeaderboardResponse {
+  success: boolean;
+  top: LeaderboardRow[];
+  data: LeaderboardRow[];
+  me: (LeaderboardRow & { page: number }) | null;
+  pagination: { page: number; limit: number; total: number; pages: number };
+}
+
 export interface PeriodStats {
   started: number;
   submitted: number;
@@ -224,6 +239,7 @@ export interface Overview {
   completedTasks: number;
   averageDegree: string;
   xpLevel: string;
+  levelInfo?: LevelInfo;
   streak: number;
   rank: number | null;
   statusCounts: { inProgress: number; inReview: number; approved: number; rejected: number; expired: number };

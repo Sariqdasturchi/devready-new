@@ -159,10 +159,10 @@ export default function SuperadminPlans() {
           <Field label="Muddat (kun)" hint="0 — muddatsiz">
             <Input type="number" min={0} value={form.duration} onChange={(e) => set("duration", Number(e.target.value))} />
           </Field>
-          <Field label="Task limiti" hint="-1 — cheksiz. Tarif davri ichida hisoblanadi">
+          <Field label="Task limiti" hint="-1 — cheksiz (faqat pullik tarifda). Tarif davri ichida hisoblanadi">
             <Input type="number" min={-1} value={form.taskLimit} onChange={(e) => set("taskLimit", Number(e.target.value))} />
           </Field>
-          <Field label="Mentor tekshiruvlari" hint="-1 — cheksiz">
+          <Field label="Mentor tekshiruvlari" hint="-1 — cheksiz (faqat pullik tarifda)">
             <Input type="number" min={-1} value={form.mentorReviewsIncluded} onChange={(e) => set("mentorReviewsIncluded", Number(e.target.value))} />
           </Field>
           <Field label="Tavsif" className="sm:col-span-2">
