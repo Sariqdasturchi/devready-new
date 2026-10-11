@@ -8,8 +8,8 @@ import { formatDate, mediaUrl } from "../../lib/format";
 import type { Blogs } from "../../types/type";
 import { stripMarkdown } from "../../components/Markdown";
 
-type Form = { title: string; text: string; tags: string; published: boolean; image: File | null; currentImage: string; removeImage: boolean };
-const EMPTY: Form = { title: "", text: "", tags: "", published: true, image: null, currentImage: "", removeImage: false };
+type Form = { title: string; slug: string; excerpt: string; text: string; tags: string; published: boolean; image: File | null; currentImage: string; removeImage: boolean };
+const EMPTY: Form = { title: "", slug: "", excerpt: "", text: "", tags: "", published: true, image: null, currentImage: "", removeImage: false };
 
 export default function SuperadminBlogs() {
   const toast = useToast();
@@ -28,7 +28,7 @@ export default function SuperadminBlogs() {
   }, [form.image]);
 
   const openEdit = (b: Blogs) => {
-    setForm({ title: b.title, text: b.text, tags: b.tags.join(", "), published: b.published, image: null, currentImage: b.image, removeImage: false });
+    setForm({ title: b.title, slug: b.slug || "", excerpt: b.excerpt || "", text: b.text, tags: b.tags.join(", "), published: b.published, image: null, currentImage: b.image, removeImage: false });
     setEditing(b);
   };
 
@@ -36,6 +36,8 @@ export default function SuperadminBlogs() {
     if (!form.title.trim() || !form.text.trim()) return toast.error("Sarlavha va matn majburiy");
     const payload = {
       title: form.title.trim(),
+      slug: form.slug.trim(),
+      excerpt: form.excerpt.trim(),
       text: form.text,
       tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
       published: form.published,
@@ -148,6 +150,12 @@ export default function SuperadminBlogs() {
         <div className="flex flex-col gap-4">
           <Field label="Sarlavha">
             <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} maxLength={200} />
+          </Field>
+          <Field label="Qisqa tavsif (SEO)" hint={`Google natijasi va Telegram preview'da chiqadi. 120–160 belgi ideal, hozir: ${form.excerpt.trim().length}. Bo'sh qolsa — matn boshidan olinadi`}>
+            <Textarea rows={2} value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} maxLength={300} />
+          </Field>
+          <Field label="Manzil (slug)" hint="devready.uz/blogs/… — bo'sh qolsa sarlavhadan avtomatik yasaladi. E'lon qilingandan keyin o'zgartirmang: eski havolalar ishlamay qoladi">
+            <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="masalan: texnik-suhbatga-tayyorgarlik" maxLength={90} />
           </Field>
           <Field label="Matn" hint="## sarlavha, - ro'yxat, **qalin**, `kod`, ``` kod bloki, > iqtibos">
             <Textarea rows={10} value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} />

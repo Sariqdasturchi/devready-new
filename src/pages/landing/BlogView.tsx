@@ -1,11 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { HiOutlineArrowLeft, HiOutlineCalendar, HiOutlineClock, HiOutlineEye, HiOutlineLink, HiOutlinePaperAirplane } from "react-icons/hi2";
 import { blogApi } from "../../api/api";
 import { formatDate, mediaUrl } from "../../lib/format";
 import type { Blogs } from "../../types/type";
 import Markdown, { markdownHeadings, stripMarkdown } from "../../components/Markdown";
 import { useToast } from "../../components/ui/toast";
+import Seo from "../../components/Seo";
+import { SITE_URL, breadcrumbs } from "../../lib/seo";
+
+/** Qidiruv natijasi uchun ~155 belgilik tavsif (so'z o'rtasida kesmasdan) */
+function describe(blog: Blogs) {
+  const t = blog.excerpt?.trim() || stripMarkdown(blog.text);
+  if (t.length <= 160) return t;
+  const cut = t.slice(0, 157);
+  return `${cut.slice(0, cut.lastIndexOf(" "))}…`;
+}
 
 const readTime = (text: string) => Math.max(1, Math.ceil(stripMarkdown(text).split(/\s+/).length / 200));
 
@@ -98,7 +108,7 @@ function ShareButtons({ title }: { title: string }) {
 
 function RelatedCard({ b, i }: { b: Blogs; i: number }) {
   return (
-    <Link to={`/blogs/${b._id}`} className="group flex flex-col">
+    <Link to={`/blogs/${b.slug || b._id}`} className="group flex flex-col">
       <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-mist border border-line">
         {b.image ? (
           <img src={mediaUrl(b.image)} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
@@ -119,11 +129,14 @@ function RelatedCard({ b, i }: { b: Blogs; i: number }) {
 
 export default function BlogView() {
   const { id = "" } = useParams();
+  const navigate = useNavigate();
   const [blog, setBlog] = useState<Blogs | null>(null);
   const [all, setAll] = useState<Blogs[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // id → slug almashganda maqola qayta yuklanmaydi (ko'rishlar soni ikki marta oshmasin)
+    if (blog && (blog.slug === id || blog._id === id)) return;
     setLoading(true);
     window.scrollTo(0, 0);
     blogApi
@@ -131,6 +144,7 @@ export default function BlogView() {
       .then(setBlog)
       .catch(() => setBlog(null))
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -140,14 +154,10 @@ export default function BlogView() {
       .catch(() => setAll([]));
   }, []);
 
+  // Eski /blogs/<id> havolasi — o'qiladigan /blogs/<slug> manziliga almashtiriladi
   useEffect(() => {
-    if (!blog) return;
-    const prev = document.title;
-    document.title = `${blog.title} — DevReady blog`;
-    return () => {
-      document.title = prev;
-    };
-  }, [blog]);
+    if (blog?.slug && id !== blog.slug) navigate(`/blogs/${blog.slug}`, { replace: true });
+  }, [blog, id, navigate]);
 
   const headings = useMemo(() => (blog ? markdownHeadings(blog.text) : []), [blog]);
   const ids = useMemo(() => headings.map((h) => h.id), [headings]);
@@ -173,6 +183,7 @@ export default function BlogView() {
   if (!blog) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 px-5 text-center">
+        <Seo title="Maqola topilmadi" noindex />
         <p className="text-2xl font-bold text-ink">Maqola topilmadi</p>
         <p className="text-muted">U o'chirilgan yoki havola noto'g'ri.</p>
         <Link to="/blogs" className="mt-2 h-11 px-5 inline-flex items-center rounded-full border border-line font-semibold hover:border-ink">
@@ -183,9 +194,42 @@ export default function BlogView() {
   }
 
   const showToc = headings.length >= 2;
+  const path = `/blogs/${blog.slug || blog._id}`;
+  const description = describe(blog);
+  const cover = blog.image ? mediaUrl(blog.image) : undefined;
 
   return (
     <>
+      <Seo
+        title={blog.title}
+        description={description}
+        path={path}
+        image={cover}
+        type="article"
+        article={{ publishedTime: blog.createdAt, modifiedTime: blog.updatedAt, tags: blog.tags }}
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            headline: blog.title,
+            description,
+            image: cover ? [cover] : undefined,
+            datePublished: blog.createdAt,
+            dateModified: blog.updatedAt || blog.createdAt,
+            inLanguage: "uz",
+            keywords: blog.tags.join(", "),
+            wordCount: stripMarkdown(blog.text).split(/\s+/).length,
+            mainEntityOfPage: `${SITE_URL}${path}`,
+            author: { "@type": "Organization", name: "DevReady", url: SITE_URL },
+            publisher: { "@type": "Organization", name: "DevReady", logo: { "@type": "ImageObject", url: `${SITE_URL}/web-app-manifest-512x512.png` } },
+          },
+          breadcrumbs([
+            { name: "Bosh sahifa", path: "/" },
+            { name: "Blog", path: "/blogs" },
+            { name: blog.title, path },
+          ]),
+        ]}
+      />
       <ReadingProgress />
       <main className="pb-24">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 pt-10 sm:pt-14 grid xl:grid-cols-[1fr_minmax(0,42rem)_1fr] xl:gap-x-14">
@@ -209,7 +253,9 @@ export default function BlogView() {
                 <div className="inline-flex items-center gap-2">
                   <dt className="sr-only">Sana</dt>
                   <HiOutlineCalendar size={17} aria-hidden />
-                  <dd>{formatDate(blog.createdAt)}</dd>
+                  <dd>
+                    <time dateTime={blog.createdAt}>{formatDate(blog.createdAt)}</time>
+                  </dd>
                 </div>
                 <div className="inline-flex items-center gap-2">
                   <dt className="sr-only">O'qish vaqti</dt>
@@ -228,7 +274,7 @@ export default function BlogView() {
 
             {blog.image && (
               <figure className="mt-10">
-                <img src={mediaUrl(blog.image)} alt="" className="w-full aspect-[16/9] object-cover rounded-2xl border border-line bg-mist" />
+                <img src={mediaUrl(blog.image)} alt={blog.title} width={1600} height={900} fetchPriority="high" className="w-full h-auto aspect-[16/9] object-cover rounded-2xl border border-line bg-mist" />
               </figure>
             )}
 

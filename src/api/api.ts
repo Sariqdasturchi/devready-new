@@ -236,12 +236,14 @@ export const adminApi = {
 };
 
 // ─── BLOGS ───────────────────────────────────────────────────────────────
-export type BlogPayload = { title: string; text: string; tags: string[]; published: boolean; image?: File | null; removeImage?: boolean };
+export type BlogPayload = { title: string; text: string; tags: string[]; published: boolean; slug?: string; excerpt?: string; image?: File | null; removeImage?: boolean };
 
 const blogForm = (body: Partial<BlogPayload>) => {
   const form = new FormData();
   if (body.title !== undefined) form.append("title", body.title);
   if (body.text !== undefined) form.append("text", body.text);
+  if (body.slug !== undefined) form.append("slug", body.slug);
+  if (body.excerpt !== undefined) form.append("excerpt", body.excerpt);
   if (body.tags !== undefined) form.append("tags", body.tags.join(","));
   if (body.published !== undefined) form.append("published", String(body.published));
   if (body.image) form.append("image", body.image);

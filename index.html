@@ -2,13 +2,70 @@
 <html lang="uz">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DevReady — amaliy tasklar orqali ishga tayyorlaning</title>
-    <meta name="description" content="Real loyihalarga o'xshash tasklarni vaqt bilan bajaring, mentorlar kodingizni tekshiradi va texnik suhbatga tayyorlaydi." />
+
+    <title>DevReady — amaliy tasklar va mentor tekshiruvi bilan dasturchi bo'ling</title>
+    <meta name="description" content="Real loyihalarga o'xshash tasklarni vaqt bilan bajaring, mentor va AI kodingizni tekshiradi. Frontend, backend va boshqa yo'nalishlarda portfolio yig'ing va texnik suhbatga tayyorlaning." />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://devready.uz" />
     <meta name="theme-color" content="#ffffff" />
+    <meta name="application-name" content="DevReady" />
+    <meta name="apple-mobile-web-app-title" content="DevReady" />
+
+    <!-- Ikonkalar -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Ijtimoiy tarmoqlar (Telegram, Facebook, LinkedIn, X) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DevReady" />
+    <meta property="og:locale" content="uz_UZ" />
+    <meta property="og:title" content="DevReady — amaliy tasklar va mentor tekshiruvi bilan dasturchi bo'ling" />
+    <meta property="og:description" content="Real loyihalarga o'xshash tasklarni vaqt bilan bajaring, mentor va AI kodingizni tekshiradi. Portfolio yig'ing va texnik suhbatga tayyorlaning." />
+    <meta property="og:url" content="https://devready.uz" />
+    <meta property="og:image" content="https://devready.uz/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="DevReady — amaliy tasklar orqali ishga tayyorlaning" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="DevReady — amaliy tasklar va mentor tekshiruvi bilan dasturchi bo'ling" />
+    <meta name="twitter:description" content="Real loyihalarga o'xshash tasklarni vaqt bilan bajaring, mentor va AI kodingizni tekshiradi." />
+    <meta name="twitter:image" content="https://devready.uz/og-image.png" />
+
+    <!-- API serveriga oldindan ulanish (birinchi so'rov tezroq) -->
+    <link rel="preconnect" href="https://devreadyapi-production.up.railway.app" crossorigin />
+
+    <!-- Google natijasida sayt nomi va logotip -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://devready.uz/#organization",
+            "name": "DevReady",
+            "url": "https://devready.uz",
+            "logo": "https://devready.uz/web-app-manifest-512x512.png",
+            "sameAs": ["https://t.me/devreadyrobot"]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://devready.uz/#website",
+            "name": "DevReady",
+            "alternateName": "devready.uz",
+            "url": "https://devready.uz",
+            "inLanguage": "uz",
+            "publisher": { "@id": "https://devready.uz/#organization" }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
+    <noscript>DevReady — amaliy tasklar, mentor va AI tekshiruvi orqali dasturchilarni ishga tayyorlaydigan platforma. Saytdan foydalanish uchun JavaScript'ni yoqing.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

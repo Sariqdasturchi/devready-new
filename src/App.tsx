@@ -1,7 +1,8 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import { getStoredUser, getToken, homeForRole } from "./lib/auth";
 import { PageLoader } from "./components/ui";
+import Seo from "./components/Seo";
 
 const LandingLayout = lazy(() => import("./components/layout/landingLayout"));
 const Home = lazy(() => import("./pages/landing/Home"));
@@ -9,6 +10,7 @@ const Pricing = lazy(() => import("./pages/landing/Pricing"));
 const BecomeMentor = lazy(() => import("./pages/landing/BecomeMentor"));
 const BlogPage = lazy(() => import("./pages/landing/Blog"));
 const BlogView = lazy(() => import("./pages/landing/BlogView"));
+const NotFound = lazy(() => import("./pages/landing/NotFound"));
 const Register = lazy(() => import("./pages/auth/Register"));
 const Login = lazy(() => import("./pages/auth/Login"));
 
@@ -53,14 +55,34 @@ function ProtectedRoute({ roles }: { roles: AppRole[] }) {
     const home = homeForRole(user.role);
     return user.role === "admin" ? <Navigate to="/login" replace /> : <Navigate to={home} replace />;
   }
-  return <Outlet />;
+  // Kabinet sahifalari qidiruv tizimlariga yopiq
+  return (
+    <>
+      <Seo title="Kabinet" noindex />
+      <Outlet />
+    </>
+  );
 }
 
 /** Tizimga kirgan foydalanuvchi login/register sahifasiga kirsa — o'z kabinetiga */
 function GuestOnly() {
   const user = getStoredUser();
+  const { pathname } = useLocation();
   if (getToken() && user && user.role !== "admin") return <Navigate to={homeForRole(user.role)} replace />;
-  return <Outlet />;
+  const register = pathname.startsWith("/register");
+  return (
+    <>
+      {register ? (
+        <Seo
+          title="Ro'yxatdan o'tish"
+          description="DevReady'da bepul ro'yxatdan o'ting: yo'nalishingizni tanlang, darajangizni aniqlovchi testdan o'ting va birinchi amaliy taskni boshlang."
+        />
+      ) : (
+        <Seo title="Kirish" noindex />
+      )}
+      <Outlet />
+    </>
+  );
 }
 
 export default function App() {
@@ -74,6 +96,7 @@ export default function App() {
             <Route path="/mentors" element={<BecomeMentor />} />
             <Route path="/blogs" element={<BlogPage />} />
             <Route path="/blogs/:id" element={<BlogView />} />
+            <Route path="*" element={<NotFound />} />
           </Route>
 
           <Route element={<GuestOnly />}>
@@ -119,7 +142,6 @@ export default function App() {
             </Route>
           </Route>
 
-          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

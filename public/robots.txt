@@ -1,0 +1,9 @@
+# devready.uz
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /mentor/
+Disallow: /superadmin/
+Disallow: /login
+
+Sitemap: https://devready.uz/sitemap.xml

@@ -1,1 +1,3 @@
+/sitemap.xml  https://devreadyapi-production.up.railway.app/api/seo/sitemap.xml  200
+/uploads/images/*  https://devreadyapi-production.up.railway.app/uploads/images/:splat  200
 /*    /index.html   200

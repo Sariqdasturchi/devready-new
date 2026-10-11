@@ -1,4 +1,6 @@
 import { SUPPORT_USERNAME } from "../../lib/constants";
+import Seo from "../../components/Seo";
+import { breadcrumbs } from "../../lib/seo";
 
 const ROLE = [
   { title: "Yechimlarni tekshirasiz", text: "Talabalar o'z yo'nalishingizdagi tasklarni sizga yuboradi. Ball qo'yasiz va nima yaxshi, nimani tuzatish kerakligini yozasiz." },
@@ -16,6 +18,14 @@ export default function BecomeMentor() {
   const apply = `https://t.me/${SUPPORT_USERNAME}`;
   return (
     <main>
+      <Seo
+        title="Mentor bo'lish"
+        description="Tajribali dasturchimisiz? DevReady'da mentor bo'ling: junior dasturchilarning kodini tekshiring, izoh bering va har bir review uchun daromad oling."
+        jsonLd={breadcrumbs([
+          { name: "Bosh sahifa", path: "/" },
+          { name: "Mentor bo'lish", path: "/mentors" },
+        ])}
+      />
       <section className="max-w-6xl mx-auto px-5 sm:px-8 pt-16 sm:pt-24 pb-20">
         <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-[-0.045em] leading-[1.02] text-ink max-w-4xl text-balance">
           Tajribangizni keyingi avlod dasturchilariga ulashing.

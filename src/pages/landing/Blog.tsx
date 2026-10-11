@@ -5,6 +5,8 @@ import { blogApi } from "../../api/api";
 import { formatDate, mediaUrl } from "../../lib/format";
 import type { Blogs } from "../../types/type";
 import { stripMarkdown } from "../../components/Markdown";
+import Seo from "../../components/Seo";
+import { SITE_URL } from "../../lib/seo";
 
 export default function BlogPage() {
   const [blogs, setBlogs] = useState<Blogs[]>([]);
@@ -28,6 +30,23 @@ export default function BlogPage() {
 
   return (
     <main className="max-w-6xl mx-auto px-5 sm:px-8 pt-16 sm:pt-24 pb-24">
+      <Seo
+        title="Blog — karyera, texnik suhbat va amaliy dasturlash"
+        description="Junior dasturchilar uchun o'zbek tilida maqolalar: portfolio, texnik suhbatga tayyorgarlik, Git, code review, JavaScript va backend bo'yicha amaliy maslahatlar."
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Blog",
+          name: "DevReady blog",
+          url: `${SITE_URL}/blogs`,
+          inLanguage: "uz",
+          blogPost: blogs.slice(0, 20).map((b) => ({
+            "@type": "BlogPosting",
+            headline: b.title,
+            url: `${SITE_URL}/blogs/${b.slug || b._id}`,
+            datePublished: b.createdAt,
+          })),
+        }}
+      />
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
         <div>
           <h1 className="text-5xl sm:text-6xl font-extrabold tracking-[-0.045em] text-ink">Blog</h1>
@@ -69,7 +88,7 @@ export default function BlogPage() {
       ) : visible.length ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12">
           {visible.map((b, i) => (
-            <Link key={b._id} to={`/blogs/${b._id}`} className="group flex flex-col">
+            <Link key={b._id} to={`/blogs/${b.slug || b._id}`} className="group flex flex-col">
               <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-mist border border-line">
                 {b.image ? (
                   <img src={mediaUrl(b.image)} alt="" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />

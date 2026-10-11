@@ -293,10 +293,15 @@ export interface Question {
 export interface Blogs {
   _id: string;
   title: string;
+  /** SEO manzil: /blogs/<slug> */
+  slug?: string;
+  /** Qidiruv natijasi va preview uchun qisqa tavsif */
+  excerpt?: string;
   text: string;
   image: string;
   tags: string[];
   published: boolean;
   views: number;
   createdAt: string;
+  updatedAt?: string;
 }

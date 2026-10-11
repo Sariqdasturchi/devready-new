@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import HeroTask from "../../components/home/HeroTask";
 import PlansGrid from "../../components/home/pricingHome/PlansGrid";
 import { TRACKS } from "../../lib/constants";
+import Seo from "../../components/Seo";
+import { SITE_URL } from "../../lib/seo";
 
 const STEPS = [
   {
@@ -47,6 +49,18 @@ const HEAT_CLS = ["bg-white/[0.07]", "bg-brand/40", "bg-brand/70", "bg-brand"];
 export default function Home() {
   return (
     <main>
+      <Seo
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "DevReady — amaliy tasklar va mentor tekshiruvi bilan dasturchi bo'ling",
+          url: SITE_URL,
+          description: "Amaliy tasklar, vaqt va mentor tekshiruvi orqali dasturchilarni real loyihalar va texnik suhbatga tayyorlaydigan platforma.",
+          inLanguage: "uz",
+          isPartOf: { "@id": `${SITE_URL}/#website` },
+          about: { "@id": `${SITE_URL}/#organization` },
+        }}
+      />
       {/* HERO */}
       <section className="relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 pt-14 sm:pt-20 pb-24 lg:pb-44 grid lg:grid-cols-[1.05fr_0.95fr] gap-14 lg:gap-10 items-center">
