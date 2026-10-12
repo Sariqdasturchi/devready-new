@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { PatternFormat } from "react-number-format";
 import { authApi, errorCode, errorMessage } from "../../api/api";
 import { homeForRole, setSession } from "../../lib/auth";
@@ -11,6 +11,7 @@ const RESEND_SECONDS = 60;
 
 export default function Login() {
   const navigate = useNavigate();
+  const from = (useLocation().state as { from?: string } | null)?.from;
   const [step, setStep] = useState<1 | 2>(1);
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
@@ -57,7 +58,9 @@ export default function Login() {
     try {
       const res = await authApi.loginVerify({ phone: fullPhone, code });
       setSession(res.token, res.user);
-      navigate(homeForRole(res.user.role), { replace: true });
+      // Himoyalangan sahifadan kelgan bo'lsa (va u shu rolga tegishli bo'lsa) — o'sha yerga qaytaramiz
+      const home = homeForRole(res.user.role);
+      navigate(from && from.startsWith(home) ? from : home, { replace: true });
     } catch (err) {
       setCode("");
       setMsg({ text: errorMessage(err), tone: "error" });

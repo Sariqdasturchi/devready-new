@@ -50,7 +50,9 @@ type AppRole = "user" | "mentor" | "superadmin";
 
 function ProtectedRoute({ roles }: { roles: AppRole[] }) {
   const user = getStoredUser();
-  if (!getToken() || !user) return <Navigate to="/login" replace />;
+  const location = useLocation();
+  // Kirgandan keyin shu sahifaga qaytish uchun (masalan, Telegram'dagi "Taskni boshlash" tugmasi)
+  if (!getToken() || !user) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   if (!roles.includes(user.role as AppRole)) {
     const home = homeForRole(user.role);
     return user.role === "admin" ? <Navigate to="/login" replace /> : <Navigate to={home} replace />;
