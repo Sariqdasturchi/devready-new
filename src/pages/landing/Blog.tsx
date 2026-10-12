@@ -7,6 +7,7 @@ import type { Blogs } from "../../types/type";
 import { stripMarkdown } from "../../components/Markdown";
 import Seo from "../../components/Seo";
 import { SITE_URL } from "../../lib/seo";
+import SafeImg from "../../components/SafeImg";
 
 export default function BlogPage() {
   const [blogs, setBlogs] = useState<Blogs[]>([]);
@@ -90,19 +91,21 @@ export default function BlogPage() {
           {visible.map((b, i) => (
             <Link key={b._id} to={`/blogs/${b.slug || b._id}`} className="group flex flex-col">
               <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-mist border border-line">
-                {b.image ? (
-                  <img src={mediaUrl(b.image)} alt="" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
-                ) : (
-                  // Rasm yo'q — tegdan tipografik muqova (uch xil rang navbatma-navbat)
-                  <div
-                    className={`w-full h-full flex flex-col justify-between p-6 ${
-                      ["bg-ink text-white", "bg-brand text-white", "bg-mist text-ink"][i % 3]
-                    }`}
-                  >
-                    <span className="text-[13px] font-semibold opacity-60">devready / blog</span>
-                    <span className="text-[34px] leading-none font-extrabold tracking-[-0.04em]">{b.tags[0] || "Maqola"}</span>
-                  </div>
-                )}
+                <SafeImg
+                  src={b.image ? mediaUrl(b.image) : ""}
+                  alt=""
+                  className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                  fallback={
+                    <div
+                      className={`w-full h-full flex flex-col justify-between p-6 ${
+                        ["bg-ink text-white", "bg-brand text-white", "bg-mist text-ink"][i % 3]
+                      }`}
+                    >
+                      <span className="text-[13px] font-semibold opacity-60">devready / blog</span>
+                      <span className="text-[34px] leading-none font-extrabold tracking-[-0.04em]">{b.tags[0] || "Maqola"}</span>
+                    </div>
+                  }
+                />
               </div>
               <p className="mt-5 text-sm text-muted">
                 {b.tags[0] ? `${b.tags[0]}, ` : ""}

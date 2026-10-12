@@ -7,6 +7,7 @@ import { useToast } from "../../components/ui/toast";
 import { formatDate, mediaUrl } from "../../lib/format";
 import type { Blogs } from "../../types/type";
 import { stripMarkdown } from "../../components/Markdown";
+import SafeImg from "../../components/SafeImg";
 
 type Form = { title: string; slug: string; excerpt: string; text: string; tags: string; published: boolean; image: File | null; currentImage: string; removeImage: boolean };
 const EMPTY: Form = { title: "", slug: "", excerpt: "", text: "", tags: "", published: true, image: null, currentImage: "", removeImage: false };
@@ -100,13 +101,17 @@ export default function SuperadminBlogs() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {query.data.map((b) => (
             <Card key={b._id} className="overflow-hidden flex flex-col">
-              {b.image ? (
-                <img src={mediaUrl(b.image)} alt="" className="h-40 w-full object-cover" />
-              ) : (
-                <div className="h-40 bg-mist flex items-center justify-center text-muted">
-                  <HiOutlinePhoto size={32} />
-                </div>
-              )}
+              <SafeImg
+                src={b.image ? mediaUrl(b.image) : ""}
+                alt=""
+                className="h-40 w-full object-cover"
+                fallback={
+                  <div className="h-40 bg-mist flex flex-col items-center justify-center gap-1 text-muted">
+                    <HiOutlinePhoto size={32} />
+                    {b.image && <span className="text-xs">Rasm topilmadi — qayta yuklang</span>}
+                  </div>
+                }
+              />
               <div className="p-4 flex flex-col gap-2 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   {b.published ? <Badge tone="success">E'lon qilingan</Badge> : <Badge>Qoralama</Badge>}

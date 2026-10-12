@@ -8,6 +8,7 @@ import Markdown, { markdownHeadings, stripMarkdown } from "../../components/Mark
 import { useToast } from "../../components/ui/toast";
 import Seo from "../../components/Seo";
 import { SITE_URL, breadcrumbs } from "../../lib/seo";
+import SafeImg from "../../components/SafeImg";
 
 /** Qidiruv natijasi uchun ~155 belgilik tavsif (so'z o'rtasida kesmasdan) */
 function describe(blog: Blogs) {
@@ -110,13 +111,17 @@ function RelatedCard({ b, i }: { b: Blogs; i: number }) {
   return (
     <Link to={`/blogs/${b.slug || b._id}`} className="group flex flex-col">
       <div className="aspect-[16/9] rounded-2xl overflow-hidden bg-mist border border-line">
-        {b.image ? (
-          <img src={mediaUrl(b.image)} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
-        ) : (
-          <div className={`w-full h-full flex items-end p-6 ${["bg-ink text-white", "bg-brand text-white", "bg-mist text-ink"][i % 3]}`}>
-            <span className="text-[28px] leading-none font-extrabold tracking-[-0.04em]">{b.tags[0] || "Maqola"}</span>
-          </div>
-        )}
+        <SafeImg
+          src={b.image ? mediaUrl(b.image) : ""}
+          alt=""
+          loading="lazy"
+          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+          fallback={
+            <div className={`w-full h-full flex items-end p-6 ${["bg-ink text-white", "bg-brand text-white", "bg-mist text-ink"][i % 3]}`}>
+              <span className="text-[28px] leading-none font-extrabold tracking-[-0.04em]">{b.tags[0] || "Maqola"}</span>
+            </div>
+          }
+        />
       </div>
       <p className="mt-4 text-sm text-muted">
         {b.tags[0] ? `${b.tags[0]}, ` : ""}
@@ -273,9 +278,14 @@ export default function BlogView() {
             </header>
 
             {blog.image && (
-              <figure className="mt-10">
-                <img src={mediaUrl(blog.image)} alt={blog.title} width={1600} height={900} fetchPriority="high" className="w-full h-auto aspect-[16/9] object-cover rounded-2xl border border-line bg-mist" />
-              </figure>
+              <SafeImg
+                src={mediaUrl(blog.image)}
+                alt={blog.title}
+                width={1600}
+                height={900}
+                fetchPriority="high"
+                className="mt-10 w-full h-auto aspect-[16/9] object-cover rounded-2xl border border-line bg-mist"
+              />
             )}
 
             {showToc && (
