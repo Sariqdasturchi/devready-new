@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   HiOutlineArrowLeft,
   HiOutlineArrowTopRightOnSquare,
   HiOutlineCheckCircle,
   HiOutlineClock,
+  HiOutlineCodeBracket,
   HiOutlineCpuChip,
   HiOutlineDocumentText,
   HiOutlinePaintBrush,
@@ -29,6 +30,7 @@ const isGitHub = (url: string) => /^https:\/\/github\.com\/[^/]+\/[^/]+/.test(ur
 export default function TaskDetails() {
   const { id = "" } = useParams();
   const toast = useToast();
+  const navigate = useNavigate();
   const [task, setTask] = useState<UserTask | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -72,6 +74,8 @@ export default function TaskDetails() {
       toast.success("Task boshlandi. Vaqt ketdi — omad!");
       refreshLists();
       setConfirmStart(false);
+      // Kod muhiti bor taskda to'g'ridan-to'g'ri muharrirga o'tamiz
+      if (task?.sandbox?.enabled) return navigate(`/dashboard/tasks/${id}/code`);
       await load();
     } catch (err) {
       setConfirmStart(false);
@@ -187,6 +191,12 @@ export default function TaskDetails() {
                   "Boshlash" bosilgach <b className="text-ink-2">{formatDuration(task.estimatedTime)}</b> vaqt beriladi. Vaqt tugasa task avtomatik
                   "bajarilmagan" bo'ladi.
                 </p>
+                {task.sandbox?.enabled && (
+                  <p className="mt-3 flex items-start gap-2 rounded-xl bg-brand-tint p-3 text-xs text-ink-2">
+                    <HiOutlineCodeBracket size={16} className="text-brand shrink-0 mt-px" />
+                    Bu task brauzerda bajariladi: muharrir, jonli natija va {task.sandbox.tests.length} ta avtomatik test tayyor.
+                  </p>
+                )}
               </div>
               <Button size="lg" onClick={() => setConfirmStart(true)}>
                 <HiOutlinePlay size={18} /> {task.status === "not_started" ? "Taskni boshlash" : "Qayta boshlash"}
@@ -194,8 +204,47 @@ export default function TaskDetails() {
             </Card>
           )}
 
+          {task.status === "in_progress" && task.sandbox?.enabled && (
+            <Card className="p-5 flex flex-col gap-3 border-brand/30">
+              <div className="flex items-start gap-3">
+                <span className="w-10 h-10 rounded-xl bg-brand-tint text-brand inline-flex items-center justify-center shrink-0">
+                  <HiOutlineCodeBracket size={20} />
+                </span>
+                <div>
+                  <h3 className="text-sm font-bold text-ink">Brauzerda kod yozing</h3>
+                  <p className="text-xs text-muted mt-1">
+                    Hech narsa o'rnatmasdan: muharrir, jonli natija va {task.sandbox.tests.length} ta avtomatik test bir joyda.
+                  </p>
+                </div>
+              </div>
+              <Link
+                to={`/dashboard/tasks/${task._id}/code`}
+                className="h-11 rounded-full bg-brand text-white font-semibold text-sm inline-flex items-center justify-center gap-2 hover:bg-brand-700 transition-colors"
+              >
+                <HiOutlineCodeBracket size={18} /> Kod muhitini ochish
+              </Link>
+            </Card>
+          )}
+
           {task.status === "in_progress" && submission && (
             <SubmitPanel task={task} submissionId={submission._id} offset={offset} onDone={() => { refreshLists(); load(); }} />
+          )}
+
+          {task.status !== "in_progress" && submission?.code && task.sandbox?.enabled && (
+            <Link
+              to={`/dashboard/tasks/${task._id}/code`}
+              className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-4 hover:border-brand/40 transition-colors"
+            >
+              <span className="w-10 h-10 rounded-xl bg-brand-tint text-brand inline-flex items-center justify-center shrink-0">
+                <HiOutlineCodeBracket size={20} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-ink">Yuborilgan kodni ko'rish</span>
+                <span className="block text-xs text-muted">
+                  {submission.testResults?.total ? `Testlar: ${submission.testResults.passed}/${submission.testResults.total}` : "Kod muhitida yozilgan"}
+                </span>
+              </span>
+            </Link>
           )}
 
           {IN_REVIEW.includes(task.status) && submission && (
@@ -352,7 +401,7 @@ function SubmitPanel({ task, submissionId, offset, onDone }: { task: UserTask; s
       </Card>
 
       <Card className="p-5">
-        <h3 className="text-sm font-bold text-ink mb-4">Yechimni tekshirishga yuborish</h3>
+        <h3 className="text-sm font-bold text-ink mb-4">{task.sandbox?.enabled ? "Yoki havola orqali yuborish" : "Yechimni tekshirishga yuborish"}</h3>
         <form onSubmit={submit} className="flex flex-col gap-4">
           <Field label="Yechim havolasi *" hint="GitHub repozitoriy, Figma, Behance yoki boshqa havola">
             <Input value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} placeholder="https://github.com/username/repo" inputMode="url" />

@@ -50,6 +50,7 @@ export function TaskViewModal({ task, onClose }: { task: Task | null; onClose: (
           <span className={`px-2 py-0.5 rounded-md border text-[11px] font-semibold ${diff.className}`}>{diff.label}</span>
           <Badge tone="warning">{task.xp} XP</Badge>
           <Badge tone="info">{formatDuration(task.estimatedTime)}</Badge>
+          {task.sandbox?.enabled && <Badge tone="violet">Kod muhiti · {task.sandbox.tests.length} test</Badge>}
           {!task.isActive && <Badge tone="danger">Nofaol</Badge>}
         </div>
         <p className="text-ink-2 whitespace-pre-line">{task.description}</p>
@@ -79,6 +80,7 @@ export function TaskTile({ task, onClick, footer }: { task: Task; onClick: () =>
         <div className="flex flex-wrap items-center gap-1.5">
           <Badge>{task.track}</Badge>
           <span className={`px-2 py-0.5 rounded-md border text-[11px] font-semibold ${diff.className}`}>{diff.label}</span>
+          {task.sandbox?.enabled && <Badge tone="violet">Kod muhiti</Badge>}
           {!task.isActive && <Badge tone="danger">Nofaol</Badge>}
         </div>
         <div>

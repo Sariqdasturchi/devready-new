@@ -48,10 +48,23 @@
   --color-brand-tint: var(--color-brand-50);
   /* Ko'k fon ustidagi och aksent (masalan, "Tavsiya etiladi") */
   --color-brand-on: #c3d0ff;
+  /* Kod muharriri sintaksis ranglari */
+  --sb-keyword: #9333ea;
+  --sb-string: #047857;
+  --sb-number: #b45309;
+  --sb-tag: #1538d9;
+  --sb-attr: #0e7490;
+  --sb-fn: #be185d;
 }
 
 /* ─── Qorong'i mavzu ─────────────────────────────────────────────────── */
 :root.dark {
+  --sb-keyword: #c4a5ff;
+  --sb-string: #7ee2b8;
+  --sb-number: #fbbf72;
+  --sb-tag: #9db1ff;
+  --sb-attr: #67d8ef;
+  --sb-fn: #f9a8d4;
   color-scheme: dark;
 
   --color-ink: #e8ecf5;

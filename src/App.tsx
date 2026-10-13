@@ -19,6 +19,7 @@ const UserDashboardLayout = lazy(() => import("./pages/userDashboard/UserDashboa
 const Dashboard = lazy(() => import("./pages/userDashboard/Dashboard"));
 const UserTasks = lazy(() => import("./pages/userDashboard/Task"));
 const TaskDetails = lazy(() => import("./components/user/TaskDetails"));
+const SandboxWorkspace = lazy(() => import("./components/sandbox/SandboxWorkspace"));
 const CompletedTasks = lazy(() => import("./pages/userDashboard/CompletedTasks"));
 const MyPoints = lazy(() => import("./pages/userDashboard/MyPoints"));
 const Leaderboard = lazy(() => import("./pages/userDashboard/Leaderboard"));
@@ -118,6 +119,7 @@ export default function App() {
               <Route path="/dashboard/plans" element={<Suspense fallback={<PageLoader />}><UserPlans /></Suspense>} />
               <Route path="/dashboard/settings" element={<Suspense fallback={<PageLoader />}><UserSettings /></Suspense>} />
             </Route>
+            <Route path="/dashboard/tasks/:id/code" element={<Suspense fallback={<PageLoader />}><SandboxWorkspace /></Suspense>} />
           </Route>
 
           <Route element={<ProtectedRoute roles={["mentor"]} />}>

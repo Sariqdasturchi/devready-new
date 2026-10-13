@@ -19,6 +19,7 @@ export function TaskCard({ task }: { task: UserTask }) {
         <div className="flex items-center gap-1.5">
           <Badge>{task.track}</Badge>
           <span className={`px-2 py-0.5 rounded-md border text-[11px] font-semibold ${diff.className}`}>{diff.label}</span>
+          {task.sandbox?.enabled && <Badge tone="violet">Brauzerda</Badge>}
         </div>
         <StatusBadge status={task.status} />
       </div>

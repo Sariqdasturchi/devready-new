@@ -73,6 +73,19 @@ export interface Task {
   createdAt?: string;
   submissionsCount?: number;
   approvedCount?: number;
+  sandbox?: TaskSandbox | null;
+}
+
+export interface SandboxCode {
+  html: string;
+  css: string;
+  js: string;
+}
+
+export interface TaskSandbox {
+  enabled: boolean;
+  starter?: Partial<SandboxCode>;
+  tests: { title: string; code: string }[];
 }
 
 export interface AiFeedback {
@@ -104,6 +117,9 @@ export interface Submission {
   githubUrl?: string | null;
   liveDemoUrl?: string | null;
   notes?: string | null;
+  /** Kod muhitida yozilgan yechim */
+  code?: SandboxCode | null;
+  testResults?: { passed: number; total: number; checkedAt?: string } | null;
   startedAt: string;
   dueAt: string;
   submittedAt?: string | null;

@@ -12,6 +12,7 @@ import type {
   PaymentInfo,
   Plan,
   Question,
+  SandboxCode,
   Submission,
   Task,
   User,
@@ -133,8 +134,17 @@ export const submissionApi = {
   start: (taskId: string) => data<Submission>(api.post("/submissions/start", { taskId })),
   submit: (
     id: string,
-    body: { githubUrl: string; liveDemoUrl?: string; notes?: string; reviewMethod: "ai" | "mentor"; mentorId?: string },
+    body: {
+      githubUrl?: string;
+      liveDemoUrl?: string;
+      notes?: string;
+      reviewMethod: "ai" | "mentor";
+      mentorId?: string;
+      code?: SandboxCode;
+      testResults?: { passed: number; total: number };
+    },
   ) => data<Submission>(api.post(`/submissions/${id}/submit`, body)),
+  saveDraft: (id: string, code: SandboxCode) => data<{ savedAt: string }>(api.put(`/submissions/${id}/draft`, { code })),
   mine: () => data<Submission[]>(api.get("/submissions/me")),
   get: (id: string) => data<Submission>(api.get(`/submissions/${id}`)),
   retryAi: (id: string) => api.post(`/submissions/${id}/ai-check`).then((r) => r.data),
