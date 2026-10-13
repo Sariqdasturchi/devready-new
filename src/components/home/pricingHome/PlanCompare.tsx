@@ -7,7 +7,7 @@ export default function PlanCompare({ plans, currentId }: { plans: Plan[]; curre
   if (plans.length < 2) return null;
   const rows = comparisonRows(plans);
   return (
-    <div className="overflow-x-auto rounded-[22px] border border-line bg-white">
+    <div className="overflow-x-auto rounded-[22px] border border-line bg-surface">
       <table className="w-full min-w-[560px] text-[15px]">
         <thead>
           <tr className="border-b border-line">

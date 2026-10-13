@@ -15,11 +15,13 @@ import { Badge, Card, CardHeader, EmptyState, ErrorState, PageHeader, PageLoader
 import ActivityCalendar from "../../components/user/ActivityCalendar";
 import { formatDate, limitLabel, timeAgo } from "../../lib/format";
 import type { Overview } from "../../types/type";
+import { useChartColors } from "../../lib/theme";
 
 type Period = "daily" | "weekly" | "monthly";
 const PERIOD_LABEL: Record<Period, string> = { daily: "Bugun", weekly: "7 kun", monthly: "30 kun" };
 
 export default function UserDashboard() {
+  const cc = useChartColors();
   const [period, setPeriod] = useState<Period>("weekly");
   const overview = useCachedQuery<Overview>("user:overview", analyticsApi.overview, { staleTime: 15_000 });
   const calendar = useCachedQuery<Record<string, number>>("user:calendar", analyticsApi.calendar, { staleTime: 60_000 });
@@ -71,7 +73,7 @@ export default function UserDashboard() {
             { label: "Bajarilmagan", value: p.expired, cls: "text-rose-600" },
             { label: "Olingan XP", value: `+${p.xp}`, cls: "text-brand" },
           ].map((s) => (
-            <div key={s.label} className="bg-white px-4 py-4">
+            <div key={s.label} className="bg-surface px-4 py-4">
               <p className="text-[11px] text-muted">{s.label}</p>
               <p className={`text-xl font-bold mt-1 tabular-nums ${s.value && s.value !== "+0" && s.cls ? s.cls : "text-ink"}`}>{s.value}</p>
             </div>
@@ -84,19 +86,19 @@ export default function UserDashboard() {
               <AreaChart data={o.chart} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="xpFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#1f4bff" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#1f4bff" stopOpacity={0} />
+                    <stop offset="0%" stopColor={cc.brand} stopOpacity={0.35} />
+                    <stop offset="100%" stopColor={cc.brand} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="#eef1f5" vertical={false} />
-                <XAxis dataKey="date" tickFormatter={(d: string) => d.slice(8)} tick={{ fill: "#697386", fontSize: 11 }} axisLine={false} tickLine={false} interval={4} />
-                <YAxis allowDecimals={false} tick={{ fill: "#697386", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <CartesianGrid stroke={cc.grid} vertical={false} />
+                <XAxis dataKey="date" tickFormatter={(d: string) => d.slice(8)} tick={{ fill: cc.muted, fontSize: 11 }} axisLine={false} tickLine={false} interval={4} />
+                <YAxis allowDecimals={false} tick={{ fill: cc.muted, fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip
-                  contentStyle={{ background: "#fff", border: "1px solid #e3e8ef", borderRadius: 12, fontSize: 12, boxShadow: "0 8px 24px -12px rgba(7,10,19,.25)" }}
+                  contentStyle={cc.tooltip} labelStyle={{ color: cc.muted }} itemStyle={{ color: cc.ink }}
                   labelFormatter={(d) => formatDate(String(d))}
                   formatter={(v) => [`${v} XP`, "XP"]}
                 />
-                <Area type="monotone" dataKey="xp" stroke="#1f4bff" strokeWidth={2} fill="url(#xpFill)" />
+                <Area type="monotone" dataKey="xp" stroke={cc.brand} strokeWidth={2} fill="url(#xpFill)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>

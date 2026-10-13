@@ -1,25 +1,113 @@
 @import "tailwindcss";
 
-/* ─── DevReady dizayn tokenlari: oq · qora · ko'k ─────────────────────── */
+/* Sinf orqali boshqariladigan dark mode: <html class="dark"> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─── DevReady dizayn tokenlari ─────────────────────────────────────────
+ * Ranglar VAZIFASI bo'yicha nomlangan — yorug' va qorong'i mavzuda qiymati almashadi:
+ *   ink / ink-2 / muted   — matn (asosiy / ikkinchi / yordamchi)
+ *   paper                 — sahifa foni
+ *   surface               — kartochka, input, modal foni
+ *   mist                  — yumshoq blok foni, hover
+ *   line                  — chegara va ajratgichlar
+ *   brand-*               — yagona aksent (ko'k) shkalasi; brand = 600
+ *   night                 — har ikki mavzuda qorong'i qoladigan sirt (kod bloki, toast)
+ * Holat ranglari (emerald / amber / rose) Tailwind palitrasidan, dark'da tuslari moslanadi.
+ */
 @theme {
   --font-sans: "Onest Variable", "Onest", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Onest Variable", "Onest", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --color-ink: #070a13; /* asosiy matn, qora bloklar */
-  --color-ink-2: #2f3747; /* ikkinchi darajali matn */
-  --color-muted: #697386; /* izohlar, yordamchi matn */
+  /* Matn */
+  --color-ink: #0b1020;
+  --color-ink-2: #344055;
+  --color-muted: #667085;
+
+  /* Sirtlar */
   --color-paper: #ffffff;
-  --color-mist: #f4f6fa; /* sahifa foni, yumshoq bloklar */
-  --color-line: #e3e8ef; /* chegaralar */
-  --color-brand: #1f4bff; /* yagona aksent */
-  --color-brand-deep: #1336d6;
-  --color-brand-tint: #eef2ff;
+  --color-surface: #ffffff;
+  --color-mist: #f4f6fb;
+  --color-line: #e2e7f0;
+  --color-night: #0b1020;
+
+  /* Brend — ko'k shkala */
+  --color-brand-50: #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c3d0ff;
+  --color-brand-300: #9db1ff;
+  --color-brand-400: #6c88ff;
+  --color-brand-500: #3f63ff;
+  --color-brand-600: #1f4bff;
+  --color-brand-700: #1538d9;
+  --color-brand-800: #152fae;
+  --color-brand-900: #172b86;
+  --color-brand-950: #0f1a4d;
+  --color-brand: var(--color-brand-600);
+  --color-brand-deep: var(--color-brand-700);
+  --color-brand-tint: var(--color-brand-50);
+  /* Ko'k fon ustidagi och aksent (masalan, "Tavsiya etiladi") */
+  --color-brand-on: #c3d0ff;
+}
+
+/* ─── Qorong'i mavzu ─────────────────────────────────────────────────── */
+:root.dark {
+  color-scheme: dark;
+
+  --color-ink: #e8ecf5;
+  --color-ink-2: #b4bdcf;
+  --color-muted: #8791a7;
+
+  --color-paper: #0a0d16;
+  --color-surface: #121725;
+  --color-mist: #171d2c;
+  --color-line: #252d40;
+  --color-night: #05070d;
+
+  /* Ko'k: to'q fonda o'qilishi uchun biroz yorqinroq; tint — to'q ko'k */
+  --color-brand-50: #141c3d;
+  --color-brand-100: #1a2550;
+  --color-brand-200: #223170;
+  --color-brand-600: #3d63ff;
+  --color-brand-700: #5a7bff;
+  --color-brand-tint: #151d3f;
+
+  /* Holat ranglari: och fonlar → to'q tuslar, matnlar → och tuslar */
+  --color-emerald-50: #0e2a22;
+  --color-emerald-100: #12382d;
+  --color-emerald-200: #1b4d3e;
+  --color-emerald-600: #34d399;
+  --color-emerald-700: #4ade9f;
+  --color-emerald-800: #6ee7b7;
+  --color-amber-50: #2b220d;
+  --color-amber-100: #3a2d10;
+  --color-amber-200: #4d3b14;
+  --color-amber-600: #fbbf24;
+  --color-amber-800: #fcd34d;
+  --color-rose-50: #2d1218;
+  --color-rose-200: #4d1f2a;
+  --color-rose-600: #fb7185;
+  --color-rose-700: #fda4af;
+  --color-slate-100: #1c2333;
+  --color-slate-200: #252d40;
+  --color-blue-50: #141c3d;
+  --color-blue-200: #223170;
+  --color-blue-500: #6c88ff;
+  --color-blue-600: #8aa2ff;
+}
+
+/* To'q fonda ko'k MATN uchun yorqinroq tus (ko'k tugma fonlari o'zgarmaydi) */
+:root.dark .text-brand,
+:root.dark .hover\:text-brand:hover,
+:root.dark .group:hover .group-hover\:text-brand,
+:root.dark .text-brand-deep {
+  color: #8aa2ff;
 }
 
 @layer base {
   html {
     color-scheme: light;
+    background-color: var(--color-paper);
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
   }
@@ -54,6 +142,11 @@
     background: var(--color-brand);
     color: #fff;
   }
+  /* Mavzu almashganda ranglar silliq o'tadi (faqat almashtirish paytida yoqiladi) */
+  html.theme-switching,
+  html.theme-switching * {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease !important;
+  }
 }
 
 ::-webkit-scrollbar {
@@ -64,9 +157,9 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d3d9e3;
+  background: var(--color-line);
   border-radius: 9999px;
-  border: 2px solid #fff;
+  border: 2px solid var(--color-paper);
 }
 
 @keyframes dr-spin {
@@ -122,7 +215,7 @@
 
   /* Eski sinflar — ishlatilmay qolgan joylar buzilmasligi uchun */
   .dark-card {
-    background: #fff;
+    background: var(--color-surface);
     border: 1px solid var(--color-line);
   }
   .btn-mint {

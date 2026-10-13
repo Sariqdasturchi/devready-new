@@ -162,7 +162,7 @@ export default function Register() {
             <h1 className="text-[32px] font-extrabold tracking-[-0.035em] leading-tight text-ink">Xush kelibsiz!</h1>
             <p className="text-[15px] text-ink-2 mt-2 leading-relaxed">Yo'nalish: {direction}. Boshlang'ich darajangiz:</p>
           </div>
-          <div className="h-10 px-5 inline-flex items-center rounded-full bg-ink text-white font-semibold">
+          <div className="h-10 px-5 inline-flex items-center rounded-full bg-brand text-white font-semibold">
             {result}
           </div>
           <p className="text-[15px] text-ink-2 leading-relaxed">Vazifalar yo'nalishingiz bo'yicha taqdim etiladi. Free tarifda 10 ta task bajarishingiz mumkin.</p>
@@ -210,12 +210,12 @@ export default function Register() {
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Ali Valiyev"
               autoFocus
-              className="w-full h-12 px-4 bg-white border border-line rounded-xl text-[16px] text-ink focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 placeholder:text-muted/60"
+              className="w-full h-12 px-4 bg-surface border border-line rounded-xl text-[16px] text-ink focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 placeholder:text-muted/60"
             />
           </label>
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-ink">Telefon raqam</span>
-            <div className="flex border border-line rounded-xl overflow-hidden focus-within:border-brand focus-within:ring-4 focus-within:ring-brand/10 bg-white">
+            <div className="flex border border-line rounded-xl overflow-hidden focus-within:border-brand focus-within:ring-4 focus-within:ring-brand/10 bg-surface">
               <span className="bg-mist px-4 text-[15px] text-ink-2 border-r border-line flex items-center">+998</span>
               <PatternFormat
                 format="(##) ###-##-##"
@@ -265,7 +265,7 @@ export default function Register() {
               placeholder="Masalan: 584930221"
               inputMode="numeric"
               autoFocus
-              className="w-full h-12 px-4 bg-white border border-line rounded-xl text-[16px] text-ink tabular-nums tracking-wide focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 placeholder:text-muted/60"
+              className="w-full h-12 px-4 bg-surface border border-line rounded-xl text-[16px] text-ink tabular-nums tracking-wide focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 placeholder:text-muted/60"
             />
           </label>
           <button type="submit" disabled={loading} className="w-full h-12 bg-brand hover:bg-brand-deep text-white font-semibold rounded-full flex items-center justify-center gap-2 text-[15px] cursor-pointer transition-colors disabled:opacity-50">
@@ -311,7 +311,7 @@ export default function Register() {
                 type="button"
                 disabled={loading}
                 onClick={() => chooseDirection(t)}
-                className="h-12 px-4 rounded-xl border border-line bg-white hover:border-ink text-[15px] font-medium text-ink text-left cursor-pointer disabled:opacity-50 transition-colors"
+                className="h-12 px-4 rounded-xl border border-line bg-surface hover:border-ink text-[15px] font-medium text-ink text-left cursor-pointer disabled:opacity-50 transition-colors"
               >
                 {loading && direction === t ? "Yuklanmoqda..." : t}
               </button>
@@ -335,7 +335,7 @@ export default function Register() {
                 type="button"
                 disabled={loading}
                 onClick={() => answer(i)}
-                className="w-full p-4 rounded-xl border border-line bg-white hover:border-ink text-left text-[15px] text-ink flex items-center gap-3 cursor-pointer disabled:opacity-50 transition-colors"
+                className="w-full p-4 rounded-xl border border-line bg-surface hover:border-ink text-left text-[15px] text-ink flex items-center gap-3 cursor-pointer disabled:opacity-50 transition-colors"
               >
                 <span className="w-7 h-7 rounded-full bg-mist text-[13px] font-semibold text-ink-2 flex items-center justify-center shrink-0">{i + 1}</span>
                 {opt}

@@ -4,6 +4,7 @@ import { HiOutlineBars3, HiOutlineXMark } from "react-icons/hi2";
 import { menuList } from "../../config/config";
 import { getStoredUser, getToken, homeForRole } from "../../lib/auth";
 import Logo from "../Logo";
+import ThemeToggle from "../ThemeToggle";
 
 export default function Header() {
   const location = useLocation();
@@ -24,7 +25,7 @@ export default function Header() {
     `text-[15px] transition-colors ${isActive ? "text-ink font-semibold" : "text-muted hover:text-ink"}`;
 
   return (
-    <header className={`sticky top-0 z-50 bg-white/90 backdrop-blur-md transition-shadow ${scrolled ? "shadow-[0_1px_0_var(--color-line)]" : ""}`}>
+    <header className={`sticky top-0 z-50 bg-paper/90 backdrop-blur-md transition-shadow ${scrolled ? "shadow-[0_1px_0_var(--color-line)]" : ""}`}>
       <nav className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between gap-6">
         <Logo />
 
@@ -39,8 +40,9 @@ export default function Header() {
         </ul>
 
         <div className="hidden md:flex items-center gap-2">
+          <ThemeToggle />
           {cabinet ? (
-            <Link to={cabinet} className="h-10 px-5 inline-flex items-center rounded-full bg-ink text-white text-sm font-semibold hover:bg-brand transition-colors">
+            <Link to={cabinet} className="h-10 px-5 inline-flex items-center rounded-full bg-brand text-white text-sm font-semibold hover:bg-brand-deep transition-colors">
               Kabinetga o'tish
             </Link>
           ) : (
@@ -55,19 +57,22 @@ export default function Header() {
           )}
         </div>
 
+        <div className="md:hidden flex items-center gap-1 -mr-2">
+        <ThemeToggle />
         <button
           type="button"
-          className="md:hidden -mr-2 p-2 rounded-full text-ink hover:bg-mist cursor-pointer"
+          className="p-2 rounded-full text-ink hover:bg-mist cursor-pointer"
           onClick={() => setOpen((v) => !v)}
           aria-label={open ? "Menyuni yopish" : "Menyuni ochish"}
           aria-expanded={open}
         >
           {open ? <HiOutlineXMark size={24} /> : <HiOutlineBars3 size={24} />}
         </button>
+        </div>
       </nav>
 
       {open && (
-        <div className="md:hidden border-t border-line bg-white px-5 pb-6 pt-2">
+        <div className="md:hidden border-t border-line bg-surface px-5 pb-6 pt-2">
           <ul className="flex flex-col">
             {menuList.map((item) => (
               <li key={item.id}>
@@ -79,7 +84,7 @@ export default function Header() {
           </ul>
           <div className="mt-4 grid grid-cols-2 gap-2">
             {cabinet ? (
-              <Link to={cabinet} className="col-span-2 h-12 inline-flex items-center justify-center rounded-full bg-ink text-white font-semibold">
+              <Link to={cabinet} className="col-span-2 h-12 inline-flex items-center justify-center rounded-full bg-brand text-white font-semibold">
                 Kabinetga o'tish
               </Link>
             ) : (

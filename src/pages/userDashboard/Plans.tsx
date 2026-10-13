@@ -226,7 +226,7 @@ function PaymentModal({
     >
       {plan && (
         <div className="flex flex-col gap-5">
-          <div className="rounded-2xl p-5 bg-linear-to-br from-brand-tint to-white border border-brand/30">
+          <div className="rounded-2xl p-5 bg-linear-to-br from-brand-tint to-surface border border-brand/30">
             <p className="text-xs text-brand">To'lov summasi</p>
             <p className="text-2xl font-bold text-ink">{formatPrice(plan.price)}</p>
             <div className="mt-4 flex items-center justify-between gap-3">

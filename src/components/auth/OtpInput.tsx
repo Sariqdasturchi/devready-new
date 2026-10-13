@@ -57,7 +57,7 @@ export default function OtpInput({ value, onChange, disabled }: { value: string;
           onKeyDown={(e) => handleKey(i, e)}
           onPaste={handlePaste}
           aria-label={`Kod ${i + 1}-raqami`}
-          className="w-11 h-14 sm:w-12 rounded-xl border border-line bg-white text-center text-xl font-bold font-mono text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/15 disabled:opacity-50"
+          className="w-11 h-14 sm:w-12 rounded-xl border border-line bg-surface text-center text-xl font-bold font-mono text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/15 disabled:opacity-50"
         />
       ))}
     </div>

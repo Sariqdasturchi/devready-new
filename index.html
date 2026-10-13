@@ -9,6 +9,19 @@
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href="https://devready.uz" />
     <meta name="theme-color" content="#ffffff" />
+    <!-- Mavzu sahifa chizilishidan OLDIN qo'yiladi — oq "chaqnash" bo'lmasin -->
+    <script>
+      (function () {
+        try {
+          var p = localStorage.getItem("devready-theme");
+          var dark = p === "dark" || (p !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) {
+            document.documentElement.classList.add("dark");
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", "#0a0d16");
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta name="application-name" content="DevReady" />
     <meta name="apple-mobile-web-app-title" content="DevReady" />
 

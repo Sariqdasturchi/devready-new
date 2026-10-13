@@ -126,7 +126,7 @@ export default function ReviewModal({ submission, onClose, onReviewed }: { submi
         {canReview ? (
           <div className="flex flex-col gap-4">
             <Field label={`Ball: ${score} / 100`}>
-              <input type="range" min={0} max={100} value={score} onChange={(e) => setScore(Number(e.target.value))} className="w-full accent-[#1f4bff]" />
+              <input type="range" min={0} max={100} value={score} onChange={(e) => setScore(Number(e.target.value))} className="w-full accent-brand" />
             </Field>
             <div className="flex flex-wrap gap-2 -mt-2">
               {QUICK.map((q) => (

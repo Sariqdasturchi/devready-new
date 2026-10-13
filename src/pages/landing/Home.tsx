@@ -44,7 +44,7 @@ const HEAT = Array.from({ length: 7 * 18 }, (_, i) => {
   const v = (i * 37 + (i % 7) * 11) % 10;
   return v > 7 ? 3 : v > 5 ? 2 : v > 2 ? 1 : 0;
 });
-const HEAT_CLS = ["bg-white/[0.07]", "bg-brand/40", "bg-brand/70", "bg-brand"];
+const HEAT_CLS = ["bg-line", "bg-brand/35", "bg-brand/65", "bg-brand"];
 
 export default function Home() {
   return (
@@ -102,7 +102,7 @@ export default function Home() {
           </p>
           <ul className="flex flex-wrap gap-2">
             {TRACKS.map((t) => (
-              <li key={t} className="h-10 px-4 inline-flex items-center rounded-full bg-white border border-line text-[15px] font-medium text-ink">
+              <li key={t} className="h-10 px-4 inline-flex items-center rounded-full bg-surface border border-line text-[15px] font-medium text-ink">
                 {t}
               </li>
             ))}
@@ -133,55 +133,55 @@ export default function Home() {
         </div>
       </section>
 
-      {/* NEGA AMALIYOT — qora blok */}
-      <section className="bg-ink text-white">
+      {/* NEGA AMALIYOT — yumshoq fon */}
+      <section className="bg-mist border-y border-line">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 py-24 sm:py-32">
           <div className="grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
             <div>
-              <h2 className="text-4xl sm:text-5xl font-extrabold tracking-[-0.04em] leading-[1.05] text-balance">Ish beruvchi diplomni emas, qilgan ishingizni so'raydi.</h2>
+              <h2 className="text-4xl sm:text-5xl font-extrabold tracking-[-0.04em] leading-[1.05] text-balance text-ink">Ish beruvchi diplomni emas, qilgan ishingizni so'raydi.</h2>
               <div className="mt-12 flex flex-col gap-9">
                 {VALUES.map((v) => (
                   <div key={v.title} className="max-w-lg">
-                    <h3 className="text-xl font-bold tracking-[-0.01em]">{v.title}</h3>
-                    <p className="mt-2 text-white/65 leading-relaxed">{v.text}</p>
+                    <h3 className="text-xl font-bold tracking-[-0.01em] text-ink">{v.title}</h3>
+                    <p className="mt-2 text-ink-2 leading-relaxed">{v.text}</p>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Kabinet namunasi */}
-            <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-5 sm:p-7" aria-label="Kabinet namunasi">
+            <div className="rounded-[22px] border border-line bg-surface p-5 sm:p-7 shadow-[0_30px_70px_-40px_rgba(11,16,32,0.35)]" aria-label="Kabinet namunasi">
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { k: "Jami XP", v: "2 340" },
                   { k: "Reyting", v: "#4" },
                   { k: "Streak", v: "12 kun" },
                 ].map((s) => (
-                  <div key={s.k} className="rounded-2xl bg-white/[0.06] p-3.5 sm:p-4">
-                    <p className="text-[12px] sm:text-[13px] text-white/50">{s.k}</p>
-                    <p className="mt-1 text-xl sm:text-2xl font-bold tracking-tight">{s.v}</p>
+                  <div key={s.k} className="rounded-2xl bg-mist p-3.5 sm:p-4">
+                    <p className="text-[12px] sm:text-[13px] text-muted">{s.k}</p>
+                    <p className="mt-1 text-xl sm:text-2xl font-bold tracking-tight text-ink">{s.v}</p>
                   </div>
                 ))}
               </div>
               <div className="mt-6">
-                <p className="text-[13px] text-white/50 mb-3">So'nggi 18 hafta faolligi</p>
+                <p className="text-[13px] text-muted mb-3">So'nggi 18 hafta faolligi</p>
                 <div className="grid grid-flow-col grid-rows-7 gap-[4px] w-fit">
                   {HEAT.map((h, i) => (
                     <span key={i} className={`w-[11px] h-[11px] sm:w-[14px] sm:h-[14px] rounded-[3px] ${HEAT_CLS[h]}`} />
                   ))}
                 </div>
               </div>
-              <div className="mt-6 flex flex-col divide-y divide-white/10">
+              <div className="mt-6 flex flex-col divide-y divide-line">
                 {[
                   { t: "REST API: kutubxona", s: "Qabul qilindi", x: "+212 XP", ok: true },
                   { t: "Kanban board drag & drop", s: "Mentor tekshirmoqda", x: "", ok: false },
                 ].map((r) => (
                   <div key={r.t} className="flex items-center justify-between gap-3 py-3">
                     <div className="min-w-0">
-                      <p className="text-[15px] font-medium truncate">{r.t}</p>
-                      <p className={`text-[13px] ${r.ok ? "text-[#8fa6ff]" : "text-white/50"}`}>{r.s}</p>
+                      <p className="text-[15px] font-medium truncate text-ink">{r.t}</p>
+                      <p className={`text-[13px] ${r.ok ? "text-brand" : "text-muted"}`}>{r.s}</p>
                     </div>
-                    {r.x && <span className="text-[14px] font-semibold shrink-0">{r.x}</span>}
+                    {r.x && <span className="text-[14px] font-semibold shrink-0 text-brand">{r.x}</span>}
                   </div>
                 ))}
               </div>
@@ -210,7 +210,7 @@ export default function Home() {
             <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.03em] text-ink">Tajribali dasturchimisiz?</h2>
             <p className="mt-2 text-ink-2 max-w-xl">Mentor bo'ling: yechimlarni tekshiring, yosh dasturchilarga yo'l ko'rsating va jamoangiz uchun kadrlar toping.</p>
           </div>
-          <Link to="/mentors" className="h-12 px-6 inline-flex items-center justify-center rounded-full border border-ink text-ink font-semibold hover:bg-ink hover:text-white transition-colors shrink-0">
+          <Link to="/mentors" className="h-12 px-6 inline-flex items-center justify-center rounded-full border border-line bg-surface text-ink font-semibold hover:border-brand hover:text-brand transition-colors shrink-0">
             Mentor bo'lish
           </Link>
         </div>
@@ -222,7 +222,7 @@ export default function Home() {
           <h2 className="text-4xl sm:text-6xl font-extrabold tracking-[-0.045em] leading-[1.02] max-w-3xl text-balance">Birinchi taskni bugun boshlang.</h2>
           <Link
             to="/register"
-            className="h-14 px-8 inline-flex items-center justify-center rounded-full bg-white text-ink text-base font-semibold hover:bg-ink hover:text-white transition-colors shrink-0"
+            className="h-14 px-8 inline-flex items-center justify-center rounded-full bg-white text-brand-700 text-base font-semibold hover:bg-white/90 transition-colors shrink-0"
           >
             Bepul ro'yxatdan o'tish
           </Link>

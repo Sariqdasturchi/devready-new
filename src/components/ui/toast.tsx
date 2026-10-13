@@ -18,7 +18,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({ show }), [show]);
   const icon = { success: HiOutlineCheckCircle, error: HiOutlineExclamationTriangle, info: HiOutlineInformationCircle };
   const color = {
-    success: "text-[#8fa6ff]",
+    success: "text-brand-300",
     error: "text-rose-400",
     info: "text-white/70",
   };
@@ -30,7 +30,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {items.map((t) => {
           const Icon = icon[t.type];
           return (
-            <div key={t.id} className={`flex items-start gap-3 rounded-2xl bg-ink px-4 py-3.5 shadow-[0_20px_50px_-15px_rgba(7,10,19,0.5)] text-[14px] ${color[t.type]}`}>
+            <div key={t.id} className={`flex items-start gap-3 rounded-2xl bg-night border border-white/10 px-4 py-3.5 shadow-[0_20px_50px_-15px_rgba(11,16,32,0.5)] text-[14px] ${color[t.type]}`}>
               <Icon size={20} className="shrink-0 mt-0.5" />
               <span className="text-white leading-snug">{t.message}</span>
             </div>

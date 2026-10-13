@@ -15,9 +15,10 @@ export const TRACKS = [
 export const LEVELS = ["Beginner", "Junior", "Strong Junior", "Middle"] as const;
 
 export const DIFFICULTY: Record<Difficulty, { label: string; className: string; minutes: number }> = {
-  oson: { label: "Oson", className: "text-ink-2 bg-white border-line", minutes: 120 },
-  orta: { label: "O'rta", className: "text-ink-2 bg-white border-line", minutes: 360 },
-  qiyin: { label: "Qiyin", className: "text-white bg-ink border-ink", minutes: 1440 },
+  // Qiyinlik — svetofor tamoyili: yashil / sariq / qizil (qora blok emas)
+  oson: { label: "Oson", className: "text-emerald-700 bg-emerald-50 border-emerald-200", minutes: 120 },
+  orta: { label: "O'rta", className: "text-amber-800 bg-amber-50 border-amber-200", minutes: 360 },
+  qiyin: { label: "Qiyin", className: "text-rose-700 bg-rose-50 border-rose-200", minutes: 1440 },
 };
 
 export type Tone = "neutral" | "info" | "warning" | "success" | "danger" | "violet";
@@ -42,7 +43,7 @@ export const TONE_CLASS: Record<Tone, string> = {
   warning: "text-amber-800 bg-amber-50 border-amber-200",
   success: "text-emerald-800 bg-emerald-50 border-emerald-200",
   danger: "text-rose-700 bg-rose-50 border-rose-200",
-  violet: "text-ink bg-white border-ink/20",
+  violet: "text-ink bg-surface border-line",
 };
 
 export const BOT_USERNAME = "devreadyrobot";

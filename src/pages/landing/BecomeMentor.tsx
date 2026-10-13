@@ -54,16 +54,16 @@ export default function BecomeMentor() {
         </div>
       </section>
 
-      <section className="bg-ink text-white">
+      <section className="bg-brand-tint">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 py-20 sm:py-28 grid lg:grid-cols-[0.8fr_1.2fr] gap-12">
-          <h2 className="text-4xl sm:text-5xl font-extrabold tracking-[-0.04em] leading-[1.05]">Qabul qanday o'tadi</h2>
+          <h2 className="text-4xl sm:text-5xl font-extrabold tracking-[-0.04em] leading-[1.05] text-ink">Qabul qanday o'tadi</h2>
           <ol>
             {STEPS.map((s, i) => (
-              <li key={s.title} className="grid grid-cols-[3.5rem_1fr] gap-2 py-7 border-t border-white/15 last:border-b">
-                <span className="text-3xl font-extrabold text-[#8fa6ff]">{i + 1}</span>
+              <li key={s.title} className="grid grid-cols-[3.5rem_1fr] gap-2 py-7 border-t border-brand/20 last:border-b">
+                <span className="text-3xl font-extrabold text-brand">{i + 1}</span>
                 <div>
-                  <h3 className="text-xl font-bold">{s.title}</h3>
-                  <p className="mt-2 text-white/65 leading-relaxed">{s.text}</p>
+                  <h3 className="text-xl font-bold text-ink">{s.title}</h3>
+                  <p className="mt-2 text-ink-2 leading-relaxed">{s.text}</p>
                 </div>
               </li>
             ))}

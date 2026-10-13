@@ -60,7 +60,7 @@ export default function BlogPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Maqolalarni qidirish"
-            className="w-full h-12 pl-11 pr-4 rounded-full border border-line bg-white text-[15px] text-ink placeholder:text-muted focus:outline-none focus:border-ink"
+            className="w-full h-12 pl-11 pr-4 rounded-full border border-line bg-surface text-[15px] text-ink placeholder:text-muted focus:outline-none focus:border-ink"
           />
         </label>
       </div>
@@ -73,7 +73,7 @@ export default function BlogPage() {
               type="button"
               onClick={() => setTag(t)}
               className={`h-10 px-4 rounded-full text-[15px] font-medium whitespace-nowrap border cursor-pointer transition-colors ${
-                tag === t ? "bg-ink border-ink text-white" : "border-line text-ink-2 hover:border-ink"
+                tag === t ? "bg-brand border-brand text-white" : "border-line bg-surface text-ink-2 hover:border-ink-2"
               }`}
             >
               {t}
@@ -98,7 +98,7 @@ export default function BlogPage() {
                   fallback={
                     <div
                       className={`w-full h-full flex flex-col justify-between p-6 ${
-                        ["bg-ink text-white", "bg-brand text-white", "bg-mist text-ink"][i % 3]
+                        ["bg-brand text-white", "bg-brand-tint text-brand", "bg-mist text-ink"][i % 3]
                       }`}
                     >
                       <span className="text-[13px] font-semibold opacity-60">devready / blog</span>

@@ -73,17 +73,17 @@ export default function Leaderboard() {
                   key={r.userId}
                   className={cx(
                     "rounded-[18px] p-5 flex items-center gap-4 border",
-                    first ? "bg-ink border-ink text-white" : "bg-white border-line text-ink",
-                    isMe(r) && "ring-2 ring-brand",
+                    first ? "bg-brand border-brand text-white" : "bg-surface border-line text-ink",
+                    isMe(r) && (first ? "ring-2 ring-brand-300 ring-offset-2 ring-offset-paper" : "ring-2 ring-brand"),
                   )}
                 >
-                  <span className={cx("text-[34px] font-extrabold tracking-tight w-8 tabular-nums", first ? "text-[#8fa6ff]" : "text-muted")}>{r.rank}</span>
+                  <span className={cx("text-[34px] font-extrabold tracking-tight w-8 tabular-nums", first ? "text-brand-on" : "text-muted")}>{r.rank}</span>
                   <Avatar name={r.fullName} src={r.avatar} size={44} />
                   <div className="min-w-0">
                     <p className="text-[15px] font-semibold truncate">
-                      {r.fullName} {isMe(r) && <span className={first ? "text-[#8fa6ff]" : "text-brand"}>(siz)</span>}
+                      {r.fullName} {isMe(r) && <span className={first ? "text-brand-on" : "text-brand"}>(siz)</span>}
                     </p>
-                    <p className={cx("text-[13px]", first ? "text-white/60" : "text-muted")}>{r.level}</p>
+                    <p className={cx("text-[13px]", first ? "text-white/75" : "text-muted")}>{r.level}</p>
                     <p className="text-[15px] font-bold mt-1 tabular-nums">{r.points.toLocaleString()} XP</p>
                   </div>
                 </div>
@@ -149,7 +149,7 @@ export default function Leaderboard() {
                         aria-current={p === current ? "page" : undefined}
                         className={cx(
                           "min-w-8 h-8 px-2 rounded-full text-[13px] font-medium tabular-nums cursor-pointer",
-                          p === current ? "bg-ink text-white" : "text-ink-2 hover:bg-mist",
+                          p === current ? "bg-brand text-white" : "text-ink-2 hover:bg-mist",
                           myRow?.page === p && p !== current && "ring-1 ring-brand text-brand",
                         )}
                       >

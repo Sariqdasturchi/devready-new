@@ -10,7 +10,7 @@ export default function NotFound() {
       <h1 className="mt-3 text-4xl sm:text-5xl font-extrabold tracking-[-0.04em] text-ink">Bunday sahifa yo'q</h1>
       <p className="mt-4 text-lg text-ink-2 max-w-lg">Havola eskirgan yoki manzilda xato bor. Bosh sahifadan yoki blogdan davom eting.</p>
       <div className="mt-8 flex flex-wrap gap-3">
-        <Link to="/" className="h-12 px-6 inline-flex items-center rounded-full bg-ink text-white font-semibold hover:bg-brand transition-colors">
+        <Link to="/" className="h-12 px-6 inline-flex items-center rounded-full bg-brand text-white font-semibold hover:bg-brand-deep transition-colors">
           Bosh sahifa
         </Link>
         <Link to="/blogs" className="h-12 px-6 inline-flex items-center rounded-full border border-line text-ink font-semibold hover:border-ink">

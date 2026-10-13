@@ -21,7 +21,7 @@ function ScrollManager() {
 
 export default function LandingLayout() {
   return (
-    <div className="min-h-dvh flex flex-col bg-white">
+    <div className="min-h-dvh flex flex-col bg-paper">
       <ScrollManager />
       <Header />
       <div className="flex-1">

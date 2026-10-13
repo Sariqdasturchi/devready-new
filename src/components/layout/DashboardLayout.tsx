@@ -7,6 +7,7 @@ import { Avatar, cx } from "../ui";
 import Logo from "../Logo";
 import NotificationBell from "./NotificationBell";
 import type { User } from "../../types/type";
+import ThemeToggle from "../ThemeToggle";
 
 export type NavItem = { to: string; label: string; icon: ComponentType<{ size?: number; className?: string }>; end?: boolean };
 
@@ -55,7 +56,7 @@ export default function DashboardLayout({ nav, title }: { nav: NavItem[]; title:
               className={({ isActive }) =>
                 cx(
                   "flex items-center gap-3 h-10 px-3 rounded-full text-[15px] transition-colors",
-                  isActive ? "bg-ink text-white font-medium" : "text-ink-2 hover:bg-mist hover:text-ink",
+                  isActive ? "bg-brand-tint text-brand font-semibold" : "text-ink-2 hover:bg-mist hover:text-ink",
                 )
               }
             >
@@ -89,12 +90,12 @@ export default function DashboardLayout({ nav, title }: { nav: NavItem[]; title:
 
   return (
     <div className="min-h-dvh bg-mist text-ink lg:flex">
-      <aside className="hidden lg:block w-64 shrink-0 h-dvh sticky top-0 border-r border-line bg-white px-3 py-5">{sidebar}</aside>
+      <aside className="hidden lg:block w-64 shrink-0 h-dvh sticky top-0 border-r border-line bg-surface px-3 py-5">{sidebar}</aside>
 
       {open && (
         <div className="lg:hidden fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-ink/40" onClick={() => setOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-72 max-w-[85vw] bg-white px-3 py-5 shadow-2xl">
+          <div className="absolute inset-0 bg-night/50" onClick={() => setOpen(false)} />
+          <aside className="absolute left-0 top-0 bottom-0 w-72 max-w-[85vw] bg-surface px-3 py-5 shadow-2xl">
             <button
               type="button"
               onClick={() => setOpen(false)}
@@ -114,7 +115,7 @@ export default function DashboardLayout({ nav, title }: { nav: NavItem[]; title:
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="w-10 h-10 -ml-2 inline-flex items-center justify-center rounded-full text-ink hover:bg-white cursor-pointer"
+              className="w-10 h-10 -ml-2 inline-flex items-center justify-center rounded-full text-ink hover:bg-surface cursor-pointer"
               aria-label="Menyuni ochish"
             >
               <HiOutlineBars3 size={22} />
@@ -122,7 +123,10 @@ export default function DashboardLayout({ nav, title }: { nav: NavItem[]; title:
             <Logo to={home} />
           </div>
           <div className="hidden lg:block" />
-          <NotificationBell />
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <NotificationBell />
+          </div>
         </header>
         <main className="flex-1 w-full max-w-[1200px] mx-auto px-4 sm:px-8 pt-2 pb-12">
           <Outlet />

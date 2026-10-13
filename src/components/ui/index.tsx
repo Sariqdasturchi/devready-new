@@ -11,10 +11,10 @@ const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).jo
 type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "outline";
 const BUTTON: Record<ButtonVariant, string> = {
   primary: "bg-brand text-white hover:bg-brand-deep",
-  secondary: "bg-ink text-white hover:bg-ink-2",
-  outline: "border border-line text-ink hover:border-ink bg-white",
+  secondary: "bg-brand-tint text-brand hover:bg-brand-100",
+  outline: "border border-line text-ink hover:border-ink-2 bg-surface",
   ghost: "text-ink-2 hover:bg-mist hover:text-ink",
-  danger: "bg-white text-rose-600 border border-rose-200 hover:bg-rose-50",
+  danger: "bg-surface text-rose-600 border border-rose-200 hover:bg-rose-50",
 };
 
 export function Button({
@@ -47,7 +47,7 @@ export function Button({
 // ─── Card ────────────────────────────────────────────────────────────────
 export function Card({ className, children, ...rest }: { className?: string; children: ReactNode } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div {...rest} className={cx("rounded-[18px] border border-line bg-white", className)}>
+    <div {...rest} className={cx("rounded-[18px] border border-line bg-surface", className)}>
       {children}
     </div>
   );
@@ -171,7 +171,7 @@ export function Tabs<T extends string>({
           onClick={() => onChange(it.value)}
           className={cx(
             "h-8 px-3.5 rounded-full text-[13px] font-medium transition-colors cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap",
-            value === it.value ? "bg-white text-ink shadow-[0_1px_2px_rgba(7,10,19,0.08),0_0_0_1px_var(--color-line)]" : "text-muted hover:text-ink",
+            value === it.value ? "bg-surface text-ink shadow-[0_1px_2px_rgba(7,10,19,0.08),0_0_0_1px_var(--color-line)]" : "text-muted hover:text-ink",
           )}
         >
           {it.label}
@@ -186,7 +186,7 @@ export function Tabs<T extends string>({
 
 // ─── Form controls ───────────────────────────────────────────────────────
 const inputBase =
-  "rounded-xl border border-line bg-white px-3.5 py-2.5 text-[15px] text-ink placeholder:text-muted/70 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition disabled:bg-mist disabled:text-muted";
+  "rounded-xl border border-line bg-surface px-3.5 py-2.5 text-[15px] text-ink placeholder:text-muted/70 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition disabled:bg-mist disabled:text-muted";
 
 export function Field({ label, hint, error, children, className }: { label?: ReactNode; hint?: ReactNode; error?: string; children: ReactNode; className?: string }) {
   return (
@@ -260,11 +260,11 @@ export function Modal({
   const widths = { sm: "max-w-md", md: "max-w-lg", lg: "max-w-2xl", xl: "max-w-4xl" };
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="absolute inset-0 bg-ink/40 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="absolute inset-0 bg-night/50 backdrop-blur-[2px]" onClick={onClose} />
       <div
         role="dialog"
         aria-modal="true"
-        className={cx("relative w-full bg-white rounded-t-[22px] sm:rounded-[22px] shadow-[0_30px_80px_-20px_rgba(7,10,19,0.35)] flex flex-col max-h-[92dvh]", widths[size])}
+        className={cx("relative w-full bg-surface rounded-t-[22px] sm:rounded-[22px] shadow-[0_30px_80px_-20px_rgba(7,10,19,0.35)] flex flex-col max-h-[92dvh]", widths[size])}
       >
         <div className="flex items-center justify-between gap-3 px-5 sm:px-6 py-4 border-b border-line">
           <h2 className="text-lg font-bold tracking-[-0.02em] text-ink">{title}</h2>
@@ -329,7 +329,7 @@ export function Avatar({ name, src, size = 36 }: { name?: string; src?: string |
   if (src && !broken)
     return <img src={mediaUrl(src)} alt={name || ""} onError={() => setBroken(true)} style={style} className="rounded-full object-cover ring-1 ring-line shrink-0" />;
   return (
-    <span style={style} className="rounded-full bg-ink text-white font-semibold flex items-center justify-center shrink-0">
+    <span style={style} className="rounded-full bg-brand-tint text-brand font-semibold flex items-center justify-center shrink-0">
       {initials(name)}
     </span>
   );
@@ -361,8 +361,8 @@ export function ProgressBar({ value, max = 100, tone = "success" }: { value: num
     success: "bg-brand",
     warning: "bg-amber-500",
     danger: "bg-rose-500",
-    info: "bg-ink",
-    violet: "bg-ink-2",
+    info: "bg-brand-700",
+    violet: "bg-brand-400",
     neutral: "bg-muted",
   };
   return (

@@ -89,7 +89,7 @@ export default function Login() {
         {step === 1 ? (
           <label className="flex flex-col gap-2">
             <span className="text-sm font-medium text-ink">Telefon raqam</span>
-            <div className="flex border border-line rounded-xl overflow-hidden focus-within:border-brand focus-within:ring-4 focus-within:ring-brand/10 bg-white">
+            <div className="flex border border-line rounded-xl overflow-hidden focus-within:border-brand focus-within:ring-4 focus-within:ring-brand/10 bg-surface">
               <span className="bg-mist px-4 text-[15px] text-ink-2 border-r border-line flex items-center">+998</span>
               <PatternFormat
                 format="(##) ###-##-##"

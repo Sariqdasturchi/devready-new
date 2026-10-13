@@ -13,7 +13,7 @@ export function TaskCard({ task }: { task: UserTask }) {
   return (
     <Link
       to={`/dashboard/tasks/${task._id}`}
-      className="group rounded-2xl border border-line bg-white hover:border-brand/30 hover:bg-white transition-all p-5 flex flex-col gap-4"
+      className="group rounded-2xl border border-line bg-surface hover:border-brand/30 hover:bg-surface transition-all p-5 flex flex-col gap-4"
     >
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-1.5">

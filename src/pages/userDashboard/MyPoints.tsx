@@ -4,6 +4,7 @@ import { analyticsApi, taskApi } from "../../api/api";
 import { useCachedQuery } from "../../hooks/useCachedQuery";
 import { Card, CardHeader, EmptyState, ErrorState, PageHeader, PageLoader, ProgressBar, StatCard } from "../../components/ui";
 import { formatDate, formatDuration } from "../../lib/format";
+import { useChartColors } from "../../lib/theme";
 
 const LEVELS = [
   { name: "Beginner", from: 0 },
@@ -13,6 +14,7 @@ const LEVELS = [
 ];
 
 export default function MyPoints() {
+  const cc = useChartColors();
   const stats = useCachedQuery("user:taskStats", taskApi.stats, { staleTime: 15_000 });
   const techs = useCachedQuery("user:techs", analyticsApi.technologies, { staleTime: 60_000 });
 
@@ -68,11 +70,11 @@ export default function MyPoints() {
             <div className="h-56 px-3 pb-4">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={breakdown} margin={{ left: -20, right: 8 }}>
-                  <CartesianGrid stroke="#eef1f5" vertical={false} />
-                  <XAxis dataKey="track" tick={{ fill: "#697386", fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: "#697386", fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <Tooltip cursor={{ fill: "rgba(31,75,255,0.06)" }} contentStyle={{ background: "#fff", border: "1px solid #e3e8ef", borderRadius: 12, fontSize: 12, boxShadow: "0 8px 24px -12px rgba(7,10,19,.25)" }} />
-                  <Bar dataKey="xp" name="XP" fill="#1f4bff" radius={[6, 6, 0, 0]} maxBarSize={48} />
+                  <CartesianGrid stroke={cc.grid} vertical={false} />
+                  <XAxis dataKey="track" tick={{ fill: cc.muted, fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: cc.muted, fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <Tooltip cursor={{ fill: cc.cursor }} contentStyle={cc.tooltip} labelStyle={{ color: cc.muted }} itemStyle={{ color: cc.ink }} />
+                  <Bar dataKey="xp" name="XP" fill={cc.brand} radius={[6, 6, 0, 0]} maxBarSize={48} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

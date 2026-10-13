@@ -72,7 +72,7 @@ export default function NotificationBell() {
         )}
       </button>
       {open && (
-        <div className="absolute right-0 mt-2 w-[min(92vw,380px)] rounded-[18px] border border-line bg-white shadow-[0_24px_60px_-20px_rgba(7,10,19,0.3)] overflow-hidden z-50">
+        <div className="absolute right-0 mt-2 w-[min(92vw,380px)] rounded-[18px] border border-line bg-surface shadow-[0_24px_60px_-20px_rgba(7,10,19,0.3)] overflow-hidden z-50">
           <div className="flex items-center justify-between px-4 py-3.5 border-b border-line">
             <span className="text-[15px] font-semibold text-ink">Bildirishnomalar</span>
             {unread > 0 && (

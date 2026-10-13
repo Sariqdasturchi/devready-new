@@ -148,7 +148,7 @@ export default function SuperadminQuestions() {
             <span className="text-xs font-semibold text-ink-2">Variantlar (to'g'risini belgilang)</span>
             {form.options.map((o, i) => (
               <div key={i} className="flex items-center gap-2">
-                <input type="radio" name="correct" checked={form.correct === i} onChange={() => setForm({ ...form, correct: i })} className="accent-[#1f4bff] w-4 h-4" />
+                <input type="radio" name="correct" checked={form.correct === i} onChange={() => setForm({ ...form, correct: i })} className="accent-brand w-4 h-4" />
                 <Input value={o} onChange={(e) => setForm({ ...form, options: form.options.map((x, j) => (j === i ? e.target.value : x)) })} placeholder={`${i + 1}-variant`} />
                 {form.options.length > 2 && (
                   <Button

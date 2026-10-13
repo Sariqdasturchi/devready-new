@@ -117,7 +117,7 @@ function RelatedCard({ b, i }: { b: Blogs; i: number }) {
           loading="lazy"
           className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
           fallback={
-            <div className={`w-full h-full flex items-end p-6 ${["bg-ink text-white", "bg-brand text-white", "bg-mist text-ink"][i % 3]}`}>
+            <div className={`w-full h-full flex items-end p-6 ${["bg-brand text-white", "bg-brand-tint text-brand", "bg-mist text-ink"][i % 3]}`}>
               <span className="text-[28px] leading-none font-extrabold tracking-[-0.04em]">{b.tags[0] || "Maqola"}</span>
             </div>
           }
@@ -322,12 +322,12 @@ export default function BlogView() {
         </div>
 
         <section className="max-w-6xl mx-auto px-5 sm:px-8 mt-20">
-          <div className="rounded-3xl bg-ink text-white px-7 py-10 sm:px-12 sm:py-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="rounded-3xl bg-brand text-white px-7 py-10 sm:px-12 sm:py-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="max-w-xl">
               <h2 className="text-[26px] sm:text-[32px] font-extrabold tracking-[-0.03em] leading-tight">O'qiganingizni amalda sinab ko'ring</h2>
-              <p className="mt-3 text-white/70 text-[17px] leading-relaxed">Real tasklarni yeching, mentordan kodingizga izoh oling va portfolioni to'ldiring.</p>
+              <p className="mt-3 text-white/85 text-[17px] leading-relaxed">Real tasklarni yeching, mentordan kodingizga izoh oling va portfolioni to'ldiring.</p>
             </div>
-            <Link to="/register" className="shrink-0 h-12 px-6 inline-flex items-center justify-center rounded-full bg-brand text-white font-semibold hover:bg-brand-deep transition-colors">
+            <Link to="/register" className="shrink-0 h-12 px-6 inline-flex items-center justify-center rounded-full bg-white text-brand-700 font-semibold hover:bg-white/90 transition-colors">
               Bepul boshlash
             </Link>
           </div>

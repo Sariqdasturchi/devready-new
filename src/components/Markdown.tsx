@@ -94,7 +94,7 @@ export default function Markdown({ text, lead = false }: { text: string; lead?: 
       while (i < lines.length && !lines[i].startsWith("```")) code.push(lines[i++]);
       i++;
       blocks.push(
-        <pre key={key()} className="mb-7 rounded-2xl bg-ink text-white/90 p-5 sm:p-6 overflow-x-auto text-[14px] leading-relaxed font-mono" aria-label={lang || "kod"}>
+        <pre key={key()} className="mb-7 rounded-2xl bg-night text-white/90 border border-line p-5 sm:p-6 overflow-x-auto text-[14px] leading-relaxed font-mono" aria-label={lang || "kod"}>
           <code>{code.join("\n")}</code>
         </pre>,
       );

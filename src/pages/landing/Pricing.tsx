@@ -43,7 +43,7 @@ export default function Pricing() {
                     className="w-full py-6 flex items-center justify-between gap-6 text-left cursor-pointer"
                   >
                     <span className="text-lg font-semibold text-ink">{f.q}</span>
-                    <span className={`w-8 h-8 shrink-0 rounded-full border border-line bg-white flex items-center justify-center text-ink transition-transform ${isOpen ? "rotate-45" : ""}`}>
+                    <span className={`w-8 h-8 shrink-0 rounded-full border border-line bg-surface flex items-center justify-center text-ink transition-transform ${isOpen ? "rotate-45" : ""}`}>
                       <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.8">
                         <path d="M6 1v10M1 6h10" />
                       </svg>
