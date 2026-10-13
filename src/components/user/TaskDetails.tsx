@@ -23,6 +23,7 @@ import { useToast } from "../ui/toast";
 import { MentorSelector } from "./MentorSelector";
 import { useCountdown } from "./Countdown";
 import ReviewResult from "./ReviewResult";
+import { MentorFeedback, ReassignPanel } from "./MentorFeedback";
 import UpgradeModal from "./UpgradeModal";
 
 const isGitHub = (url: string) => /^https:\/\/github\.com\/[^/]+\/[^/]+/.test(url.trim());
@@ -262,6 +263,9 @@ export default function TaskDetails() {
                     : `Yechim ${typeof submission.mentorId === "object" && submission.mentorId ? submission.mentorId.fullName : "mentor"}ga yuborildi. Natija chiqqanda bildirishnoma keladi.`}
                 </p>
                 <SubmissionLinks githubUrl={submission.githubUrl} liveDemoUrl={submission.liveDemoUrl} submittedAt={submission.submittedAt} />
+                {submission.reviewMethod !== "ai" && submission.status === "under_review" && submission.mentorId && (
+                  <ReassignPanel submission={submission} track={task.track} onDone={() => { refreshLists(); load(); }} />
+                )}
               </Card>
             )
           )}
@@ -269,6 +273,7 @@ export default function TaskDetails() {
           {submission && (submission.status === "approved" || submission.status === "rejected") && (
             <>
               <ReviewResult submission={submission} />
+              {submission.reviewMethod !== "ai" && <MentorFeedback submission={submission} />}
               <Card className="p-5">
                 <SubmissionLinks githubUrl={submission.githubUrl} liveDemoUrl={submission.liveDemoUrl} submittedAt={submission.submittedAt} />
               </Card>

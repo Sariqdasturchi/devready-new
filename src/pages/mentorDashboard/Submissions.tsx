@@ -5,6 +5,7 @@ import { errorMessage, mentorApi, submissionApi } from "../../api/api";
 import { useToast } from "../../components/ui/toast";
 import { useCachedQuery, invalidateCache } from "../../hooks/useCachedQuery";
 import { Card, EmptyState, ErrorState, PageHeader, PageLoader, Tabs } from "../../components/ui";
+import ContractBanner from "../../components/payout/ContractBanner";
 import ReviewModal from "../../components/review/ReviewModal";
 import SubmissionRow from "../../components/review/SubmissionRow";
 import type { Submission } from "../../types/type";
@@ -35,6 +36,7 @@ export default function MentorSubmissions() {
   return (
     <div className="flex flex-col gap-5">
       <PageHeader title="Tekshiruvlar" subtitle="Sizga yuborilgan yechimlar. Har bir yechimni ochib, ball va izoh qoldiring." />
+      <ContractBanner />
       <Tabs
         value={tab}
         onChange={setTab}

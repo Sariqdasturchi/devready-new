@@ -1,8 +1,13 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { HiOutlineArrowTopRightOnSquare, HiOutlineCodeBracket } from "react-icons/hi2";
-import { errorMessage, submissionApi } from "../../api/api";
+import { earningApi, errorCode, errorMessage, submissionApi } from "../../api/api";
+import { useCachedQuery } from "../../hooks/useCachedQuery";
+import { getStoredUser } from "../../lib/auth";
+import { formatPrice } from "../../lib/format";
+import ContractModal from "../payout/ContractModal";
 import type { Submission } from "../../types/type";
 import { formatDate, formatDuration } from "../../lib/format";
+import type { MentorContract } from "../../types/type";
 import { Alert, Avatar, Badge, Button, Field, Modal, StatusBadge, Textarea } from "../ui";
 import { useToast } from "../ui/toast";
 import ReviewResult from "../user/ReviewResult";
@@ -11,38 +16,51 @@ const QUICK = [40, 60, 75, 85, 95];
 const CodeReviewOverlay = lazy(() => import("../sandbox/CodeReviewOverlay"));
 const lines = (v?: string) => (v?.trim() ? v.split("\n").length : 0);
 
+/** Mentor uchun: shu tekshiruvga qancha hisoblanishi (stavka va muddatga qarab) */
+function payHint(c: MentorContract | undefined, difficulty: string | undefined, since: string | null | undefined) {
+  if (!c) return null;
+  const rate = c.settings.rates[(difficulty as "oson" | "orta" | "qiyin") || "oson"] ?? c.settings.rates.oson;
+  const hours = since ? (Date.now() - new Date(since).getTime()) / 3600000 : 0;
+  const late = hours > c.settings.slaHours;
+  return { amount: Math.round((rate * (late ? c.settings.lateRatePct : 100)) / 100), late, left: Math.max(0, c.settings.slaHours - hours) };
+}
+
 /** Mentor / superadmin uchun yechimni ko'rish va baholash */
 export default function ReviewModal({ submission, onClose, onReviewed }: { submission: Submission | null; onClose: () => void; onReviewed: () => void }) {
+  if (!submission) return null;
+  // key — boshqa yechim ochilganda holat (ball, izoh) yangidan boshlanadi
+  return <ReviewModalBody key={submission._id} submission={submission} onClose={onClose} onReviewed={onReviewed} />;
+}
+
+function ReviewModalBody({ submission: s, onClose, onReviewed }: { submission: Submission; onClose: () => void; onReviewed: () => void }) {
   const toast = useToast();
   const [score, setScore] = useState(80);
   const [comment, setComment] = useState("");
   const [saving, setSaving] = useState<"approved" | "rejected" | null>(null);
   const [codeOpen, setCodeOpen] = useState(false);
-
-  useEffect(() => {
-    if (submission) {
-      setScore(80);
-      setComment("");
-      setCodeOpen(false);
-    }
-  }, [submission]);
-
-  if (!submission) return null;
-  const s = submission;
+  const [contractOpen, setContractOpen] = useState(false);
+  const isMentor = getStoredUser()?.role === "mentor";
+  const contract = useCachedQuery("mentor:contract", earningApi.contract, { staleTime: 60_000, enabled: isMentor });
   const student = typeof s.userId === "object" ? s.userId : null;
   const task = typeof s.taskId === "object" ? s.taskId : null;
   const canReview = s.status === "under_review" || (s.status === "pending" && s.reviewMethod !== "ai");
   const usedMinutes = s.submittedAt ? Math.round((new Date(s.submittedAt).getTime() - new Date(s.startedAt).getTime()) / 60000) : null;
+  const minLen = isMentor ? contract.data?.settings.minCommentLength || 0 : 0;
+  const pay = isMentor && canReview ? payHint(contract.data, task?.difficulty, s.assignedAt || s.submittedAt) : null;
 
   const review = async (status: "approved" | "rejected") => {
     if (status === "rejected" && !comment.trim()) return toast.error("Rad etish sababini izohda yozing");
     if (!Number.isFinite(score) || score < 0 || score > 100) return toast.error("Ball 0-100 oralig'ida bo'lishi kerak");
+    if (isMentor && contract.data && !contract.data.accepted) return setContractOpen(true);
+    if (minLen && comment.trim().length < minLen) return toast.error(`Izoh kamida ${minLen} belgi bo'lsin — nima yaxshi va nimani tuzatish kerakligini yozing`);
     setSaving(status);
     try {
-      await submissionApi.review(s._id, { status, score, comment: comment.trim() });
-      toast.success(status === "approved" ? "Yechim qabul qilindi" : "Yechim rad etildi");
+      const r = await submissionApi.review(s._id, { status, score, comment: comment.trim() });
+      const base = status === "approved" ? "Yechim qabul qilindi" : "Yechim rad etildi";
+      toast.success(r.earning ? `${base} · +${formatPrice(r.earning.amount)} hisoblandi` : base);
       onReviewed();
     } catch (err) {
+      if (errorCode(err) === "CONTRACT_REQUIRED") setContractOpen(true);
       toast.error(errorMessage(err));
     } finally {
       setSaving(null);
@@ -51,6 +69,7 @@ export default function ReviewModal({ submission, onClose, onReviewed }: { submi
 
   return (
     <>
+      {isMentor && <ContractModal open={contractOpen} onClose={() => setContractOpen(false)} onAccepted={contract.refetch} />}
       {codeOpen && s.code && (
         <Suspense fallback={null}>
           <CodeReviewOverlay submission={s} onClose={() => setCodeOpen(false)} />
@@ -164,9 +183,26 @@ export default function ReviewModal({ submission, onClose, onReviewed }: { submi
                   </button>
                 ))}
               </div>
-              <Field label="Izoh (rad etishda majburiy)" hint="Nimasi yaxshi, nimani tuzatish kerak — talaba shu izohni ko'radi">
+              <Field
+                label={minLen ? `Izoh (kamida ${minLen} belgi)` : "Izoh (rad etishda majburiy)"}
+                hint={
+                  minLen ? (
+                    <span className={comment.trim().length >= minLen ? "text-emerald-700" : ""}>
+                      {comment.trim().length} / {minLen} — nimasi yaxshi, nimani tuzatish kerak. Talaba shu izohni ko'radi
+                    </span>
+                  ) : (
+                    "Nimasi yaxshi, nimani tuzatish kerak — talaba shu izohni ko'radi"
+                  )
+                }
+              >
                 <Textarea rows={5} value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Kod tuzilmasi yaxshi, lekin..." />
               </Field>
+              {pay && (
+                <p className={pay.late ? "text-xs text-amber-700" : "text-xs text-muted"}>
+                  Bu tekshiruv uchun sizga: <b>{formatPrice(pay.amount)}</b>
+                  {pay.late ? " (muddat o'tgan — kamaytirilgan stavka)" : ` · to'liq stavka uchun ${Math.ceil(pay.left)} soat qoldi`}
+                </p>
+              )}
               {task?.xp ? <p className="text-xs text-muted">Qabul qilinsa talaba {Math.round((task.xp * score) / 100)} XP oladi.</p> : null}
             </div>
           ) : (

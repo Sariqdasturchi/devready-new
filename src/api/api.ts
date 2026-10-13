@@ -13,6 +13,15 @@ import type {
   Plan,
   Question,
   SandboxCode,
+  PayoutSettings,
+  MentorContract,
+  ContractStatus,
+  MentorEarningsOverview,
+  PayoutSummary,
+  MentorPayout,
+  FeedbackWindow,
+  StudentFeedback,
+  ComplaintItem,
   Submission,
   Task,
   User,
@@ -144,6 +153,10 @@ export const submissionApi = {
       testResults?: { passed: number; total: number };
     },
   ) => data<Submission>(api.post(`/submissions/${id}/submit`, body)),
+  feedbackWindow: (id: string) => data<FeedbackWindow>(api.get(`/submissions/${id}/feedback-window`)),
+  rate: (id: string, rating: "up" | "down") => data<StudentFeedback>(api.post(`/submissions/${id}/rate`, { rating })),
+  complain: (id: string, text: string) => data<StudentFeedback>(api.post(`/submissions/${id}/complaint`, { text })),
+  reassign: (id: string, mentorId: string) => data<Submission>(api.post(`/submissions/${id}/reassign`, { mentorId })),
   saveDraft: (id: string, code: SandboxCode) => data<{ savedAt: string }>(api.put(`/submissions/${id}/draft`, { code })),
   mine: () => data<Submission[]>(api.get("/submissions/me")),
   get: (id: string) => data<Submission>(api.get(`/submissions/${id}`)),
@@ -151,12 +164,12 @@ export const submissionApi = {
   toMentor: (id: string, mentorId: string) => data<Submission>(api.post(`/submissions/${id}/to-mentor`, { mentorId })),
   aiStatus: () => data<{ available: boolean }>(api.get("/submissions/ai-status")),
   review: (id: string, body: { status: "approved" | "rejected"; score: number; comment: string }) =>
-    data<Submission>(
-      api.patch(`/submissions/${id}/review`, {
+    api
+      .patch<{ data: Submission; earning: { amount: number; percent: number; rate: number } | null }>(`/submissions/${id}/review`, {
         status: body.status,
         mentorFeedback: { score: body.score, comment: body.comment },
-      }),
-    ),
+      })
+      .then((r) => ({ submission: r.data.data, earning: r.data.earning })),
 };
 
 export const analyticsApi = {
@@ -192,6 +205,42 @@ export const mentorApi = {
   create: (body: MentorPayload) => data<Mentor>(api.post("/mentor", body)),
   update: (id: string, body: Partial<MentorPayload> & { isAvailable?: boolean }) => data<Mentor>(api.put(`/mentor/${id}`, body)),
   remove: (id: string) => api.delete(`/mentor/${id}`).then((r) => r.data as { message: string }),
+};
+
+// ─── MENTOR TO'LOVLARI ───────────────────────────────────────────────────
+export const earningApi = {
+  mine: () => data<MentorEarningsOverview>(api.get("/mentor/earnings")),
+  setCard: (body: { number: string; holder: string }) => data<{ number: string; holder: string; masked: string }>(api.put("/mentor/payout-card", body)),
+  contract: () => data<MentorContract>(api.get("/mentor/contract")),
+  acceptContract: (version: number, typedName: string) => data<ContractStatus>(api.post("/mentor/contract/accept", { version, typedName })),
+  myReceipt: (payoutId: string) => api.get(`/mentor/payouts/${payoutId}/receipt`, { responseType: "blob" }).then((r) => URL.createObjectURL(r.data)),
+};
+
+export const payoutApi = {
+  summary: () => data<PayoutSummary>(api.get("/admin/payouts/summary")),
+  history: (mentorId?: string) => data<MentorPayout[]>(api.get("/admin/payouts/history", { params: mentorId ? { mentorId } : undefined })),
+  settings: () => data<PayoutSettings>(api.get("/admin/payouts/settings")),
+  saveSettings: (body: Partial<PayoutSettings>) =>
+    api.put<{ data: PayoutSettings; message: string }>("/admin/payouts/settings", body).then((r) => r.data),
+  contract: () =>
+    data<{
+      current: { version: number; text: string; updatedAt: string };
+      versions: { version: number; createdAt: string }[];
+      acceptances: { _id: string; mentorId: { _id: string; fullName: string; phone?: string } | null; version: number; typedName: string; ip: string; acceptedAt: string }[];
+    }>(api.get("/admin/payouts/contract")),
+  saveContract: (text: string, newVersion: boolean) =>
+    api.put<{ data: { version: number }; message: string }>("/admin/payouts/contract", { text, newVersion }).then((r) => r.data),
+  complaints: (status: "open" | "all") => data<ComplaintItem[]>(api.get("/admin/payouts/complaints", { params: { status } })),
+  resolve: (submissionId: string, action: "accept" | "reject", resolution: string) =>
+    data<StudentFeedback>(api.patch(`/admin/payouts/complaints/${submissionId}`, { action, resolution })),
+  pay: (mentorId: string, body: { note?: string; force?: boolean; receipt?: File | null }) => {
+    const form = new FormData();
+    if (body.note) form.append("note", body.note);
+    if (body.force) form.append("force", "true");
+    if (body.receipt) form.append("check", body.receipt);
+    return api.post<{ data: MentorPayout; message: string }>(`/admin/payouts/${mentorId}/pay`, form).then((r) => r.data);
+  },
+  receipt: (payoutId: string) => api.get(`/admin/payouts/${payoutId}/receipt`, { responseType: "blob" }).then((r) => URL.createObjectURL(r.data)),
 };
 
 // ─── PLANS & PAYMENTS ────────────────────────────────────────────────────

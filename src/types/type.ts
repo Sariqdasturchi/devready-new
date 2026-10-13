@@ -120,6 +120,8 @@ export interface Submission {
   /** Kod muhitida yozilgan yechim */
   code?: SandboxCode | null;
   testResults?: { passed: number; total: number; checkedAt?: string } | null;
+  studentFeedback?: StudentFeedback | null;
+  assignedAt?: string | null;
   startedAt: string;
   dueAt: string;
   submittedAt?: string | null;
@@ -320,4 +322,125 @@ export interface Blogs {
   views: number;
   createdAt: string;
   updatedAt?: string;
+}
+
+// ─── Mentor to'lovlari ────────────────────────────────────────────────────
+export type Difficulty3 = "oson" | "orta" | "qiyin";
+
+export interface PayoutSettings {
+  rates: Record<Difficulty3, number>;
+  minCommentLength: number;
+  slaHours: number;
+  lateRatePct: number;
+  reassignHours: number;
+  holdDays: number;
+  minPayout: number;
+  payoutDay: number;
+  bonusPct: number;
+  bonusThresholdPct: number;
+  bonusMinRatings: number;
+}
+
+export interface ContractStatus {
+  version: number;
+  accepted: boolean;
+  acceptedVersion: number | null;
+  acceptedAt: string | null;
+}
+
+export interface MentorContract extends ContractStatus {
+  text: string;
+  updatedAt?: string;
+  settings: PayoutSettings;
+}
+
+export type EarningStatus = "pending" | "approved" | "paid" | "void";
+
+export interface MentorEarning {
+  _id: string;
+  submissionId: string;
+  task?: { _id: string; title: string; track: string; difficulty: string } | null;
+  student?: { fullName: string } | null;
+  difficulty: Difficulty3;
+  rate: number;
+  percent: number;
+  amount: number;
+  reviewHours: number;
+  reviewedAt: string;
+  availableAt: string;
+  status: EarningStatus;
+  voidReason?: string;
+  rating?: "up" | "down" | null;
+  complaintOpen?: boolean;
+}
+
+export interface MentorPayout {
+  _id: string;
+  mentorId: string | { _id: string; fullName: string; phone?: string };
+  reviews: number;
+  amount: number;
+  bonus: number;
+  total: number;
+  rating: { up: number; down: number };
+  card: { number: string; holder: string };
+  receipt?: string | null;
+  note?: string;
+  paidBy?: { fullName: string } | string | null;
+  paidAt: string;
+}
+
+export interface BonusInfo {
+  eligible: boolean;
+  share: number;
+  rated: number;
+  bonus: number;
+}
+
+export interface MentorEarningsOverview {
+  summary: { pending: number; approved: number; paid: number; void: number; thisMonth: number; thisMonthCount: number; bonus: BonusInfo };
+  settings: PayoutSettings;
+  card: { number: string; holder: string; masked: string } | null;
+  contract: ContractStatus;
+  items: MentorEarning[];
+  payouts: MentorPayout[];
+}
+
+export interface PayoutSummaryRow {
+  mentor: { _id: string; fullName: string; phone?: string; direction?: string; avatar?: string | null; status?: string };
+  card: { number: string; holder: string } | null;
+  contract: { accepted: boolean; version: number | null; acceptedAt: string | null };
+  pending: number;
+  approved: number;
+  approvedCount: number;
+  paid: number;
+  bonus: BonusInfo;
+  payable: number;
+  lastPayout: { paidAt: string; total: number } | null;
+}
+
+export interface PayoutSummary {
+  rows: PayoutSummaryRow[];
+  totals: { payable: number; pending: number; paid: number };
+  settings: PayoutSettings;
+  contractVersion: number;
+}
+
+export interface StudentFeedback {
+  rating?: "up" | "down" | null;
+  ratedAt?: string;
+  complaint?: { text: string; createdAt: string; status: "open" | "accepted" | "rejected"; resolution?: string; resolvedAt?: string };
+}
+
+export interface FeedbackWindow {
+  canRate: boolean;
+  canComplain: boolean;
+  complaintUntil: string | null;
+  reassignAt: string | null;
+  reassignHours: number;
+  feedback: StudentFeedback | null;
+}
+
+export interface ComplaintItem extends Omit<Submission, "studentFeedback"> {
+  studentFeedback: StudentFeedback;
+  earning: (MentorEarning & { mentorId: string }) | null;
 }

@@ -33,6 +33,7 @@ const MentorDashboard = lazy(() => import("./pages/mentorDashboard/Dashboard"));
 const MentorSubmissions = lazy(() => import("./pages/mentorDashboard/Submissions"));
 const MentorTasks = lazy(() => import("./pages/mentorDashboard/Tasks"));
 const MentorSettings = lazy(() => import("./pages/mentorDashboard/Settings"));
+const MentorEarnings = lazy(() => import("./pages/mentorDashboard/Earnings"));
 
 // Superadmin
 const SuperadminDashboardLayout = lazy(() => import("./pages/superadminDashboard/SuperadminDashboardLayout"));
@@ -42,6 +43,7 @@ const SuperadminMentors = lazy(() => import("./pages/superadminDashboard/Superad
 const SuperadminTasks = lazy(() => import("./pages/superadminDashboard/Tasks"));
 const SuperadminSubmissions = lazy(() => import("./pages/superadminDashboard/Submissions"));
 const SuperadminPayments = lazy(() => import("./pages/superadminDashboard/Payments"));
+const SuperadminPayouts = lazy(() => import("./pages/superadminDashboard/Payouts"));
 const SuperadminPlans = lazy(() => import("./pages/superadminDashboard/Plans"));
 const SuperadminBlogs = lazy(() => import("./pages/superadminDashboard/Blogs"));
 const SuperadminQuestions = lazy(() => import("./pages/superadminDashboard/Questions"));
@@ -127,6 +129,7 @@ export default function App() {
               <Route path="/mentor/dashboard" element={<Suspense fallback={<PageLoader />}><MentorDashboard /></Suspense>} />
               <Route path="/mentor/dashboard/submissions" element={<Suspense fallback={<PageLoader />}><MentorSubmissions /></Suspense>} />
               <Route path="/mentor/dashboard/tasks" element={<Suspense fallback={<PageLoader />}><MentorTasks /></Suspense>} />
+              <Route path="/mentor/dashboard/earnings" element={<Suspense fallback={<PageLoader />}><MentorEarnings /></Suspense>} />
               <Route path="/mentor/dashboard/settings" element={<Suspense fallback={<PageLoader />}><MentorSettings /></Suspense>} />
             </Route>
           </Route>
@@ -139,6 +142,7 @@ export default function App() {
               <Route path="/superadmin/dashboard/tasks" element={<Suspense fallback={<PageLoader />}><SuperadminTasks /></Suspense>} />
               <Route path="/superadmin/dashboard/submissions" element={<Suspense fallback={<PageLoader />}><SuperadminSubmissions /></Suspense>} />
               <Route path="/superadmin/dashboard/payments" element={<Suspense fallback={<PageLoader />}><SuperadminPayments /></Suspense>} />
+              <Route path="/superadmin/dashboard/payouts" element={<Suspense fallback={<PageLoader />}><SuperadminPayouts /></Suspense>} />
               <Route path="/superadmin/dashboard/plans" element={<Suspense fallback={<PageLoader />}><SuperadminPlans /></Suspense>} />
               <Route path="/superadmin/dashboard/blogs" element={<Suspense fallback={<PageLoader />}><SuperadminBlogs /></Suspense>} />
               <Route path="/superadmin/dashboard/questions" element={<Suspense fallback={<PageLoader />}><SuperadminQuestions /></Suspense>} />

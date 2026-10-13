@@ -6,6 +6,7 @@ import { useCachedQuery } from "../../hooks/useCachedQuery";
 import { getStoredUser } from "../../lib/auth";
 import { Alert, Card, CardHeader, EmptyState, ErrorState, PageHeader, PageLoader, StatCard } from "../../components/ui";
 import SubmissionRow from "../../components/review/SubmissionRow";
+import ContractBanner from "../../components/payout/ContractBanner";
 import { useChartColors } from "../../lib/theme";
 
 export default function MentorDashboard() {
@@ -22,6 +23,7 @@ export default function MentorDashboard() {
   return (
     <div className="flex flex-col gap-5">
       <PageHeader title={`Salom, ${user?.fullName?.split(" ")[0] || "mentor"}!`} subtitle={`${user?.direction || ""} yo'nalishi bo'yicha tekshiruvlar`} />
+      <ContractBanner />
       {user?.isAvailable === false && <Alert tone="warning">Siz "band" holatidasiz — talabalar sizni tanlay olmaydi. Sozlamalardan o'zgartirishingiz mumkin.</Alert>}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">

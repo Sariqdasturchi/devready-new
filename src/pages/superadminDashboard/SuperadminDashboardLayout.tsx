@@ -9,6 +9,7 @@ import {
   HiOutlineHome,
   HiOutlineQuestionMarkCircle,
   HiOutlineUsers,
+  HiOutlineWallet,
 } from "react-icons/hi2";
 import DashboardLayout, { type NavItem } from "../../components/layout/DashboardLayout";
 
@@ -19,6 +20,7 @@ const NAV: NavItem[] = [
   { to: "/superadmin/dashboard/tasks", label: "Tasklar", icon: HiOutlineClipboardDocumentList },
   { to: "/superadmin/dashboard/submissions", label: "Topshiriqlar", icon: HiOutlineClipboardDocumentCheck },
   { to: "/superadmin/dashboard/payments", label: "To'lovlar", icon: HiOutlineBanknotes },
+  { to: "/superadmin/dashboard/payouts", label: "Mentor to'lovlari", icon: HiOutlineWallet },
   { to: "/superadmin/dashboard/plans", label: "Tariflar", icon: HiOutlineCreditCard },
   { to: "/superadmin/dashboard/blogs", label: "Postlar", icon: HiOutlineDocumentText },
   { to: "/superadmin/dashboard/questions", label: "Test savollari", icon: HiOutlineQuestionMarkCircle },

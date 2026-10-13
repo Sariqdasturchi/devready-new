@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { HiOutlinePlus } from "react-icons/hi2";
-import { errorMessage, planApi } from "../../api/api";
+import { errorMessage, payoutApi, planApi } from "../../api/api";
 import { useCachedQuery } from "../../hooks/useCachedQuery";
 import { Alert, Badge, Button, Card, ConfirmModal, EmptyState, ErrorState, Field, Input, Modal, PageHeader, PageLoader, Textarea, Toggle } from "../../components/ui";
 import { useToast } from "../../components/ui/toast";
@@ -24,6 +24,7 @@ const EMPTY: Form = {
 export default function SuperadminPlans() {
   const toast = useToast();
   const query = useCachedQuery<Plan[]>("admin:plans", planApi.all, { staleTime: 15_000 });
+  const payout = useCachedQuery("admin:payout-settings", payoutApi.settings, { staleTime: 60_000 });
   const [editing, setEditing] = useState<Plan | "new" | null>(null);
   const [form, setForm] = useState<Form>(EMPTY);
   const [saving, setSaving] = useState(false);
@@ -176,7 +177,12 @@ export default function SuperadminPlans() {
             <Toggle checked={!!form.isPopular} onChange={(v) => set("isPopular", v)} label="Ommabop" />
             <Toggle checked={form.aiReviewEnabled} onChange={(v) => set("aiReviewEnabled", v)} label="AI tekshiruv" />
           </div>
-          {editing !== "new" && <Alert tone="info" className="sm:col-span-2">O'zgarishlar shu tarifdagi barcha foydalanuvchilarga darhol ta'sir qiladi.</Alert>}
+          {payout.data && form.price > 0 && <MentorCostHint price={form.price} reviews={form.mentorReviewsIncluded} rates={payout.data.rates} />}
+          {editing !== "new" && (
+            <Alert tone="info" className="sm:col-span-2">
+              Yangi limitlar yangi va uzaytirilgan obunalarga qo'llanadi. Amaldagi obunalar muddati tugaguncha sotib olingan shartda qoladi.
+            </Alert>
+          )}
         </div>
       </Modal>
 
@@ -190,5 +196,25 @@ export default function SuperadminPlans() {
         onClose={() => setDeleting(null)}
       />
     </div>
+  );
+}
+
+/** Mentor tekshiruvlari tarif narxining qancha qismini oladi (eng yomon holat — hammasi "qiyin") */
+function MentorCostHint({ price, reviews, rates }: { price: number; reviews: number; rates: { oson: number; orta: number; qiyin: number } }) {
+  if (reviews === -1) {
+    return (
+      <Alert tone="warning" className="sm:col-span-2">
+        Cheksiz mentor tekshiruvi: faol foydalanuvchi uchun mentorlarga to'lov tarif narxidan oshib ketishi mumkin.
+      </Alert>
+    );
+  }
+  const worst = reviews * rates.qiyin;
+  const typical = Math.round(reviews * 0.55 * ((rates.oson + rates.orta) / 2));
+  const pct = (n: number) => Math.round((n / price) * 100);
+  return (
+    <Alert tone={worst > price ? "danger" : "neutral"} className="sm:col-span-2">
+      Mentorlarga to'lov: odatda ~{formatPrice(typical)} ({pct(typical)}%), eng yomon holatda {formatPrice(worst)} ({pct(worst)}%)
+      {worst > price ? " — tarif narxidan oshadi, limitni kamaytiring" : ""}.
+    </Alert>
   );
 }
