@@ -10,7 +10,8 @@ export type PlanLine = { text: string; included: boolean };
  * raqamlar bilan har doim mos keladi. Admin qo'shgan qo'shimcha qatorlar oxirida.
  */
 export function planLines(plan: Plan): PlanLine[] {
-  const period = plan.duration ? `${plan.duration} kunda` : "Jami";
+  // Bepul tarif limiti butun davr uchun (oyma-oy yangilanmaydi), pullik — tarif muddati ichida
+  const period = !plan.price ? "Jami" : plan.duration ? `${plan.duration} kunda` : "Jami";
   const lines: PlanLine[] = [
     {
       text: unlimited(plan.taskLimit) ? "Cheksiz task — xohlagancha amaliyot" : `${period} ${plan.taskLimit} ta task`,
@@ -20,13 +21,16 @@ export function planLines(plan: Plan): PlanLine[] {
       text: unlimited(plan.mentorReviewsIncluded)
         ? "Har bir yechimga mentor review"
         : plan.mentorReviewsIncluded > 0
-          ? `${plan.mentorReviewsIncluded} ta mentor review`
+          ? `${plan.price && plan.duration ? `${plan.duration} kunda ` : "Jami "}${plan.mentorReviewsIncluded} ta mentor review`
           : "Mentor review",
       included: unlimited(plan.mentorReviewsIncluded) || plan.mentorReviewsIncluded > 0,
     },
     { text: "AI kod tahlili — bir necha daqiqada baho", included: !!plan.aiReviewEnabled },
   ];
-  return [...lines, ...(plan.features || []).filter(Boolean).map((text) => ({ text, included: true }))];
+  // Task, mentor va AI qatorlari limitlardan yasaladi — admin yozgan shu mavzudagi qatorlar takrorlanmasin
+  const auto = /\btask|mentor|\bAI\b|review|tekshiruv/i;
+  const extra = (plan.features || []).map((t) => t?.trim()).filter((t): t is string => !!t && !auto.test(t));
+  return [...lines, ...extra.map((text) => ({ text, included: true }))];
 }
 
 /** Bitta task narxi (cheklangan pullik tariflarda) — tanlashni osonlashtiradi */
@@ -40,7 +44,7 @@ export function planAudience(plan: Plan, all: Plan[]): string {
   if (plan.description?.trim()) return plan.description.trim();
   if (!plan.price) return "Platformani sinab ko'rish va birinchi tasklarni bajarish uchun.";
   const top = isTopPlan(plan, all);
-  if (top) return "Suhbatga jadal tayyorlanayotganlar uchun: hech qanday cheklovsiz.";
+  if (top) return "Suhbatga jadal tayyorlanayotganlar uchun: eng ko'p task va mentor tekshiruvi.";
   return "Muntazam amaliyot qilib, ko'nikmani bosqichma-bosqich oshirish uchun.";
 }
 

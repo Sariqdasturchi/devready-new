@@ -20,7 +20,7 @@ export default function Pricing() {
       <section className="max-w-6xl mx-auto px-5 sm:px-8 pt-16 sm:pt-24 pb-14">
         <h1 className="text-5xl sm:text-6xl font-extrabold tracking-[-0.045em] leading-[1.02] text-ink max-w-3xl text-balance">Bepul boshlang, o'sganingiz sari oshiring.</h1>
         <p className="mt-6 text-lg sm:text-xl text-ink-2 max-w-2xl leading-relaxed">
-          Free tarifda platformani sinab ko'rasiz. Muntazam amaliyot kerak bo'lsa — o'rta tarif, suhbatga jadal tayyorlansangiz — cheklovsiz tarif. Yashirin to'lovlar yo'q, muddat tugagach avtomatik yechib olinmaydi.
+          Free tarifda platformani sinab ko'rasiz. Ko'proq task va mentor tekshiruvi kerak bo'lsa — pullik tarifga o'tasiz. Yashirin to'lovlar yo'q, muddat tugagach pul avtomatik yechib olinmaydi.
         </p>
       </section>
 
