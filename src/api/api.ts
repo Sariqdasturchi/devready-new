@@ -22,6 +22,8 @@ import type {
   FeedbackWindow,
   StudentFeedback,
   ComplaintItem,
+  PromoCode,
+  PromoCheck,
   Submission,
   Task,
   User,
@@ -207,6 +209,26 @@ export const mentorApi = {
   remove: (id: string) => api.delete(`/mentor/${id}`).then((r) => r.data as { message: string }),
 };
 
+// ─── PROMOKODLAR (superadmin) ────────────────────────────────────────────
+export type PromoPayload = {
+  code: string;
+  description?: string;
+  discountType: "percent" | "fixed";
+  value: number;
+  plans: string[];
+  maxUses: number | null;
+  firstPurchaseOnly: boolean;
+  validFrom: string | null;
+  validUntil: string | null;
+  active?: boolean;
+};
+export const promoApi = {
+  list: () => data<PromoCode[]>(api.get("/admin/promos")),
+  create: (body: PromoPayload) => data<PromoCode>(api.post("/admin/promos", body)),
+  update: (id: string, body: Partial<PromoPayload>) => data<PromoCode>(api.patch(`/admin/promos/${id}`, body)),
+  remove: (id: string) => api.delete<{ message: string; data: { deleted?: boolean; deactivated?: boolean } }>(`/admin/promos/${id}`).then((r) => r.data),
+};
+
 // ─── MENTOR TO'LOVLARI ───────────────────────────────────────────────────
 export const earningApi = {
   mine: () => data<MentorEarningsOverview>(api.get("/mentor/earnings")),
@@ -257,12 +279,14 @@ export const planApi = {
 export const paymentApi = {
   info: () => data<PaymentInfo>(api.get("/payments/info")),
   mine: () => data<Payment[]>(api.get("/payments/my")),
-  create: (planId: string, check: File) => {
+  create: (planId: string, check: File | null, promoCode?: string) => {
     const form = new FormData();
     form.append("planId", planId);
-    form.append("check", check);
-    return data<Payment>(api.post("/payments", form));
+    if (check) form.append("check", check);
+    if (promoCode) form.append("promoCode", promoCode);
+    return api.post<{ data: Payment; message: string }>("/payments", form).then((r) => r.data);
   },
+  checkPromo: (code: string, planId: string) => data<PromoCheck>(api.post("/payments/promo-check", { code, planId })),
   // superadmin
   all: (status?: string) =>
     api

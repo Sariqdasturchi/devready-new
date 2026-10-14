@@ -3,9 +3,11 @@ import PlansGrid from "../../components/home/pricingHome/PlansGrid";
 import { faqs } from "../../config/config";
 import Seo from "../../components/Seo";
 import { breadcrumbs } from "../../lib/seo";
+import { getStoredPromo } from "../../lib/promo";
 
 export default function Pricing() {
   const [open, setOpen] = useState<number | null>(0);
+  const [promo] = useState(getStoredPromo);
 
   return (
     <main>
@@ -25,6 +27,12 @@ export default function Pricing() {
       </section>
 
       <section className="max-w-6xl mx-auto px-5 sm:px-8 pb-24">
+        {promo && (
+          <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border border-brand/30 bg-brand-tint px-5 py-4 text-[15px] text-ink">
+            <span className="font-mono font-bold text-brand">{promo}</span>
+            <span>promokodingiz saqlandi — tarifni tanlang, to'lov paytida chegirma avtomatik qo'llanadi.</span>
+          </div>
+        )}
         <PlansGrid compare />
       </section>
 

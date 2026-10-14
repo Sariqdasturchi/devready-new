@@ -8,6 +8,7 @@ import {
   HiOutlineDocumentText,
   HiOutlineHome,
   HiOutlineQuestionMarkCircle,
+  HiOutlineTicket,
   HiOutlineUsers,
   HiOutlineWallet,
 } from "react-icons/hi2";
@@ -22,6 +23,7 @@ const NAV: NavItem[] = [
   { to: "/superadmin/dashboard/payments", label: "To'lovlar", icon: HiOutlineBanknotes },
   { to: "/superadmin/dashboard/payouts", label: "Mentor to'lovlari", icon: HiOutlineWallet },
   { to: "/superadmin/dashboard/plans", label: "Tariflar", icon: HiOutlineCreditCard },
+  { to: "/superadmin/dashboard/promos", label: "Promokodlar", icon: HiOutlineTicket },
   { to: "/superadmin/dashboard/blogs", label: "Postlar", icon: HiOutlineDocumentText },
   { to: "/superadmin/dashboard/questions", label: "Test savollari", icon: HiOutlineQuestionMarkCircle },
   { to: "/superadmin/dashboard/settings", label: "Sozlamalar", icon: HiOutlineCog6Tooth },

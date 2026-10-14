@@ -60,7 +60,10 @@ export default function SuperadminPayments() {
                     <span className="block text-xs text-muted">{u?.phone}</span>
                   </td>
                   <td className="px-4 py-3 text-ink-2">{plan?.name || "—"}</td>
-                  <td className="px-4 py-3 text-ink-2 whitespace-nowrap">{formatPrice(p.amount || plan?.price)}</td>
+                  <td className="px-4 py-3 text-ink-2 whitespace-nowrap">
+                    {formatPrice(p.amount ?? plan?.price)}
+                    {p.promoCodeText && <span className="block text-[11px] text-brand">{p.promoCodeText} · −{formatPrice(p.discount)}</span>}
+                  </td>
                   <td className="px-4 py-3 text-muted">{p.source === "telegram" ? "Bot" : "Sayt"}</td>
                   <td className="px-4 py-3">
                     <Badge tone={STATUS[p.status].tone}>{STATUS[p.status].label}</Badge>
@@ -102,6 +105,7 @@ function PaymentReview({ payment, onClose, onDone }: { payment: Payment | null; 
     setImg("");
     setImgError(false);
     setReason("");
+    if (!payment.checkImage) return;
     paymentApi
       .checkImage(payment._id)
       .then((u) => {
@@ -157,7 +161,9 @@ function PaymentReview({ payment, onClose, onDone }: { payment: Payment | null; 
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="rounded-xl border border-line bg-mist min-h-64 flex items-center justify-center overflow-hidden">
-          {img ? (
+          {!payment.checkImage ? (
+            <p className="text-sm text-muted p-4 text-center">Chek yo'q — to'liq promokod bilan faollashtirilgan</p>
+          ) : img ? (
             <a href={img} target="_blank" rel="noreferrer">
               <img src={img} alt="Chek" className="max-h-[60vh] object-contain" />
             </a>
@@ -172,7 +178,8 @@ function PaymentReview({ payment, onClose, onDone }: { payment: Payment | null; 
           <Row label="Telefon" value={u?.phone} />
           <Row label="Telegram ID" value={u?.telegramId || "—"} />
           <Row label="Tarif" value={plan ? `${plan.name} (${plan.duration} kun)` : "—"} />
-          <Row label="Summa" value={formatPrice(payment.amount || plan?.price)} />
+          <Row label="Summa" value={formatPrice(payment.amount ?? plan?.price)} />
+          {payment.promoCodeText && <Row label="Promokod" value={`${payment.promoCodeText} (−${formatPrice(payment.discount)}, narx ${formatPrice(payment.originalAmount ?? undefined)})`} />}
           <Row label="Sana" value={formatDate(payment.createdAt, true)} />
           <Row label="Manba" value={payment.source === "telegram" ? "Telegram bot" : "Sayt"} />
           {payment.status !== "pending" && <Row label="Holat" value={`${STATUS[payment.status].label}${payment.rejectReason ? ` — ${payment.rejectReason}` : ""}`} />}

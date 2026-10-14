@@ -44,6 +44,7 @@ const SuperadminTasks = lazy(() => import("./pages/superadminDashboard/Tasks"));
 const SuperadminSubmissions = lazy(() => import("./pages/superadminDashboard/Submissions"));
 const SuperadminPayments = lazy(() => import("./pages/superadminDashboard/Payments"));
 const SuperadminPayouts = lazy(() => import("./pages/superadminDashboard/Payouts"));
+const SuperadminPromos = lazy(() => import("./pages/superadminDashboard/Promos"));
 const SuperadminPlans = lazy(() => import("./pages/superadminDashboard/Plans"));
 const SuperadminBlogs = lazy(() => import("./pages/superadminDashboard/Blogs"));
 const SuperadminQuestions = lazy(() => import("./pages/superadminDashboard/Questions"));
@@ -143,6 +144,7 @@ export default function App() {
               <Route path="/superadmin/dashboard/submissions" element={<Suspense fallback={<PageLoader />}><SuperadminSubmissions /></Suspense>} />
               <Route path="/superadmin/dashboard/payments" element={<Suspense fallback={<PageLoader />}><SuperadminPayments /></Suspense>} />
               <Route path="/superadmin/dashboard/payouts" element={<Suspense fallback={<PageLoader />}><SuperadminPayouts /></Suspense>} />
+              <Route path="/superadmin/dashboard/promos" element={<Suspense fallback={<PageLoader />}><SuperadminPromos /></Suspense>} />
               <Route path="/superadmin/dashboard/plans" element={<Suspense fallback={<PageLoader />}><SuperadminPlans /></Suspense>} />
               <Route path="/superadmin/dashboard/blogs" element={<Suspense fallback={<PageLoader />}><SuperadminBlogs /></Suspense>} />
               <Route path="/superadmin/dashboard/questions" element={<Suspense fallback={<PageLoader />}><SuperadminQuestions /></Suspense>} />

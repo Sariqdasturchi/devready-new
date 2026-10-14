@@ -189,7 +189,10 @@ export interface Payment {
   plan: Ref<Pick<Plan, "_id" | "name" | "price" | "duration">>;
   admin?: Ref<Pick<User, "_id" | "fullName">>;
   amount: number;
-  checkImage: string;
+  originalAmount?: number | null;
+  discount?: number;
+  promoCodeText?: string | null;
+  checkImage: string | null;
   source: "web" | "telegram";
   status: "pending" | "approved" | "rejected";
   rejectReason?: string;
@@ -443,4 +446,29 @@ export interface FeedbackWindow {
 export interface ComplaintItem extends Omit<Submission, "studentFeedback"> {
   studentFeedback: StudentFeedback;
   earning: (MentorEarning & { mentorId: string }) | null;
+}
+
+// ─── Promokodlar ─────────────────────────────────────────────────────────
+export interface PromoCode {
+  _id: string;
+  code: string;
+  description?: string;
+  discountType: "percent" | "fixed";
+  value: number;
+  plans: { _id: string; name: string; price: number }[];
+  maxUses: number | null;
+  firstPurchaseOnly: boolean;
+  validFrom: string | null;
+  validUntil: string | null;
+  active: boolean;
+  createdAt: string;
+  usage: { approved: number; pending: number; rejected: number; revenue: number; discount: number };
+}
+
+export interface PromoCheck {
+  code: string;
+  description?: string;
+  price: number;
+  discount: number;
+  amount: number;
 }
