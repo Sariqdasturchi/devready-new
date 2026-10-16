@@ -88,9 +88,27 @@ export interface TaskSandbox {
   tests: { title: string; code: string }[];
 }
 
+export interface AiCriteria {
+  requirements?: number;
+  functionality?: number;
+  quality?: number;
+  structure?: number;
+}
+
+export interface AiRequirementCheck {
+  text: string;
+  status: "met" | "partial" | "missing";
+  note?: string;
+}
+
 export interface AiFeedback {
   score?: number;
   summary?: string;
+  criteria?: AiCriteria;
+  requirements?: AiRequirementCheck[];
+  provider?: string;
+  model?: string;
+  truncated?: boolean;
   strengths?: string[];
   weaknesses?: string[];
   suggestions?: string[];
