@@ -10,6 +10,14 @@ const CRITERIA = [
   { key: "structure", label: "Tuzilma", max: 15 },
 ] as const;
 
+// Dizayn tasklari: o'sha kalitlar, boshqa nomlar
+const DESIGN_LABEL: Record<(typeof CRITERIA)[number]["key"], string> = {
+  requirements: "Talablarga moslik",
+  functionality: "UX va qulaylik",
+  quality: "Vizual sifat",
+  structure: "Tizimlilik",
+};
+
 const REQ = {
   met: { Icon: HiCheckCircle, cls: "text-emerald-600", label: "Bajarilgan" },
   partial: { Icon: HiMinusCircle, cls: "text-amber-500", label: "Qisman" },
@@ -24,7 +32,8 @@ function AiBreakdown({ ai }: { ai: AiFeedback }) {
     <>
       {hasCriteria && (
         <div className="grid gap-2.5">
-          {CRITERIA.map(({ key, label, max }) => {
+          {CRITERIA.map(({ key, label: codeLabel, max }) => {
+            const label = ai.rubric === "design" ? DESIGN_LABEL[key] : codeLabel;
             const v = Math.max(0, Math.min(max, c?.[key] ?? 0));
             return (
               <div key={key}>

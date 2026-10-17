@@ -14,7 +14,7 @@ import {
   HiOutlineUserGroup,
 } from "react-icons/hi2";
 import { errorCode, errorMessage, mentorApi, submissionApi, taskApi } from "../../api/api";
-import type { Mentor, Submission, UserTask } from "../../types/type";
+import type { DesignImage, Mentor, Submission, UserTask } from "../../types/type";
 import { DIFFICULTY, IN_REVIEW } from "../../lib/constants";
 import { formatCountdown, formatDate, formatDuration } from "../../lib/format";
 import { invalidateCache } from "../../hooks/useCachedQuery";
@@ -25,6 +25,8 @@ import { useCountdown } from "./Countdown";
 import ReviewResult from "./ReviewResult";
 import { MentorFeedback, ReassignPanel } from "./MentorFeedback";
 import UpgradeModal from "./UpgradeModal";
+import { stackLabel, testCount } from "../sandbox/kinds";
+import DesignUpload from "./DesignUpload";
 
 const isGitHub = (url: string) => /^https:\/\/github\.com\/[^/]+\/[^/]+/.test(url.trim());
 
@@ -195,7 +197,7 @@ export default function TaskDetails() {
                 {task.sandbox?.enabled && (
                   <p className="mt-3 flex items-start gap-2 rounded-xl bg-brand-tint p-3 text-xs text-ink-2">
                     <HiOutlineCodeBracket size={16} className="text-brand shrink-0 mt-px" />
-                    Bu task brauzerda bajariladi: muharrir, jonli natija va {task.sandbox.tests.length} ta avtomatik test tayyor.
+                    Bu task brauzerda bajariladi ({stackLabel(task.sandbox)}): muharrir va {testCount(task.sandbox)} ta avtomatik test tayyor — hech narsa o'rnatish shart emas.
                   </p>
                 )}
               </div>
@@ -214,7 +216,7 @@ export default function TaskDetails() {
                 <div>
                   <h3 className="text-sm font-bold text-ink">Brauzerda kod yozing</h3>
                   <p className="text-xs text-muted mt-1">
-                    Hech narsa o'rnatmasdan: muharrir, jonli natija va {task.sandbox.tests.length} ta avtomatik test bir joyda.
+                    Hech narsa o'rnatmasdan: {stackLabel(task.sandbox)}, muharrir va {testCount(task.sandbox)} ta avtomatik test bir joyda.
                   </p>
                 </div>
               </div>
@@ -330,6 +332,8 @@ function SubmitPanel({ task, submissionId, offset, onDone }: { task: UserTask; s
   const [mentors, setMentors] = useState<Mentor[] | null>(null);
   const [mentorsError, setMentorsError] = useState("");
   const [aiAvailable, setAiAvailable] = useState(true);
+  const isDesign = !task.sandbox?.enabled && task.deliverable === "design";
+  const [images, setImages] = useState<DesignImage[]>(task.submission?.designImages || []);
 
   useEffect(() => {
     submissionApi
@@ -367,18 +371,23 @@ function SubmitPanel({ task, submissionId, offset, onDone }: { task: UserTask; s
   const total = task.estimatedTime * 60;
   const pct = total ? Math.min(100, (left / total) * 100) : 0;
   const urgent = left < Math.min(600, total * 0.15);
-  const aiAllowed = useMemo(() => isGitHub(githubUrl), [githubUrl]);
+  const aiAllowed = useMemo(() => (isDesign ? images.length > 0 : isGitHub(githubUrl)), [isDesign, images.length, githubUrl]);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!/^https?:\/\/\S+$/.test(githubUrl.trim())) return toast.error("Yechim havolasini to'g'ri kiriting (https://...)");
+    const url = githubUrl.trim();
+    if (isDesign) {
+      if (!url && !images.length) return toast.error("Figma havolasini kiriting yoki maket rasmlarini yuklang");
+      if (url && !/^https?:\/\/\S+$/.test(url)) return toast.error("Havola noto'g'ri (https://...)");
+    } else if (!/^https?:\/\/\S+$/.test(url)) return toast.error("Yechim havolasini to'g'ri kiriting (https://...)");
     if (liveDemoUrl && !/^https?:\/\/\S+$/.test(liveDemoUrl.trim())) return toast.error("Demo havolasi noto'g'ri");
     if (method === "mentor" && !mentorId) return toast.error("Tekshiruvchi mentorni tanlang");
-    if (method === "ai" && !aiAllowed) return toast.error("AI tekshiruvi uchun GitHub repozitoriy havolasi kerak");
+    if (method === "ai" && !aiAllowed)
+      return toast.error(isDesign ? "AI dizaynni ko'rishi uchun maket rasmlarini yuklang" : "AI tekshiruvi uchun GitHub repozitoriy havolasi kerak");
     setSending(true);
     try {
       await submissionApi.submit(submissionId, {
-        githubUrl: githubUrl.trim(),
+        githubUrl: githubUrl.trim() || undefined,
         liveDemoUrl: liveDemoUrl.trim() || undefined,
         notes: notes.trim() || undefined,
         reviewMethod: method,
@@ -408,12 +417,25 @@ function SubmitPanel({ task, submissionId, offset, onDone }: { task: UserTask; s
       <Card className="p-5">
         <h3 className="text-sm font-bold text-ink mb-4">{task.sandbox?.enabled ? "Yoki havola orqali yuborish" : "Yechimni tekshirishga yuborish"}</h3>
         <form onSubmit={submit} className="flex flex-col gap-4">
-          <Field label="Yechim havolasi *" hint="GitHub repozitoriy, Figma, Behance yoki boshqa havola">
-            <Input value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} placeholder="https://github.com/username/repo" inputMode="url" />
-          </Field>
-          <Field label="Demo havola (ixtiyoriy)">
-            <Input value={liveDemoUrl} onChange={(e) => setLiveDemoUrl(e.target.value)} placeholder="https://my-app.vercel.app" inputMode="url" />
-          </Field>
+          {isDesign ? (
+            <>
+              <Field label="Figma havolasi" hint={`Share → "Anyone with the link can view" qilib nusxalang`}>
+                <Input value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} placeholder="https://www.figma.com/design/..." inputMode="url" />
+              </Field>
+              <Field label="Maket rasmlari" hint="Har bir ekran/kadrni PNG qilib eksport qiling — AI va mentor aynan shu rasmlarni ko'radi">
+                <DesignUpload submissionId={submissionId} images={images} onChange={setImages} disabled={expired} />
+              </Field>
+            </>
+          ) : (
+            <>
+              <Field label="Yechim havolasi *" hint="GitHub repozitoriy yoki boshqa havola">
+                <Input value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} placeholder="https://github.com/username/repo" inputMode="url" />
+              </Field>
+              <Field label="Demo havola (ixtiyoriy)">
+                <Input value={liveDemoUrl} onChange={(e) => setLiveDemoUrl(e.target.value)} placeholder="https://my-app.vercel.app" inputMode="url" />
+              </Field>
+            </>
+          )}
           <Field label="Izoh (ixtiyoriy)">
             <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Mentor uchun qo'shimcha ma'lumot..." className="min-h-[70px]" />
           </Field>
@@ -437,7 +459,7 @@ function SubmitPanel({ task, submissionId, offset, onDone }: { task: UserTask; s
                   >
                     <span className="block text-sm font-semibold text-ink">{m === "mentor" ? "Mentor" : "AI"}</span>
                     <span className="block text-[11px] text-muted">
-                      {m === "mentor" ? "Batafsil code review" : off ? "Hozircha mavjud emas" : "Tezkor, faqat GitHub"}
+                      {m === "mentor" ? (isDesign ? "Batafsil dizayn tahlili" : "Batafsil code review") : off ? "Hozircha mavjud emas" : isDesign ? "Rasmlarni ko'rib baholaydi" : "Tezkor, faqat GitHub"}
                     </span>
                   </button>
                 );
@@ -451,7 +473,7 @@ function SubmitPanel({ task, submissionId, offset, onDone }: { task: UserTask; s
             ) : mentorsError ? (
               <Alert tone="danger">{mentorsError}</Alert>
             ) : <MentorSelector mentors={mentors} selectedId={mentorId} onSelect={setMentorId} />)}
-          {method === "ai" && !aiAllowed && githubUrl && <Alert tone="warning">AI faqat GitHub repozitoriy havolasini tekshira oladi.</Alert>}
+          {method === "ai" && !aiAllowed && (isDesign ? <Alert tone="warning">AI baholashi uchun kamida bitta maket rasmini yuklang.</Alert> : githubUrl && <Alert tone="warning">AI faqat GitHub repozitoriy havolasini tekshira oladi.</Alert>)}
 
           <Button type="submit" size="lg" loading={sending} disabled={expired}>
             Tekshirishga yuborish

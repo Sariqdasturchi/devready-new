@@ -74,18 +74,65 @@ export interface Task {
   submissionsCount?: number;
   approvedCount?: number;
   sandbox?: TaskSandbox | null;
+  /** Sandbox bo'lmagan tasklar: repozitoriy havolasi yoki dizayn (Figma + rasmlar) */
+  deliverable?: "repo" | "design";
 }
 
+export type SandboxKind = "web" | "code" | "sql" | "config" | "qa";
+export type CodeLanguage = "javascript" | "typescript" | "python";
+
+/** Kod muhitidagi yechim: web — html/css/js(+server); code/sql/qa — language + main; config — files */
 export interface SandboxCode {
-  html: string;
-  css: string;
-  js: string;
+  html?: string;
+  css?: string;
+  js?: string;
+  server?: string;
+  language?: string;
+  main?: string;
+  files?: { name: string; content: string }[];
+}
+
+export type CodeMatch = "equal" | "subset" | "approx" | "throws" | "unordered";
+export interface CodeCaseStep {
+  call?: string;
+  args?: unknown[];
+  expect?: unknown;
+  match?: CodeMatch;
+}
+export interface CodeCase {
+  title: string;
+  steps: CodeCaseStep[];
+}
+export interface SqlCheckDef {
+  title: string;
+  sql: string;
+  expected: unknown[][];
+  ordered?: boolean;
 }
 
 export interface TaskSandbox {
   enabled: boolean;
-  starter?: Partial<SandboxCode>;
-  tests: { title: string; code: string }[];
+  kind?: SandboxKind;
+  // web
+  starter?: { html?: string; css?: string; js?: string; server?: string };
+  viewport?: "desktop" | "mobile";
+  // web (DOM) va config testlari
+  tests?: { title: string; code: string }[];
+  // code
+  languages?: CodeLanguage[];
+  entry?: string;
+  starters?: Partial<Record<CodeLanguage | "sql", string>>;
+  cases?: CodeCase[];
+  // sql
+  setup?: string;
+  checks?: SqlCheckDef[];
+  // config
+  files?: { name: string; lang: string; starter: string }[];
+  // qa
+  target?: string;
+  names?: string[];
+  mutants?: { title: string; code: string }[];
+  minTests?: number;
 }
 
 export interface AiCriteria {
@@ -101,8 +148,15 @@ export interface AiRequirementCheck {
   note?: string;
 }
 
+export interface DesignImage {
+  url: string;
+  name?: string;
+}
+
 export interface AiFeedback {
   score?: number;
+  /** "design" bo'lsa mezon nomlari dizayn uchun ko'rsatiladi */
+  rubric?: "code" | "design";
   summary?: string;
   criteria?: AiCriteria;
   requirements?: AiRequirementCheck[];
@@ -138,6 +192,8 @@ export interface Submission {
   /** Kod muhitida yozilgan yechim */
   code?: SandboxCode | null;
   testResults?: { passed: number; total: number; checkedAt?: string } | null;
+  /** Dizayn tasklari: yuklangan maket rasmlari */
+  designImages?: DesignImage[];
   studentFeedback?: StudentFeedback | null;
   assignedAt?: string | null;
   startedAt: string;

@@ -9,7 +9,7 @@ import { DIFFICULTY, TRACKS } from "../../lib/constants";
 import { formatDuration } from "../../lib/format";
 import type { DesignTemplate, Difficulty, Task } from "../../types/type";
 import SandboxSettings from "../../components/sandbox/SandboxSettings";
-import { EMPTY_SANDBOX, sandboxToForm, type SandboxForm } from "../../components/sandbox/sandboxForm";
+import { EMPTY_SANDBOX, formToSandbox, sandboxToForm, type SandboxForm } from "../../components/sandbox/sandboxForm";
 
 type Form = {
   title: string;
@@ -23,6 +23,7 @@ type Form = {
   designTemplates: DesignTemplate[];
   exampleLink: string;
   isActive: boolean;
+  deliverable: "repo" | "design";
   sandbox: SandboxForm;
 };
 
@@ -38,6 +39,7 @@ const EMPTY: Form = {
   designTemplates: [],
   exampleLink: "",
   isActive: true,
+  deliverable: "repo",
   sandbox: EMPTY_SANDBOX,
 };
 
@@ -73,6 +75,7 @@ export default function SuperadminTasks() {
       designTemplates: t.designTemplates || [],
       exampleLink: t.exampleLink || "",
       isActive: t.isActive,
+      deliverable: t.deliverable === "design" ? "design" : "repo",
       sandbox: sandboxToForm(t.sandbox),
     });
     setEditing(t);
@@ -85,20 +88,15 @@ export default function SuperadminTasks() {
     if (form.exampleLink && !isUrl(form.exampleLink)) return toast.error("Namuna havolasi noto'g'ri");
     const templates = form.designTemplates.filter((t) => t.url.trim());
     if (templates.some((t) => !isUrl(t.url))) return toast.error("Shablon havolalari https:// bilan boshlanishi kerak");
-    const sandboxTests = form.sandbox.tests.filter((t) => t.title.trim() || t.code.trim());
-    if (form.sandbox.enabled) {
-      if (!sandboxTests.length) return toast.error("Kod muhiti uchun kamida bitta test yozing");
-      if (sandboxTests.some((t) => !t.title.trim() || !t.code.trim())) return toast.error("Har bir testning nomi va kodi bo'lishi kerak");
-    }
+    const sandbox = formToSandbox(form.sandbox);
+    if (typeof sandbox === "string") return toast.error(sandbox);
     const payload: Partial<Task> = {
       ...form,
       title: form.title.trim(),
       requirements: form.requirements.map((r) => r.trim()).filter(Boolean),
       designTemplates: templates.map((t) => ({ title: t.title.trim() || "Shablon", url: t.url.trim() })),
       exampleLink: form.exampleLink.trim() || null,
-      sandbox: form.sandbox.enabled
-        ? { enabled: true, starter: form.sandbox.starter, tests: sandboxTests.map((t) => ({ title: t.title.trim(), code: t.code.trim() })) }
-        : null,
+      sandbox,
     };
     setSaving(true);
     try {
@@ -292,6 +290,14 @@ export default function SuperadminTasks() {
           </div>
 
           <SandboxSettings value={form.sandbox} onChange={(v) => set("sandbox", v)} />
+          {!form.sandbox.enabled && (
+            <Field label="Topshirish usuli" className="sm:col-span-2">
+              <Select value={form.deliverable} onChange={(e) => set("deliverable", e.target.value as Form["deliverable"])}>
+                <option value="repo">Havola — GitHub repozitoriy (AI kodni o'qiydi)</option>
+                <option value="design">Dizayn — Figma havolasi + maket rasmlari (AI rasmlarni ko'radi)</option>
+              </Select>
+            </Field>
+          )}
 
           <Field label="Namuna havolasi (ixtiyoriy)" className="sm:col-span-2">
             <Input value={form.exampleLink} onChange={(e) => set("exampleLink", e.target.value)} placeholder="https://..." />

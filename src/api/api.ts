@@ -13,6 +13,7 @@ import type {
   Plan,
   Question,
   SandboxCode,
+  DesignImage,
   PayoutSettings,
   MentorContract,
   ContractStatus,
@@ -160,6 +161,12 @@ export const submissionApi = {
   complain: (id: string, text: string) => data<StudentFeedback>(api.post(`/submissions/${id}/complaint`, { text })),
   reassign: (id: string, mentorId: string) => data<Submission>(api.post(`/submissions/${id}/reassign`, { mentorId })),
   saveDraft: (id: string, code: SandboxCode) => data<{ savedAt: string }>(api.put(`/submissions/${id}/draft`, { code })),
+  addDesignImages: (id: string, files: File[]) => {
+    const form = new FormData();
+    files.forEach((f) => form.append("images", f));
+    return data<DesignImage[]>(api.post(`/submissions/${id}/design-images`, form));
+  },
+  removeDesignImage: (id: string, url: string) => data<DesignImage[]>(api.delete(`/submissions/${id}/design-images`, { data: { url } })),
   mine: () => data<Submission[]>(api.get("/submissions/me")),
   get: (id: string) => data<Submission>(api.get(`/submissions/${id}`)),
   retryAi: (id: string) => api.post(`/submissions/${id}/ai-check`).then((r) => r.data),

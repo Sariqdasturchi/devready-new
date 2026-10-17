@@ -1,7 +1,8 @@
 import { useState, type RefObject } from "react";
 import { HiOutlineCheckCircle, HiOutlineComputerDesktop, HiOutlineDevicePhoneMobile, HiOutlineXCircle } from "react-icons/hi2";
 import { cx } from "../ui";
-import type { ConsoleLine, SandboxTest, TestResult } from "./runtime";
+import type { ConsoleLine, TestResult } from "./runtime";
+import type { SqlPreview } from "./runners/types";
 
 /** Talaba kodi ishlaydigan oyna: sandbox="allow-scripts" — sayt cookie/token'lariga kira olmaydi */
 export function PreviewFrame({
@@ -67,7 +68,7 @@ export function ConsoleView({ logs }: { logs: ConsoleLine[] }) {
   );
 }
 
-export function TestList({ tests, results, running, compact }: { tests: SandboxTest[]; results: TestResult[] | null; running: boolean; compact?: boolean }) {
+export function TestList({ tests, results, running, compact }: { tests: { title: string }[]; results: TestResult[] | null; running: boolean; compact?: boolean }) {
   const passed = results?.filter((r) => r.ok).length ?? 0;
   const all = !!results && passed === tests.length;
   return (
@@ -119,7 +120,7 @@ export function BottomPanel({
   onTab,
 }: {
   logs: ConsoleLine[];
-  tests: SandboxTest[];
+  tests: { title: string }[];
   results: TestResult[] | null;
   running: boolean;
   tab?: "console" | "tests";
@@ -155,3 +156,42 @@ export function BottomPanel({
     </div>
   );
 }
+
+/** SQL natijasi: oxirgi SELECT jadvali */
+export function SqlTable({ preview, ran }: { preview: SqlPreview; ran: boolean }) {
+  if (!preview)
+    return <p className="p-4 text-[13px] text-muted">{ran ? "Skriptdagi oxirgi so'rov jadval qaytarmadi. Natijani ko'rish uchun oxiriga SELECT yozing." : "Skript natijasi shu yerda jadval ko'rinishida chiqadi."}</p>;
+  const cell = (v: unknown) => (v === null ? <span className="text-muted italic">NULL</span> : v instanceof Date ? v.toISOString().slice(0, 10) : typeof v === "object" ? JSON.stringify(v) : String(v));
+  return (
+    <div className="p-3">
+      <div className="overflow-auto rounded-lg border border-line">
+        <table className="w-full text-[12.5px] font-mono">
+          <thead className="bg-mist text-ink">
+            <tr>
+              {preview.columns.map((c) => (
+                <th key={c} className="text-left font-semibold px-3 py-2 border-b border-line whitespace-nowrap">
+                  {c}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {preview.rows.map((r, i) => (
+              <tr key={i} className="border-b border-line/60 last:border-0">
+                {r.map((v, j) => (
+                  <td key={j} className="px-3 py-1.5 text-ink-2 whitespace-nowrap">
+                    {cell(v)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-2 text-[12px] text-muted">
+        {preview.rows.length} qator{preview.truncated ? " (birinchi 200 tasi ko'rsatildi)" : ""}
+      </p>
+    </div>
+  );
+}
+

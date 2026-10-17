@@ -3,7 +3,7 @@ import { HiOutlineArrowTopRightOnSquare, HiOutlineCodeBracket } from "react-icon
 import { earningApi, errorCode, errorMessage, submissionApi } from "../../api/api";
 import { useCachedQuery } from "../../hooks/useCachedQuery";
 import { getStoredUser } from "../../lib/auth";
-import { formatPrice } from "../../lib/format";
+import { formatPrice, mediaUrl } from "../../lib/format";
 import ContractModal from "../payout/ContractModal";
 import type { Submission } from "../../types/type";
 import { formatDate, formatDuration } from "../../lib/format";
@@ -11,10 +11,10 @@ import type { MentorContract } from "../../types/type";
 import { Alert, Avatar, Badge, Button, Field, Modal, StatusBadge, Textarea } from "../ui";
 import { useToast } from "../ui/toast";
 import ReviewResult from "../user/ReviewResult";
+import { codeSummary } from "../sandbox/kinds";
 
 const QUICK = [40, 60, 75, 85, 95];
 const CodeReviewOverlay = lazy(() => import("../sandbox/CodeReviewOverlay"));
-const lines = (v?: string) => (v?.trim() ? v.split("\n").length : 0);
 
 /** Mentor uchun: shu tekshiruvga qancha hisoblanishi (stavka va muddatga qarab) */
 function payHint(c: MentorContract | undefined, difficulty: string | undefined, since: string | null | undefined) {
@@ -151,12 +151,21 @@ function ReviewModalBody({ submission: s, onClose, onReviewed }: { submission: S
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold text-ink">Kod muhitida yozilgan yechim</span>
                   <span className="block text-xs text-muted">
-                    HTML {lines(s.code.html)} · CSS {lines(s.code.css)} · JS {lines(s.code.js)} qator
+                    {codeSummary(s.code)}
                     {s.testResults?.total ? ` · testlar: ${s.testResults.passed}/${s.testResults.total}` : ""}
                   </span>
                 </span>
                 <span className="text-sm font-semibold text-brand shrink-0">Kodni ochish</span>
               </button>
+            )}
+            {!!s.designImages?.length && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {s.designImages.map((im) => (
+                  <a key={im.url} href={mediaUrl(im.url) || im.url} target="_blank" rel="noreferrer" className="block rounded-xl overflow-hidden border border-line hover:border-brand/40 bg-mist">
+                    <img src={mediaUrl(im.url) || im.url} alt={im.name || "Maket"} loading="lazy" className="w-full h-28 object-cover object-top" />
+                  </a>
+                ))}
+              </div>
             )}
             {s.githubUrl && (
               <a href={s.githubUrl} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-2 p-3 rounded-xl border border-line hover:border-brand/40 text-sm text-brand">

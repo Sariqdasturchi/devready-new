@@ -3,15 +3,33 @@ import { EditorView, basicSetup } from "codemirror";
 import { EditorState, type Extension } from "@codemirror/state";
 import { keymap } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
-import { HighlightStyle, syntaxHighlighting, indentUnit } from "@codemirror/language";
+import { HighlightStyle, StreamLanguage, syntaxHighlighting, indentUnit } from "@codemirror/language";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
 import { javascript } from "@codemirror/lang-javascript";
+import { python } from "@codemirror/lang-python";
+import { sql, PostgreSQL } from "@codemirror/lang-sql";
+import { yaml } from "@codemirror/lang-yaml";
+import { dockerFile } from "@codemirror/legacy-modes/mode/dockerfile";
+import { nginx } from "@codemirror/legacy-modes/mode/nginx";
+import { shell } from "@codemirror/legacy-modes/mode/shell";
 import { tags as t } from "@lezer/highlight";
 
-export type Lang = "html" | "css" | "js";
+export type Lang = "html" | "css" | "js" | "ts" | "python" | "sql" | "yaml" | "dockerfile" | "nginx" | "shell" | "text";
 
-const LANG: Record<Lang, () => Extension> = { html: () => html(), css: () => css(), js: () => javascript() };
+const LANG: Record<Lang, () => Extension> = {
+  html: () => html(),
+  css: () => css(),
+  js: () => javascript(),
+  ts: () => javascript({ typescript: true }),
+  python: () => python(),
+  sql: () => sql({ dialect: PostgreSQL, upperCaseKeywords: true }),
+  yaml: () => yaml(),
+  dockerfile: () => StreamLanguage.define(dockerFile),
+  nginx: () => StreamLanguage.define(nginx),
+  shell: () => StreamLanguage.define(shell),
+  text: () => [],
+};
 
 /** Muharrir ko'rinishi — DevReady tokenlaridan, shuning uchun yorug'/qorong'i mavzuga o'zi moslashadi */
 const theme = EditorView.theme({
@@ -75,8 +93,8 @@ export default function CodeEditor({
       extensions: [
         basicSetup,
         keymap.of([indentWithTab]),
-        indentUnit.of("  "),
-        EditorState.tabSize.of(2),
+        indentUnit.of(l === "python" ? "    " : "  "),
+        EditorState.tabSize.of(l === "python" ? 4 : 2),
         LANG[l](),
         theme,
         syntaxHighlighting(highlight),

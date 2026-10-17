@@ -4,6 +4,7 @@ import type { Task } from "../types/type";
 import { DIFFICULTY, TRACKS } from "../lib/constants";
 import { formatDuration } from "../lib/format";
 import { Badge, Card, EmptyState, Input, Modal, Select } from "./ui";
+import { stackLabel, testCount } from "./sandbox/kinds";
 
 /** Tasklarni filtrlash/qidirish (mentor — faqat ko'rish) */
 // eslint-disable-next-line react-refresh/only-export-components
@@ -50,7 +51,8 @@ export function TaskViewModal({ task, onClose }: { task: Task | null; onClose: (
           <span className={`px-2 py-0.5 rounded-md border text-[11px] font-semibold ${diff.className}`}>{diff.label}</span>
           <Badge tone="warning">{task.xp} XP</Badge>
           <Badge tone="info">{formatDuration(task.estimatedTime)}</Badge>
-          {task.sandbox?.enabled && <Badge tone="violet">Kod muhiti · {task.sandbox.tests.length} test</Badge>}
+          {task.sandbox?.enabled && <Badge tone="violet">Kod muhiti · {stackLabel(task.sandbox)} · {testCount(task.sandbox)} test</Badge>}
+          {!task.sandbox?.enabled && task.deliverable === "design" && <Badge tone="violet">Dizayn · Figma</Badge>}
           {!task.isActive && <Badge tone="danger">Nofaol</Badge>}
         </div>
         <p className="text-ink-2 whitespace-pre-line">{task.description}</p>
@@ -80,7 +82,7 @@ export function TaskTile({ task, onClick, footer }: { task: Task; onClick: () =>
         <div className="flex flex-wrap items-center gap-1.5">
           <Badge>{task.track}</Badge>
           <span className={`px-2 py-0.5 rounded-md border text-[11px] font-semibold ${diff.className}`}>{diff.label}</span>
-          {task.sandbox?.enabled && <Badge tone="violet">Kod muhiti</Badge>}
+          {task.sandbox?.enabled ? <Badge tone="violet">{stackLabel(task.sandbox)}</Badge> : task.deliverable === "design" ? <Badge tone="violet">Dizayn</Badge> : null}
           {!task.isActive && <Badge tone="danger">Nofaol</Badge>}
         </div>
         <div>
