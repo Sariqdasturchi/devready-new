@@ -11,6 +11,7 @@ import {
 } from "react-icons/hi2";
 import { analyticsApi, errorMessage } from "../../api/api";
 import { useCachedQuery } from "../../hooks/useCachedQuery";
+import { getStoredUser } from "../../lib/auth";
 import { Badge, Card, CardHeader, EmptyState, ErrorState, PageHeader, PageLoader, ProgressBar, StatCard, StatusBadge, Tabs } from "../../components/ui";
 import ActivityCalendar from "../../components/user/ActivityCalendar";
 import { formatDate, limitLabel, timeAgo } from "../../lib/format";
@@ -56,6 +57,8 @@ export default function UserDashboard() {
         <StatCard label="Bajarilgan" value={o.completedTasks} icon={<HiOutlineCheckCircle />} tone="success" hint={`${o.statusCounts.inReview} ta tekshiruvda`} />
         <StatCard label="Streak" value={`${o.streak} kun`} icon={<HiOutlineFire />} tone="danger" hint="Ketma-ket faol kunlar" />
       </div>
+
+      {o.statusCounts.approved > 0 && <PublicProfileBanner approved={o.statusCounts.approved} />}
 
       {/* Davr bo'yicha faollik */}
       <Card>
@@ -183,6 +186,30 @@ export default function UserDashboard() {
           </div>
         )}
       </Card>
+    </div>
+  );
+}
+
+/** Qabul qilingan yechim bo'lsa — ochiq profilni yoqishga yoki ulashishga undash */
+function PublicProfileBanner({ approved }: { approved: number }) {
+  const me = getStoredUser();
+  const live = !!me?.profilePublic && !!me.username;
+  return (
+    <div className="rounded-2xl border border-line bg-surface p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+      <div className="min-w-0 flex-1">
+        <p className="font-bold text-ink">{live ? "Ochiq profilingiz tayyor" : `${approved} ta tekshirilgan yechimingiz bor — ish beruvchiga ko'rsating`}</p>
+        <p className="mt-1 text-[14px] text-ink-2">
+          {live
+            ? `devready.uz/u/${me!.username} — havolani rezyumega va HR'ga yuboring.`
+            : "Ochiq profil yoqilsa, baholar, test natijalari va mentor izohlari bitta havolada ko'rinadi."}
+        </p>
+      </div>
+      <Link
+        to={live ? `/u/${me!.username}` : "/dashboard/settings#public-profile"}
+        className="shrink-0 h-10 px-5 inline-flex items-center justify-center rounded-full bg-brand text-white text-sm font-semibold hover:bg-brand-deep"
+      >
+        {live ? "Profilni ko'rish" : "Ochiq profilni yoqish"}
+      </Link>
     </div>
   );
 }

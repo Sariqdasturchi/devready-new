@@ -12,6 +12,7 @@ const BlogPage = lazy(() => import("./pages/landing/Blog"));
 const BlogView = lazy(() => import("./pages/landing/BlogView"));
 const NotFound = lazy(() => import("./pages/landing/NotFound"));
 const PublicTasks = lazy(() => import("./pages/landing/Tasks"));
+const PublicProfile = lazy(() => import("./pages/landing/PublicProfile"));
 const TryWorkspace = lazy(() => import("./components/sandbox/TryWorkspace"));
 const Register = lazy(() => import("./pages/auth/Register"));
 const Login = lazy(() => import("./pages/auth/Login"));
@@ -106,6 +107,7 @@ export default function App() {
             <Route path="/mentors" element={<BecomeMentor />} />
             <Route path="/blogs" element={<BlogPage />} />
             <Route path="/blogs/:id" element={<BlogView />} />
+            <Route path="/u/:username" element={<PublicProfile />} />
             <Route path="*" element={<NotFound />} />
           </Route>
 

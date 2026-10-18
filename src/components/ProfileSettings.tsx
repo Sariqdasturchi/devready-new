@@ -8,6 +8,7 @@ import { invalidateCache } from "../hooks/useCachedQuery";
 import type { User } from "../types/type";
 import { Avatar, Button, Card, ErrorState, Field, Input, PageHeader, PageLoader, Select, Textarea, Toggle } from "./ui";
 import { useToast } from "./ui/toast";
+import PublicProfileSettings from "./PublicProfileSettings";
 
 /** Barcha rollar uchun profil sozlamalari */
 export default function ProfileSettings() {
@@ -145,6 +146,16 @@ export default function ProfileSettings() {
           </div>
         </form>
       </Card>
+
+      {user.role === "user" && (
+        <PublicProfileSettings
+          user={user}
+          onSaved={(u) => {
+            setUser(u);
+            setBio(u.bio || "");
+          }}
+        />
+      )}
     </div>
   );
 }

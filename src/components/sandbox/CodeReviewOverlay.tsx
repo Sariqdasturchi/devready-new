@@ -18,19 +18,29 @@ import { FileTabs } from "./workspaceShared";
  * Mentor / superadmin uchun: talabaning kod muhitidagi yechimini to'liq ekranda ko'rish
  * va testlarni qayta ishga tushirish (kod faqat o'qish uchun). Barcha turlar: web, til, SQL, DevOps, QA.
  */
-export default function CodeReviewOverlay({ submission, onClose }: { submission: Submission; onClose: () => void }) {
+export default function CodeReviewOverlay({
+  submission,
+  onClose,
+  preloadedSandbox,
+}: {
+  submission: Submission;
+  onClose: () => void;
+  /** Ochiq profil: task sozlamasi oldindan yuklangan (kabinet API'siga murojaat qilinmaydi) */
+  preloadedSandbox?: TaskSandbox | null;
+}) {
   const code = submission.code as SandboxCode;
-  const [sandbox, setSandbox] = useState<TaskSandbox | null | undefined>(undefined);
+  const [sandbox, setSandbox] = useState<TaskSandbox | null | undefined>(preloadedSandbox);
   const task = typeof submission.taskId === "object" ? submission.taskId : null;
   const student = typeof submission.userId === "object" ? submission.userId : null;
 
   // Testlar task ichida — to'liq submission'dan olamiz
   useEffect(() => {
+    if (preloadedSandbox !== undefined) return;
     submissionApi
       .get(submission._id)
       .then((s) => setSandbox(s.taskId && typeof s.taskId === "object" ? s.taskId.sandbox || null : null))
       .catch(() => setSandbox(null));
-  }, [submission._id]);
+  }, [submission._id, preloadedSandbox]);
 
   // Escape faqat shu oynani yopadi (ostidagi baholash oynasini emas)
   useEffect(() => {
@@ -55,7 +65,7 @@ export default function CodeReviewOverlay({ submission, onClose }: { submission:
     .join(" · ");
 
   return createPortal(
-    <div className="fixed inset-0 z-[110] bg-paper text-ink flex flex-col" role="dialog" aria-modal="true" aria-label="Talaba kodi">
+    <div className="fixed inset-0 z-[110] bg-paper text-ink flex flex-col" role="dialog" aria-modal="true" aria-label="Yechim kodi">
       {sandbox === undefined ? (
         <Header title={task?.title} subtitle={subtitle} onClose={onClose} />
       ) : kind === "web" ? (

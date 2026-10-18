@@ -28,6 +28,9 @@ import type {
   Submission,
   Task,
   User,
+  ProfileLinks,
+  PublicProfile,
+  PublicWork,
   UserTask,
   LevelInfo,
   LeaderboardResponse,
@@ -110,13 +113,30 @@ export const quizApi = {
 // ─── PROFILE / NOTIFICATIONS ─────────────────────────────────────────────
 export const profileApi = {
   get: () => data<User>(api.get("/profile/me")),
-  update: (body: Partial<{ fullName: string; direction: string; bio: string; isAvailable: boolean }>) =>
+  update: (
+    body: Partial<{
+      fullName: string;
+      direction: string;
+      bio: string;
+      isAvailable: boolean;
+      username: string;
+      profilePublic: boolean;
+      profileShowWork: boolean;
+      links: ProfileLinks;
+    }>,
+  ) =>
     data<User>(api.put("/profile/update", body)),
   uploadAvatar: (file: File) => {
     const form = new FormData();
     form.append("avatar", file);
     return data<{ avatar: string }>(api.post("/profile/avatar", form));
   },
+};
+
+/** Ochiq profil — ro'yxatdan o'tmasdan */
+export const publicProfileApi = {
+  get: (username: string, count = false) => data<PublicProfile>(api.get(`/public/users/${encodeURIComponent(username)}`, { params: count ? { count: 1 } : undefined })),
+  work: (username: string, id: string) => data<PublicWork>(api.get(`/public/users/${encodeURIComponent(username)}/work/${id}`)),
 };
 
 export const notificationApi = {

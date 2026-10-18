@@ -48,6 +48,69 @@ export interface User {
   planExpireDate?: string | null;
   createdAt?: string;
   lastActiveDate?: string | null;
+  // Ochiq profil
+  username?: string | null;
+  profilePublic?: boolean;
+  profileShowWork?: boolean;
+  profileViews?: number;
+  links?: ProfileLinks;
+}
+
+export interface ProfileLinks {
+  github?: string;
+  linkedin?: string;
+  telegram?: string;
+}
+
+/** devready.uz/u/<username> — ish beruvchiga ko'rsatiladigan profil */
+export interface PublicProfileItem {
+  id: string;
+  task: { id: string; title: string; track: string; difficulty: Difficulty; tags: string[]; kind: "job" | "interview" | null };
+  score: number;
+  xp: number;
+  reviewedBy: "mentor" | "ai";
+  review: string;
+  strengths: string[];
+  tests: { passed: number; total: number } | null;
+  language: string | null;
+  date: string;
+  workType: "code" | "design" | "repo" | null;
+  canOpen: boolean;
+  githubUrl: string | null;
+  liveDemoUrl: string | null;
+}
+
+export interface PublicProfile {
+  username: string;
+  fullName: string;
+  avatar: string | null;
+  direction: string | null;
+  level: string;
+  bio: string;
+  links: ProfileLinks;
+  joinedAt: string;
+  xp: number;
+  showWork: boolean;
+  stats: {
+    approved: number;
+    interview: number;
+    job: number;
+    avgScore: number | null;
+    byDifficulty: { difficulty: Difficulty; count: number }[];
+  };
+  skills: { name: string; count: number }[];
+  items: PublicProfileItem[];
+}
+
+export interface PublicWork {
+  id: string;
+  task: { id: string; title: string; track: string; difficulty: Difficulty; deliverable?: string; sandbox: TaskSandbox | null };
+  code: SandboxCode | null;
+  designImages: { url: string; name?: string }[];
+  testResults: { passed: number; total: number } | null;
+  githubUrl: string | null;
+  liveDemoUrl: string | null;
+  author: string;
 }
 
 export interface DesignTemplate {
