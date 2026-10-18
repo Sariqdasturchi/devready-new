@@ -26,6 +26,7 @@ import ReviewResult from "./ReviewResult";
 import { MentorFeedback, ReassignPanel } from "./MentorFeedback";
 import UpgradeModal from "./UpgradeModal";
 import { stackLabel, testCount } from "../sandbox/kinds";
+import { hasTryDraft } from "../sandbox/workspaceState";
 import DesignUpload from "./DesignUpload";
 
 const isGitHub = (url: string) => /^https:\/\/github\.com\/[^/]+\/[^/]+/.test(url.trim());
@@ -39,6 +40,8 @@ export default function TaskDetails() {
   const [error, setError] = useState("");
   const [offset, setOffset] = useState(0);
   const [confirmStart, setConfirmStart] = useState(false);
+  // false — erkin rejim (7 kun), true — taymer bilan (task vaqti)
+  const [timed, setTimed] = useState(false);
   const [starting, setStarting] = useState(false);
   const [upgrade, setUpgrade] = useState<string | null>(null);
 
@@ -73,8 +76,8 @@ export default function TaskDetails() {
   const start = async () => {
     setStarting(true);
     try {
-      await submissionApi.start(id);
-      toast.success("Task boshlandi. Vaqt ketdi — omad!");
+      await submissionApi.start(id, timed);
+      toast.success(timed ? "Task boshlandi. Vaqt ketdi — omad!" : "Task boshlandi. Omad!");
       refreshLists();
       setConfirmStart(false);
       // Kod muhiti bor taskda to'g'ridan-to'g'ri muharrirga o'tamiz
@@ -191,9 +194,11 @@ export default function TaskDetails() {
               <div>
                 <h3 className="text-sm font-bold text-ink">Tayyormisiz?</h3>
                 <p className="text-xs text-muted mt-1">
-                  "Boshlash" bosilgach <b className="text-ink-2">{formatDuration(task.estimatedTime)}</b> vaqt beriladi. Vaqt tugasa task avtomatik
-                  "bajarilmagan" bo'ladi.
+                  Boshlashda rejimni tanlaysiz: erkin (7 kun) yoki taymer bilan ({formatDuration(task.estimatedTime)}) — xuddi texnik suhbatdagidek.
                 </p>
+                {task.sandbox?.enabled && hasTryDraft(task._id) && (
+                  <p className="mt-3 rounded-xl bg-emerald-50 p-3 text-xs text-emerald-800">Sinab ko'rganingizdagi kod saqlangan — boshlaganingizda muharrirda ochiladi.</p>
+                )}
                 {task.sandbox?.enabled && (
                   <p className="mt-3 flex items-start gap-2 rounded-xl bg-brand-tint p-3 text-xs text-ink-2">
                     <HiOutlineCodeBracket size={16} className="text-brand shrink-0 mt-px" />
@@ -288,9 +293,22 @@ export default function TaskDetails() {
         open={confirmStart}
         title="Taskni boshlaysizmi?"
         text={
-          <>
-            Taymer ishga tushadi va <b>{formatDuration(task.estimatedTime)}</b> ichida yechimni yuborishingiz kerak. Taymerni to'xtatib bo'lmaydi.
-          </>
+          <span className="flex flex-col gap-2 mt-1" role="radiogroup" aria-label="Rejim">
+            {([false, true] as const).map((v) => (
+              <label
+                key={String(v)}
+                className={cx("flex gap-3 p-3 rounded-xl border cursor-pointer", timed === v ? "border-brand bg-brand-tint" : "border-line hover:border-ink-2")}
+              >
+                <input type="radio" name="mode" checked={timed === v} onChange={() => setTimed(v)} className="mt-1 accent-[var(--color-brand)]" />
+                <span>
+                  <span className="block text-sm font-semibold text-ink">{v ? `Taymer bilan — ${formatDuration(task.estimatedTime)}` : "Erkin rejim — 7 kun"}</span>
+                  <span className="block text-xs text-muted mt-0.5">
+                    {v ? "Suhbatdagi test topshiriq kabi: vaqt tugasa task bajarilmagan hisoblanadi." : "O'z sur'atingizda ishlang. Muddat — 7 kun."}
+                  </span>
+                </span>
+              </label>
+            ))}
+          </span>
         }
         confirmLabel="Boshlash"
         loading={starting}
@@ -368,7 +386,8 @@ function SubmitPanel({ task, submissionId, offset, onDone }: { task: UserTask; s
     }
   }, [expired, onDone, toast]);
 
-  const total = task.estimatedTime * 60;
+  // Erkin rejimda muddat 7 kun (taymer task vaqti emas)
+  const total = (task.submission?.timed === false ? Math.max(task.estimatedTime, 7 * 24 * 60) : task.estimatedTime) * 60;
   const pct = total ? Math.min(100, (left / total) * 100) : 0;
   const urgent = left < Math.min(600, total * 0.15);
   const aiAllowed = useMemo(() => (isDesign ? images.length > 0 : isGitHub(githubUrl)), [isDesign, images.length, githubUrl]);

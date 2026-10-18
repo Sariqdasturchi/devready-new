@@ -7,6 +7,8 @@ import CodeEditor from "./CodeEditor";
 import { starterCode, sameCode } from "./kinds";
 import { BottomPanel, DeviceSwitch, PreviewFrame, TestList } from "./SandboxPanels";
 import SubmitModal from "./SubmitModal";
+import GuestSubmitModal from "./GuestSubmitModal";
+import { track } from "../../lib/track";
 import { SANDBOX_FILES, SERVER_FILE, type SandboxFiles } from "./runtime";
 import { useSandboxRunner } from "./useSandboxRunner";
 import { FileTabs, PaneSwitch, TaskBrief, WorkspaceHeader } from "./workspaceShared";
@@ -23,9 +25,9 @@ const toFiles = (c: SandboxCode): SandboxFiles => {
  * HTML/CSS/JS (+ server.js) muhiti: chapda shartlar/testlar, o'rtada muharrir, o'ngda jonli natija va konsol.
  * Kod brauzerda, izolyatsiyalangan iframe ichida ishlaydi — server resursi sarflanmaydi.
  */
-export default function WebWorkspace({ task, offset }: { task: UserTask; offset: number }) {
+export default function WebWorkspace({ task, offset, guest = false }: { task: UserTask; offset: number; guest?: boolean }) {
   const toast = useToast();
-  const [code, setCode] = useState<SandboxCode>(() => initialCode(task));
+  const [code, setCode] = useState<SandboxCode>(() => initialCode(task, guest));
   const files = useMemo(() => toFiles(code), [code]);
   const hasServer = files.server !== undefined;
   const fileList = useMemo(() => (hasServer ? [...SANDBOX_FILES, SERVER_FILE] : SANDBOX_FILES), [hasServer]);
@@ -38,7 +40,7 @@ export default function WebWorkspace({ task, offset }: { task: UserTask; offset:
   const [submitOpen, setSubmitOpen] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
 
-  const draft = useDraft(task, code);
+  const draft = useDraft(task, code, guest);
   const { onExpired, onSubmitted } = useWorkspaceExit(task);
   const tests = useMemo(() => task.sandbox?.tests || [], [task]);
   const runner = useSandboxRunner(files, tests);
@@ -60,7 +62,15 @@ export default function WebWorkspace({ task, offset }: { task: UserTask; offset:
   const runTests = useCallback(() => {
     setTested(code);
     run();
-  }, [code, run]);
+    if (guest) track("try_run", { taskId: task._id });
+  }, [code, run, guest, task._id]);
+  const openSubmit = () => {
+    if (guest) track("try_submit", { taskId: task._id });
+    setSubmitOpen(true);
+  };
+  useEffect(() => {
+    if (guest) track("try_open", { taskId: task._id });
+  }, [guest, task._id]);
   const stale = !!results && !!tested && !sameCode(tested, code);
   useRunShortcut(runTests);
 
@@ -147,7 +157,7 @@ export default function WebWorkspace({ task, offset }: { task: UserTask; offset:
 
   return (
     <div className="h-dvh flex flex-col bg-paper text-ink">
-      <WorkspaceHeader task={task} offset={offset} draft={draft} running={running} onRun={runTests} onSubmit={() => setSubmitOpen(true)} onExpired={onExpired} />
+      <WorkspaceHeader guest={guest} task={task} offset={offset} draft={draft} running={running} onRun={runTests} onSubmit={openSubmit} onExpired={onExpired} />
       <PaneSwitch
         panes={[
           { key: "brief", label: "Shartlar" },
@@ -178,7 +188,9 @@ export default function WebWorkspace({ task, offset }: { task: UserTask; offset:
         </Button>
       </div>
 
-      {draft.editable && (
+      {guest ? (
+        <GuestSubmitModal open={submitOpen} onClose={() => setSubmitOpen(false)} task={task} passed={passed} total={tests.length} tested={!!results && !stale} />
+      ) : draft.editable && (
         <SubmitModal
           open={submitOpen}
           onClose={() => setSubmitOpen(false)}

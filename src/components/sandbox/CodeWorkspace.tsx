@@ -7,6 +7,8 @@ import CodeEditor from "./CodeEditor";
 import { codeFiles, defaultLanguage, kindOf, sameCode, starterCode, testTitles } from "./kinds";
 import { ConsoleView, SqlTable, TestList } from "./SandboxPanels";
 import SubmitModal from "./SubmitModal";
+import GuestSubmitModal from "./GuestSubmitModal";
+import { track } from "../../lib/track";
 import { warmPython, type RunOutput } from "./runners/host";
 import { runChecks } from "./runChecks";
 import { LANG_LABEL } from "./runners/types";
@@ -20,11 +22,11 @@ type OutTab = "tests" | "console" | "table";
  * DevOps fayllari va QA (talaba test yozadi). Kod Web Worker'da ishlaydi — sahifa qotib qolmaydi,
  * cheksiz sikl bo'lsa worker to'xtatiladi.
  */
-export default function CodeWorkspace({ task, offset }: { task: UserTask; offset: number }) {
+export default function CodeWorkspace({ task, offset, guest = false }: { task: UserTask; offset: number; guest?: boolean }) {
   const toast = useToast();
   const sb = task.sandbox!;
   const kind = kindOf(sb);
-  const [code, setCode] = useState<SandboxCode>(() => initialCode(task));
+  const [code, setCode] = useState<SandboxCode>(() => initialCode(task, guest));
   const files = useMemo(() => codeFiles(sb, code), [sb, code]);
   const [active, setActive] = useState(files[0]?.name || "");
   const [side, setSide] = useState<"brief" | "tests">("brief");
@@ -39,7 +41,7 @@ export default function CodeWorkspace({ task, offset }: { task: UserTask; offset
   const [progress, setProgress] = useState(0);
   const [pyState, setPyState] = useState<"idle" | "loading" | "ready" | "error">("idle");
 
-  const draft = useDraft(task, code);
+  const draft = useDraft(task, code, guest);
   const { onExpired, onSubmitted } = useWorkspaceExit(task);
   const tests = useMemo(() => testTitles(sb), [sb]);
   const results = output?.results || null;
@@ -61,6 +63,7 @@ export default function CodeWorkspace({ task, offset }: { task: UserTask; offset
     setSide("tests");
     setOutTab("tests");
     const snapshot = code;
+    if (guest) track("try_run", { taskId: task._id });
     const out = await runChecks(sb, snapshot, setProgress);
     if (kind === "code" && language === "python" && !out.fatal) setPyState("ready");
     setOutput(out);
@@ -69,8 +72,15 @@ export default function CodeWorkspace({ task, offset }: { task: UserTask; offset
     const ok = out.results.filter((r) => r.ok).length;
     if (out.results.length && ok === out.results.length) toast.success(`Barcha ${ok} ta test o'tdi!`);
     else if (kind === "sql" && out.preview && ok === 0) setOutTab("table");
-  }, [running, code, kind, language, sb, toast]);
+  }, [running, code, kind, language, sb, toast, guest, task._id]);
   useRunShortcut(run);
+  const openSubmit = () => {
+    if (guest) track("try_submit", { taskId: task._id });
+    setSubmitOpen(true);
+  };
+  useEffect(() => {
+    if (guest) track("try_open", { taskId: task._id });
+  }, [guest, task._id]);
 
   const current = files.find((f) => f.name === active) || files[0];
   const onEdit = (v: string) => {
@@ -238,7 +248,7 @@ export default function CodeWorkspace({ task, offset }: { task: UserTask; offset
 
   return (
     <div className="h-dvh flex flex-col bg-paper text-ink">
-      <WorkspaceHeader task={task} offset={offset} draft={draft} running={running} onRun={run} onSubmit={() => setSubmitOpen(true)} onExpired={onExpired} />
+      <WorkspaceHeader guest={guest} task={task} offset={offset} draft={draft} running={running} onRun={run} onSubmit={openSubmit} onExpired={onExpired} />
       <PaneSwitch
         panes={[
           { key: "brief", label: "Shartlar" },
@@ -269,7 +279,9 @@ export default function CodeWorkspace({ task, offset }: { task: UserTask; offset
         </Button>
       </div>
 
-      {draft.editable && (
+      {guest ? (
+        <GuestSubmitModal open={submitOpen} onClose={() => setSubmitOpen(false)} task={task} passed={passed} total={tests.length} tested={!!results && !stale} />
+      ) : draft.editable && (
         <SubmitModal
           open={submitOpen}
           onClose={() => setSubmitOpen(false)}

@@ -21,7 +21,9 @@ export function WorkspaceHeader({
   onSubmit,
   onExpired,
   extra,
+  guest,
 }: {
+  guest?: boolean;
   task: UserTask;
   offset: number;
   draft: { editable: boolean; save: SaveState; label: string };
@@ -34,7 +36,7 @@ export function WorkspaceHeader({
   return (
     <header className="h-14 shrink-0 border-b border-line bg-surface flex items-center gap-3 px-3 sm:px-4">
       <Link
-        to={`/dashboard/tasks/${task._id}`}
+        to={guest ? "/tasks" : `/dashboard/tasks/${task._id}`}
         className="h-9 w-9 shrink-0 inline-flex items-center justify-center rounded-full text-ink-2 hover:bg-mist"
         aria-label="Taskga qaytish"
       >
@@ -45,7 +47,7 @@ export function WorkspaceHeader({
         <p className={cx("hidden sm:block text-[11px] truncate", draft.save === "local" ? "text-amber-700" : "text-muted")}>{draft.label}</p>
       </div>
       {extra}
-      {draft.editable && task.dueAt && <Timer dueAt={task.dueAt} offset={offset} onEnd={onExpired} />}
+      {!guest && draft.editable && task.dueAt && <Timer dueAt={task.dueAt} offset={offset} onEnd={onExpired} />}
       <span className="hidden sm:contents">
         <ThemeToggle />
         <Button variant="secondary" onClick={onRun} loading={running}>

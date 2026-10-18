@@ -7,16 +7,16 @@ import { SITE_URL } from "../../lib/seo";
 
 const STEPS = [
   {
-    title: "Ro'yxatdan o'ting",
-    text: "Telefon raqam va Telegram bot orqali bir daqiqada. Qisqa test boshlang'ich darajangizni aniqlaydi.",
+    title: "Taskni sinab ko'ring",
+    text: "Ro'yxatdan o'tmasdan: taskni oching, brauzerda kod yozing va avtomatik testlarni ishga tushiring.",
   },
   {
-    title: "Taskni boshlang",
-    text: "Har bir taskda shartlar, talablar va kerak bo'lsa Figma maket bor. Boshlash bosilgach taymer ishga tushadi.",
+    title: "Ro'yxatdan o'ting",
+    text: "Ism, telefon va Telegram'da bitta tugma — bir daqiqa. Yozgan kodingiz o'z joyida qoladi.",
   },
   {
     title: "Mentorga yuboring",
-    text: "GitHub yoki Figma havolasini yuborasiz va yo'nalishingizdagi mentorlardan birini o'zingiz tanlaysiz.",
+    text: "Yechimni mentor yoki AI tekshiruviga yuborasiz. Xohlasangiz taymer bilan — xuddi suhbatdagidek.",
   },
   {
     title: "Baho va izoh oling",
@@ -79,14 +79,14 @@ export default function Home() {
               >
                 Bepul boshlash
               </Link>
-              <a
-                href="#how"
+              <Link
+                to="/tasks"
                 className="h-[52px] px-7 inline-flex items-center justify-center rounded-full border border-line text-ink text-base font-semibold hover:border-ink transition-colors"
               >
-                Qanday ishlaydi
-              </a>
+                Ro'yxatdan o'tmasdan sinab ko'rish
+              </Link>
             </div>
-            <p className="mt-5 text-sm text-muted">Free tarifda 10 ta task. Karta talab qilinmaydi.</p>
+            <p className="mt-5 text-sm text-muted">Kod brauzerda ishlaydi — hech narsa o'rnatish shart emas. Free tarifda 10 ta task.</p>
           </div>
           <div className="lg:pl-10">
             <HeroTask />
@@ -102,8 +102,13 @@ export default function Home() {
           </p>
           <ul className="flex flex-wrap gap-2">
             {TRACKS.map((t) => (
-              <li key={t} className="h-10 px-4 inline-flex items-center rounded-full bg-surface border border-line text-[15px] font-medium text-ink">
-                {t}
+              <li key={t}>
+                <Link
+                  to={`/tasks?track=${encodeURIComponent(t)}`}
+                  className="h-10 px-4 inline-flex items-center rounded-full bg-surface border border-line text-[15px] font-medium text-ink hover:border-ink transition-colors"
+                >
+                  {t}
+                </Link>
               </li>
             ))}
           </ul>

@@ -6,6 +6,7 @@ import { homeForRole, setSession } from "../../lib/auth";
 import AuthShell, { AuthMessage } from "../../components/auth/AuthShell";
 import OtpInput from "../../components/auth/OtpInput";
 import { BOT_USERNAME } from "../../lib/constants";
+import { clearTryReturn, readTryReturn } from "../../lib/track";
 
 const RESEND_SECONDS = 60;
 
@@ -60,7 +61,10 @@ export default function Login() {
       setSession(res.token, res.user);
       // Himoyalangan sahifadan kelgan bo'lsa (va u shu rolga tegishli bo'lsa) — o'sha yerga qaytaramiz
       const home = homeForRole(res.user.role);
-      navigate(from && from.startsWith(home) ? from : home, { replace: true });
+      // Ro'yxatdan o'tmasdan sinab ko'rilgan task — o'sha taskka qaytamiz
+      const tried = res.user.role === "user" ? readTryReturn() : null;
+      clearTryReturn();
+      navigate(tried ? `/dashboard/tasks/${tried.taskId}` : from && from.startsWith(home) ? from : home, { replace: true });
     } catch (err) {
       setCode("");
       setMsg({ text: errorMessage(err), tone: "error" });

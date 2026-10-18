@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Header from "../header/Header";
 import Footer from "../footer/Footer";
+import { trackVisit } from "../../lib/track";
 
 /** Sahifa almashganda tepaga, "#bo'lim" bo'lsa — o'sha bo'limga */
 function ScrollManager() {
@@ -20,6 +21,7 @@ function ScrollManager() {
 }
 
 export default function LandingLayout() {
+  useEffect(() => trackVisit(), []);
   return (
     <div className="min-h-dvh flex flex-col bg-paper">
       <ScrollManager />

@@ -11,11 +11,13 @@ import {
   HiOutlineTicket,
   HiOutlineUsers,
   HiOutlineWallet,
+  HiOutlineFunnel,
 } from "react-icons/hi2";
 import DashboardLayout, { type NavItem } from "../../components/layout/DashboardLayout";
 
 const NAV: NavItem[] = [
   { to: "/superadmin/dashboard", label: "Statistika", icon: HiOutlineHome, end: true },
+  { to: "/superadmin/dashboard/funnel", label: "Voronka", icon: HiOutlineFunnel },
   { to: "/superadmin/dashboard/users", label: "Foydalanuvchilar", icon: HiOutlineUsers },
   { to: "/superadmin/dashboard/mentors", label: "Mentorlar", icon: HiOutlineAcademicCap },
   { to: "/superadmin/dashboard/tasks", label: "Tasklar", icon: HiOutlineClipboardDocumentList },

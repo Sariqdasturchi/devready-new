@@ -6,6 +6,7 @@ import { TfiStatsUp } from "react-icons/tfi";
 
 export const menuList = [
     { id: 1, name: 'Bosh sahifa', path: '/' },
+    { id: 5, name: 'Tasklar', path: '/tasks' },
     { id: 2, name: 'Narxlar', path: '/pricing' },
     { id: 3, name: "Mentor bo'lish", path: '/mentors' },
     { id: 4, name: 'Blog', path: '/blogs' },

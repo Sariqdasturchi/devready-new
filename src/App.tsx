@@ -11,6 +11,8 @@ const BecomeMentor = lazy(() => import("./pages/landing/BecomeMentor"));
 const BlogPage = lazy(() => import("./pages/landing/Blog"));
 const BlogView = lazy(() => import("./pages/landing/BlogView"));
 const NotFound = lazy(() => import("./pages/landing/NotFound"));
+const PublicTasks = lazy(() => import("./pages/landing/Tasks"));
+const TryWorkspace = lazy(() => import("./components/sandbox/TryWorkspace"));
 const Register = lazy(() => import("./pages/auth/Register"));
 const Login = lazy(() => import("./pages/auth/Login"));
 
@@ -39,6 +41,7 @@ const MentorEarnings = lazy(() => import("./pages/mentorDashboard/Earnings"));
 const SuperadminDashboardLayout = lazy(() => import("./pages/superadminDashboard/SuperadminDashboardLayout"));
 const SuperadminDashboard = lazy(() => import("./pages/superadminDashboard/Dashboard"));
 const SuperadminUsers = lazy(() => import("./pages/superadminDashboard/Users"));
+const SuperadminFunnel = lazy(() => import("./pages/superadminDashboard/Funnel"));
 const SuperadminMentors = lazy(() => import("./pages/superadminDashboard/SuperadminMentors"));
 const SuperadminTasks = lazy(() => import("./pages/superadminDashboard/Tasks"));
 const SuperadminSubmissions = lazy(() => import("./pages/superadminDashboard/Submissions"));
@@ -98,12 +101,16 @@ export default function App() {
         <Routes>
           <Route element={<LandingLayout />}>
             <Route path="/" element={<Home />} />
+            <Route path="/tasks" element={<PublicTasks />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/mentors" element={<BecomeMentor />} />
             <Route path="/blogs" element={<BlogPage />} />
             <Route path="/blogs/:id" element={<BlogView />} />
             <Route path="*" element={<NotFound />} />
           </Route>
+
+          {/* Ro'yxatdan o'tmasdan sinab ko'rish */}
+          <Route path="/try/:id" element={<Suspense fallback={<PageLoader />}><TryWorkspace /></Suspense>} />
 
           <Route element={<GuestOnly />}>
             <Route path="/login" element={<Login />} />
@@ -141,6 +148,7 @@ export default function App() {
               <Route path="/superadmin/dashboard/users" element={<Suspense fallback={<PageLoader />}><SuperadminUsers /></Suspense>} />
               <Route path="/superadmin/dashboard/mentors" element={<Suspense fallback={<PageLoader />}><SuperadminMentors /></Suspense>} />
               <Route path="/superadmin/dashboard/tasks" element={<Suspense fallback={<PageLoader />}><SuperadminTasks /></Suspense>} />
+              <Route path="/superadmin/dashboard/funnel" element={<Suspense fallback={<PageLoader />}><SuperadminFunnel /></Suspense>} />
               <Route path="/superadmin/dashboard/submissions" element={<Suspense fallback={<PageLoader />}><SuperadminSubmissions /></Suspense>} />
               <Route path="/superadmin/dashboard/payments" element={<Suspense fallback={<PageLoader />}><SuperadminPayments /></Suspense>} />
               <Route path="/superadmin/dashboard/payouts" element={<Suspense fallback={<PageLoader />}><SuperadminPayouts /></Suspense>} />

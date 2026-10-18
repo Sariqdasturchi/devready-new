@@ -203,6 +203,8 @@ export interface Submission {
   reviewScore: number;
   earnedXP: number;
   try?: number;
+  /** false — erkin rejim (7 kun), true — taymerli */
+  timed?: boolean;
   aiFeedback?: AiFeedback;
   mentorFeedback?: MentorFeedback;
   updatedAt?: string;

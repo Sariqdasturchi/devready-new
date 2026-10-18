@@ -81,7 +81,13 @@ const data = <T>(p: Promise<{ data: Envelope<T> }>) => p.then((r) => r.data.data
 type AuthResponse = { success: boolean; message: string; token: string; user: User };
 
 export const authApi = {
-  register: (body: { fullName: string; phone: string }) => api.post("/auth/register", body).then((r) => r.data),
+  register: (body: { fullName: string; phone: string; anonId?: string; source?: string }) =>
+    api.post<{ success: boolean; message: string; linkToken?: string }>("/auth/register", body).then((r) => r.data),
+  /** Bir bosishda Telegram tasdiqlash holati */
+  telegramLink: (token: string) =>
+    api
+      .get<{ success: boolean; status: "pending" | "linked" | "expired"; error?: string | null; token?: string; user?: User }>(`/auth/telegram-link/${token}`)
+      .then((r) => r.data),
   sendOtp: (body: { phone: string; telegramId: string }) => api.post("/auth/send-otp", body).then((r) => r.data),
   verifyOtp: (body: { phone: string; code: string }) => api.post<AuthResponse>("/auth/verify-otp", body).then((r) => r.data),
   login: (body: { phone: string }) => api.post("/auth/login", body).then((r) => r.data),
@@ -125,6 +131,9 @@ export const taskApi = {
   my: () =>
     api.get<{ success: boolean; data: UserTask[]; needsDirection?: boolean }>("/tasks/my").then((r) => r.data),
   get: (id: string) => data<UserTask>(api.get(`/tasks/${id}`)),
+  /** Ochiq: ro'yxatdan o'tmasdan */
+  publicList: (track?: string) => data<Task[]>(api.get("/tasks/public", { params: { track } })),
+  publicGet: (id: string) => data<UserTask>(api.get(`/tasks/public/${id}`)),
   stats: () =>
     data<{
       completedTasks: number;
@@ -143,7 +152,7 @@ export const taskApi = {
 };
 
 export const submissionApi = {
-  start: (taskId: string) => data<Submission>(api.post("/submissions/start", { taskId })),
+  start: (taskId: string, timed = true) => data<Submission>(api.post("/submissions/start", { taskId, timed })),
   submit: (
     id: string,
     body: {
@@ -179,6 +188,21 @@ export const submissionApi = {
         mentorFeedback: { score: body.score, comment: body.comment },
       })
       .then((r) => ({ submission: r.data.data, earning: r.data.earning })),
+};
+
+export type FunnelStep = { key: string; label: string; group: string; count: number };
+export type FunnelData = {
+  days: number;
+  source: string | null;
+  steps: FunnelStep[];
+  bySource: { source: string; visitors: number; registered: number; started: number; paid: number }[];
+  daily: { date: string; visits: number; registrations: number }[];
+  methods: { telegramLink: number; manualId: number; quizSkipped: number };
+  tracking: boolean;
+};
+
+export const funnelApi = {
+  get: (days: number, source?: string) => data<FunnelData>(api.get("/events/funnel", { params: { days, source: source || undefined } })),
 };
 
 export const analyticsApi = {
