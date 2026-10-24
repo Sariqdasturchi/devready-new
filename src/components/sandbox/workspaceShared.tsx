@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { HiOutlineArrowLeft, HiOutlineCheckCircle, HiOutlineEye, HiOutlinePaperAirplane, HiOutlinePlay } from "react-icons/hi2";
+import { HiOutlineArrowLeft, HiOutlineEye, HiOutlinePaperAirplane, HiOutlinePlay } from "react-icons/hi2";
 import type { UserTask } from "../../types/type";
 import type { SaveState } from "./workspaceState";
 import { DIFFICULTY } from "../../lib/constants";
@@ -9,6 +9,8 @@ import { Badge, Button, cx } from "../ui";
 import ThemeToggle from "../ThemeToggle";
 import { useCountdown } from "../user/Countdown";
 import { stackLabel } from "./kinds";
+import { TaskRequirements, TaskText } from "../TaskText";
+import TaskKindTag from "../TaskKindTag";
 
 /* ───────── Yuqori panel ───────── */
 
@@ -90,23 +92,20 @@ export function TaskBrief({ task, children }: { task: UserTask; children?: React
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap gap-2">
+        <TaskKindTag tags={task.tags} />
         <Badge>{task.track}</Badge>
         <span className={`px-2 py-0.5 rounded-md border text-[11px] font-semibold ${diff.className}`}>{diff.label}</span>
-        <Badge tone="info">{task.xp} XP</Badge>
+        <Badge tone="warning">{task.xp} XP</Badge>
         <Badge tone="violet">{stackLabel(task.sandbox)}</Badge>
       </div>
       <h1 className="text-lg font-bold text-ink leading-snug">{task.title}</h1>
-      <p className="text-sm text-ink-2 leading-relaxed whitespace-pre-line">{task.description}</p>
-      {task.content && <p className="text-sm text-ink-2 leading-relaxed whitespace-pre-line pt-3 border-t border-line">{task.content}</p>}
+      <TaskText description={task.description} content={task.content} />
       {children}
       {!!task.requirements?.length && (
-        <ul className="flex flex-col gap-2 pt-3 border-t border-line">
-          {task.requirements.map((r) => (
-            <li key={r} className="flex gap-2 text-sm text-ink-2">
-              <HiOutlineCheckCircle className="text-brand shrink-0 mt-0.5" size={17} /> {r}
-            </li>
-          ))}
-        </ul>
+        <div className="pt-3 border-t border-line">
+          <p className="text-[13px] font-bold text-ink mb-3">Talablar</p>
+          <TaskRequirements items={task.requirements} />
+        </div>
       )}
       <p className="hidden lg:block text-[12px] text-muted pt-3 border-t border-line">
         <kbd className="px-1.5 py-0.5 rounded border border-line bg-mist font-mono text-[11px]">Ctrl</kbd> +{" "}

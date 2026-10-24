@@ -5,6 +5,8 @@ import { DIFFICULTY, TRACKS } from "../lib/constants";
 import { formatDuration } from "../lib/format";
 import { Badge, Card, EmptyState, Input, Modal, Select } from "./ui";
 import { stackLabel, testCount } from "./sandbox/kinds";
+import { TaskRequirements, TaskText } from "./TaskText";
+import TaskKindTag from "./TaskKindTag";
 
 /** Tasklarni filtrlash/qidirish (mentor — faqat ko'rish) */
 // eslint-disable-next-line react-refresh/only-export-components
@@ -47,6 +49,7 @@ export function TaskViewModal({ task, onClose }: { task: Task | null; onClose: (
     <Modal open onClose={onClose} title={task.title} size="lg">
       <div className="flex flex-col gap-4 text-sm">
         <div className="flex flex-wrap gap-2">
+          <TaskKindTag tags={task.tags} />
           <Badge>{task.track}</Badge>
           <span className={`px-2 py-0.5 rounded-md border text-[11px] font-semibold ${diff.className}`}>{diff.label}</span>
           <Badge tone="warning">{task.xp} XP</Badge>
@@ -55,15 +58,8 @@ export function TaskViewModal({ task, onClose }: { task: Task | null; onClose: (
           {!task.sandbox?.enabled && task.deliverable === "design" && <Badge tone="violet">Dizayn · Figma</Badge>}
           {!task.isActive && <Badge tone="danger">Nofaol</Badge>}
         </div>
-        <p className="text-ink-2 whitespace-pre-line">{task.description}</p>
-        {task.content && <p className="text-ink-2 whitespace-pre-line border-t border-line pt-4">{task.content}</p>}
-        {!!task.requirements?.length && (
-          <ul className="list-disc pl-5 text-ink-2 space-y-1">
-            {task.requirements.map((r, i) => (
-              <li key={i}>{r}</li>
-            ))}
-          </ul>
-        )}
+        <TaskText description={task.description} content={task.content} />
+        <TaskRequirements items={task.requirements} className="pt-4 border-t border-line" />
         {[...(task.designTemplates || []), ...(task.exampleLink ? [{ title: "Namuna", url: task.exampleLink }] : [])].map((t, i) => (
           <a key={i} href={t.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-brand hover:underline">
             {t.title} <HiOutlineArrowTopRightOnSquare />
@@ -80,6 +76,7 @@ export function TaskTile({ task, onClick, footer }: { task: Task; onClick: () =>
     <Card className="p-5 flex flex-col gap-3 hover:border-line transition-colors">
       <button type="button" onClick={onClick} className="text-left flex flex-col gap-3 cursor-pointer flex-1">
         <div className="flex flex-wrap items-center gap-1.5">
+          <TaskKindTag tags={task.tags} />
           <Badge>{task.track}</Badge>
           <span className={`px-2 py-0.5 rounded-md border text-[11px] font-semibold ${diff.className}`}>{diff.label}</span>
           {task.sandbox?.enabled ? <Badge tone="violet">{stackLabel(task.sandbox)}</Badge> : task.deliverable === "design" ? <Badge tone="violet">Dizayn</Badge> : null}

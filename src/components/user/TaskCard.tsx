@@ -5,6 +5,7 @@ import { DIFFICULTY } from "../../lib/constants";
 import { formatDuration } from "../../lib/format";
 import { Badge, StatusBadge } from "../ui";
 import Countdown from "./Countdown";
+import TaskKindTag from "../TaskKindTag";
 
 export type TaskType = UserTask;
 
@@ -16,7 +17,8 @@ export function TaskCard({ task }: { task: UserTask }) {
       className="group rounded-2xl border border-line bg-surface hover:border-brand/30 hover:bg-surface transition-all p-5 flex flex-col gap-4"
     >
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <TaskKindTag tags={task.tags} />
           <Badge>{task.track}</Badge>
           <span className={`px-2 py-0.5 rounded-md border text-[11px] font-semibold ${diff.className}`}>{diff.label}</span>
           {task.sandbox?.enabled ? <Badge tone="violet">Brauzerda</Badge> : task.deliverable === "design" ? <Badge tone="violet">Dizayn</Badge> : null}

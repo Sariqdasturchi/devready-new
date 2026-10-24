@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   HiOutlineArrowLeft,
   HiOutlineArrowTopRightOnSquare,
-  HiOutlineCheckCircle,
   HiOutlineClock,
   HiOutlineCodeBracket,
   HiOutlineCpuChip,
@@ -28,6 +27,8 @@ import UpgradeModal from "./UpgradeModal";
 import { stackLabel, testCount } from "../sandbox/kinds";
 import { hasTryDraft } from "../sandbox/workspaceState";
 import DesignUpload from "./DesignUpload";
+import { TaskRequirements, TaskText } from "../TaskText";
+import TaskKindTag from "../TaskKindTag";
 
 const isGitHub = (url: string) => /^https:\/\/github\.com\/[^/]+\/[^/]+/.test(url.trim());
 
@@ -110,6 +111,7 @@ export default function TaskDetails() {
         <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
           <Card className="p-5 sm:p-6">
             <div className="flex flex-wrap items-center gap-2 mb-3">
+              <TaskKindTag tags={task.tags} />
               <Badge>{task.track}</Badge>
               <span className={`px-2 py-0.5 rounded-md border text-[11px] font-semibold ${diff.className}`}>{diff.label}</span>
               <StatusBadge status={task.status} />
@@ -130,21 +132,14 @@ export default function TaskDetails() {
             <h2 className="text-sm font-bold text-ink mb-3 flex items-center gap-2">
               <HiOutlineDocumentText className="text-muted" /> Vazifa shartlari
             </h2>
-            <p className="text-sm text-ink-2 leading-relaxed whitespace-pre-line">{task.description}</p>
-            {task.content && <div className="mt-4 pt-4 border-t border-line text-sm text-ink-2 leading-relaxed whitespace-pre-line">{task.content}</div>}
+            <TaskText description={task.description} content={task.content} />
           </Card>
 
           {!!task.requirements?.length && (
             <Card className="p-5 sm:p-6">
-              <h2 className="text-sm font-bold text-ink mb-3">Talablar</h2>
-              <ul className="flex flex-col gap-2">
-                {task.requirements.map((r, i) => (
-                  <li key={i} className="flex gap-2.5 text-sm text-ink-2">
-                    <HiOutlineCheckCircle className="text-brand shrink-0 mt-0.5" size={18} />
-                    {r}
-                  </li>
-                ))}
-              </ul>
+              <h2 className="text-sm font-bold text-ink mb-1">Talablar</h2>
+              <p className="text-[12px] text-muted mb-4">AI va mentor yechimni aynan shu ro'yxat bo'yicha baholaydi.</p>
+              <TaskRequirements items={task.requirements} />
             </Card>
           )}
 

@@ -20,13 +20,10 @@ import { LANG_LABEL, type CodeLang } from "../../components/sandbox/runners/type
 import { Avatar, Modal, PageLoader, cx } from "../../components/ui";
 import { useToast } from "../../components/ui/toast";
 import Seo from "../../components/Seo";
+import TaskKindTag from "../../components/TaskKindTag";
 
 const CodeReviewOverlay = lazy(() => import("../../components/sandbox/CodeReviewOverlay"));
 
-const KIND_LABEL = {
-  interview: "Suhbat topshirig'i",
-  job: "Ishdagi task",
-} as const;
 /** "Suhbat topshirig'i: URL qisqartiruvchi" → "URL qisqartiruvchi" (tur alohida belgi bilan ko'rsatiladi) */
 const cleanTitle = (t: string) => {
   const s = t.replace(/^(Ishdagi( birinchi)? task|Suhbat topshirig'i)\s*:\s*/i, "");
@@ -291,11 +288,7 @@ function WorkRow({ item, onOpen, opening }: { item: PublicProfileItem; onOpen: (
       <div className="flex items-start gap-5">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-[12px]">
-            {item.task.kind && (
-              <span className={cx("px-2 py-0.5 rounded-md font-semibold", item.task.kind === "interview" ? "bg-brand-tint text-brand" : "bg-mist text-ink-2")}>
-                {KIND_LABEL[item.task.kind]}
-              </span>
-            )}
+            <TaskKindTag kind={item.task.kind} />
             <span className="font-semibold text-ink-2">{item.task.track}</span>
             <span className={`px-2 py-0.5 rounded-md border font-semibold ${diff.className}`}>{diff.label}</span>
           </div>

@@ -9,6 +9,8 @@ import { setTryReturn, track, trackVisit } from "../../lib/track";
 import { stackLabel } from "../../components/sandbox/kinds";
 import { ErrorState, Modal, PageLoader, cx } from "../../components/ui";
 import Seo from "../../components/Seo";
+import { TaskRequirements, TaskText } from "../../components/TaskText";
+import TaskKindTag from "../../components/TaskKindTag";
 
 /**
  * Ochiq tasklar katalogi: ro'yxatdan o'tmasdan ko'rish va kod yoziladigan tasklarni brauzerda sinab ko'rish.
@@ -99,7 +101,8 @@ export default function PublicTasks() {
               const code = !!t.sandbox?.enabled;
               return (
                 <li key={t._id} className="flex flex-col rounded-2xl border border-line bg-surface p-5">
-                  <div className="flex items-center gap-2 text-[12px]">
+                  <div className="flex flex-wrap items-center gap-2 text-[12px]">
+                    <TaskKindTag tags={t.tags} />
                     <span className="font-semibold text-ink-2">{t.track}</span>
                     <span className={`px-2 py-0.5 rounded-md border font-semibold ${diff.className}`}>{diff.label}</span>
                     <span className="ml-auto text-muted">{t.xp} XP</span>
@@ -170,15 +173,8 @@ function TaskBriefView({ id, fallback }: { id: string; fallback: Task }) {
   }, [id]);
   return (
     <div className="flex flex-col gap-4 text-[14px] text-ink-2 leading-relaxed">
-      <p className="whitespace-pre-line">{task.description}</p>
-      {task.content && <p className="whitespace-pre-line pt-3 border-t border-line">{task.content}</p>}
-      {!!task.requirements?.length && (
-        <ul className="list-disc pl-5 pt-3 border-t border-line">
-          {task.requirements.map((r) => (
-            <li key={r}>{r}</li>
-          ))}
-        </ul>
-      )}
+      <TaskText description={task.description} content={task.content} />
+      <TaskRequirements items={task.requirements} className="pt-4 border-t border-line" />
       <p className="text-[13px] text-muted">
         {task.deliverable === "design"
           ? "Dizaynni Figma'da chizasiz va maket rasmlarini yuklaysiz — AI yoki mentor baholaydi."
