@@ -37,6 +37,16 @@ import type {
   UserTask,
   LevelInfo,
   LeaderboardResponse,
+  AdminOrg,
+  CatalogTask,
+  GroupView,
+  JoinPreview,
+  OrgBrief,
+  OrgDetail,
+  OrgMember,
+  ReviewMode,
+  StaffSubmission,
+  StudentGroup,
 } from "../types/type";
 
 // VITE_API_URL=https://api.devready.uz/api (productionda .env orqali beriladi)
@@ -297,6 +307,53 @@ export const contestApi = {
   remove: (id: string) => api.delete<{ message: string }>(`/contests/${id}`).then((r) => r.data),
   disqualify: (id: string, userId: string, value: boolean) => api.post<{ message: string }>(`/contests/${id}/disqualify`, { userId, value }).then((r) => r.data),
   publishResults: (id: string) => api.post<{ message: string }>(`/contests/${id}/results`).then((r) => r.data),
+};
+
+// ─── O'QUV MARKAZLARI VA GURUHLAR ────────────────────────────────────────
+export interface OrgPayload {
+  name?: string;
+  ownerPhone?: string;
+  seats?: number;
+  activeUntil?: string;
+  status?: string;
+  contactName?: string;
+  contactPhone?: string;
+  note?: string;
+}
+type Msg<T = null> = { message: string; data: T };
+const msg = <T,>(p: Promise<{ data: Msg<T> }>) => p.then((r) => r.data);
+
+export const orgApi = {
+  // ega va o'qituvchi
+  my: () => data<{ orgs: OrgBrief[]; studentGroups: number }>(api.get("/org/my")),
+  detail: (orgId: string) => data<OrgDetail>(api.get(`/org/orgs/${orgId}`)),
+  addTeacher: (orgId: string, phone: string) => msg<OrgMember>(api.post(`/org/orgs/${orgId}/teachers`, { phone })),
+  removeMember: (orgId: string, userId: string) => msg(api.delete(`/org/orgs/${orgId}/members/${userId}`)),
+  catalog: (params: { track?: string; difficulty?: string; search?: string } = {}) => data<CatalogTask[]>(api.get("/org/catalog", { params })),
+  createGroup: (orgId: string, body: { name: string; description?: string }) => msg<{ id: string; inviteCode: string }>(api.post(`/org/orgs/${orgId}/groups`, body)),
+  group: (groupId: string) => data<GroupView>(api.get(`/org/groups/${groupId}`)),
+  updateGroup: (groupId: string, body: { name?: string; description?: string; inviteOpen?: boolean; archived?: boolean; teacherIds?: string[] }) =>
+    msg(api.put(`/org/groups/${groupId}`, body)),
+  resetInvite: (groupId: string) => msg<{ inviteCode: string }>(api.post(`/org/groups/${groupId}/invite`)),
+  removeStudent: (groupId: string, userId: string) => msg(api.delete(`/org/groups/${groupId}/students/${userId}`)),
+  assign: (groupId: string, body: { taskId: string; dueAt: string; reviewMode: ReviewMode; note?: string }) => msg<{ id: string }>(api.post(`/org/groups/${groupId}/assignments`, body)),
+  updateAssignment: (id: string, body: { dueAt?: string; note?: string; reviewMode?: ReviewMode }) => msg(api.put(`/org/assignments/${id}`, body)),
+  deleteAssignment: (id: string) => msg(api.delete(`/org/assignments/${id}`)),
+  remind: (id: string) => data<{ sent: number }>(api.post(`/org/assignments/${id}/remind`)),
+  submission: (id: string) => data<StaffSubmission>(api.get(`/org/submissions/${id}`)),
+  review: (id: string, body: { status: "approved" | "rejected"; score: number; comment: string }) =>
+    msg<{ status: string; reviewScore: number; earnedXP: number }>(api.post(`/org/submissions/${id}/review`, body)),
+  comment: (id: string, text: string) => msg(api.post(`/org/submissions/${id}/comment`, { text })),
+  // talaba
+  joinPreview: (code: string) => data<JoinPreview>(api.get(`/org/join/${encodeURIComponent(code)}`)),
+  join: (code: string) => msg<{ groupId: string; already: boolean }>(api.post(`/org/join/${encodeURIComponent(code)}`)),
+  student: () => data<{ groups: StudentGroup[] }>(api.get("/org/student")),
+  leave: (groupId: string) => msg(api.post(`/org/groups/${groupId}/leave`)),
+  start: (assignmentId: string) => data<{ submissionId: string; taskId: string; dueAt: string; status: string }>(api.post(`/org/assignments/${assignmentId}/start`)),
+  // superadmin
+  adminList: () => data<AdminOrg[]>(api.get("/org/admin/orgs")),
+  adminCreate: (body: OrgPayload) => msg<{ id: string }>(api.post("/org/admin/orgs", body)),
+  adminUpdate: (id: string, body: OrgPayload) => msg<{ id: string }>(api.put(`/org/admin/orgs/${id}`, body)),
 };
 
 // ─── MENTOR TO'LOVLARI ───────────────────────────────────────────────────

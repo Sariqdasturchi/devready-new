@@ -1,5 +1,7 @@
-import { HiOutlineBanknotes, HiOutlineClipboardDocumentCheck, HiOutlineClipboardDocumentList, HiOutlineCog6Tooth, HiOutlineHome } from "react-icons/hi2";
+import { useMemo } from "react";
+import { HiOutlineAcademicCap, HiOutlineBanknotes, HiOutlineClipboardDocumentCheck, HiOutlineClipboardDocumentList, HiOutlineCog6Tooth, HiOutlineHome } from "react-icons/hi2";
 import DashboardLayout, { type NavItem } from "../../components/layout/DashboardLayout";
+import { useOrgMe } from "../../hooks/useOrgMe";
 
 const NAV: NavItem[] = [
   { to: "/mentor/dashboard", label: "Bosh sahifa", icon: HiOutlineHome, end: true },
@@ -10,5 +12,8 @@ const NAV: NavItem[] = [
 ];
 
 export default function MentorDashboardLayout() {
-  return <DashboardLayout nav={NAV} title="Mentor paneli" />;
+  // Mentor o'quv markazida o'qituvchi ham bo'lishi mumkin
+  const orgMe = useOrgMe();
+  const nav = useMemo(() => (orgMe.data?.orgs.length ? [...NAV, { to: "/teach", label: "O'quv markazi", icon: HiOutlineAcademicCap }] : NAV), [orgMe.data]);
+  return <DashboardLayout nav={nav} title="Mentor paneli" />;
 }

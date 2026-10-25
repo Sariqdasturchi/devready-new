@@ -1,5 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
+  HiOutlineAcademicCap,
+  HiOutlineUserGroup,
   HiOutlineCheckCircle,
   HiOutlineClipboardDocumentList,
   HiOutlineCog6Tooth,
@@ -12,6 +14,7 @@ import {
 } from "react-icons/hi2";
 import DashboardLayout, { type NavItem } from "../../components/layout/DashboardLayout";
 import { analyticsApi } from "../../api/api";
+import { useOrgMe } from "../../hooks/useOrgMe";
 
 const NAV: NavItem[] = [
   { to: "/dashboard", label: "Bosh sahifa", icon: HiOutlineHome, end: true },
@@ -26,6 +29,15 @@ const NAV: NavItem[] = [
 ];
 
 export default function UserDashboardLayout() {
+  // Guruhga qo'shilgan talabaga "Guruhim", o'qituvchiga "O'quv markazi" bo'limi
+  const orgMe = useOrgMe();
+  const nav = useMemo(() => {
+    const items = [...NAV];
+    if (orgMe.data?.studentGroups) items.splice(2, 0, { to: "/dashboard/groups", label: "Guruhim", icon: HiOutlineUserGroup });
+    if (orgMe.data?.orgs.length) items.push({ to: "/teach", label: "O'quv markazi", icon: HiOutlineAcademicCap });
+    return items;
+  }, [orgMe.data]);
+
   // Kunlik faollik (streak va kalendar uchun) — kuniga bir marta
   useEffect(() => {
     const key = `visit:${new Date().toDateString()}`;
@@ -38,5 +50,5 @@ export default function UserDashboardLayout() {
     analyticsApi.recordVisit();
   }, []);
 
-  return <DashboardLayout nav={NAV} title="Talaba kabineti" />;
+  return <DashboardLayout nav={nav} title="Talaba kabineti" />;
 }

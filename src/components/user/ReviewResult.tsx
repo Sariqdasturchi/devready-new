@@ -82,13 +82,22 @@ export default function ReviewResult({ submission }: { submission: Submission })
   const ai = submission.aiFeedback;
   const mf = submission.mentorFeedback;
   const finished = submission.status === "approved" || submission.status === "rejected";
-  if (!finished && !ai?.summary && !mf?.comment) return null;
+  const tc = submission.teacherComment;
+  if (!finished && !ai?.summary && !mf?.comment && !tc?.text) return null;
+  const byTeacher = submission.reviewMethod === "teacher";
+  const reviewer = byTeacher
+    ? typeof submission.reviewedBy === "object" && submission.reviewedBy
+      ? submission.reviewedBy.fullName
+      : ""
+    : typeof submission.mentorId === "object" && submission.mentorId
+      ? submission.mentorId.fullName
+      : "";
 
   return (
     <Card className="p-5 flex flex-col gap-4">
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-sm font-bold text-ink">Tekshiruv natijasi</h3>
-        <StatusBadge status={submission.status} />
+        <StatusBadge status={submission.status} reviewMethod={submission.reviewMethod} />
       </div>
       {finished && (
         <div className="grid grid-cols-2 gap-3">
@@ -106,10 +115,20 @@ export default function ReviewResult({ submission }: { submission: Submission })
       {mf?.comment && (
         <div>
           <p className="text-xs font-semibold text-ink-2 mb-1.5">
-            Mentor izohi {typeof submission.mentorId === "object" && submission.mentorId ? `— ${submission.mentorId.fullName}` : ""}
+            {byTeacher ? "O'qituvchi izohi" : "Mentor izohi"} {reviewer ? `— ${reviewer}` : ""}
           </p>
           <p className="text-sm text-ink-2 whitespace-pre-line rounded-xl bg-mist border border-line p-3">{mf.comment}</p>
           {mf.reviewedAt && <p className="text-[11px] text-muted mt-1">{formatDate(mf.reviewedAt, true)}</p>}
+        </div>
+      )}
+
+      {tc?.text && (
+        <div>
+          <p className="text-xs font-semibold text-ink-2 mb-1.5">
+            O'qituvchi izohi {typeof tc.by === "object" && tc.by ? `— ${tc.by.fullName}` : ""}
+          </p>
+          <p className="text-sm text-ink-2 whitespace-pre-line rounded-xl bg-brand-tint border border-brand/20 p-3">{tc.text}</p>
+          {tc.at && <p className="text-[11px] text-muted mt-1">{formatDate(tc.at, true)}</p>}
         </div>
       )}
 

@@ -13,7 +13,7 @@ export type NavItem = { to: string; label: string; icon: ComponentType<{ size?: 
 
 const ROLE_LABEL: Record<string, string> = { user: "Talaba", mentor: "Mentor", superadmin: "Superadmin", admin: "Admin" };
 
-export default function DashboardLayout({ nav, title }: { nav: NavItem[]; title: string }) {
+export default function DashboardLayout({ nav, title, roleLabel }: { nav: NavItem[]; title: string; roleLabel?: string }) {
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<User | null>(getStoredUser());
@@ -72,8 +72,8 @@ export default function DashboardLayout({ nav, title }: { nav: NavItem[]; title:
           <div className="min-w-0">
             <p className="text-[14px] font-semibold text-ink truncate">{user?.fullName || "Foydalanuvchi"}</p>
             <p className="text-[12px] text-muted truncate">
-              {ROLE_LABEL[user?.role || "user"]}
-              {user?.direction ? `, ${user.direction}` : ""}
+              {roleLabel || ROLE_LABEL[user?.role || "user"]}
+              {!roleLabel && user?.direction ? `, ${user.direction}` : ""}
             </p>
           </div>
         </div>

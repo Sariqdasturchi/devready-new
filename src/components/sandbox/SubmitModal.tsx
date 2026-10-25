@@ -31,6 +31,9 @@ export default function SubmitModal({
   const toast = useToast();
   // Musobaqa urinishi: yechimni AI avtomatik tekshiradi, mentor tanlanmaydi
   const contest = !!task.contestId;
+  // Guruh topshirig'i: tekshiruv usulini o'qituvchi belgilagan (AI yoki o'zi)
+  const group = !contest && !!task.assignmentId;
+  const fixed = contest || group;
   const [method, setMethod] = useState<"mentor" | "ai">("mentor");
   const [mentorId, setMentorId] = useState("");
   const [mentors, setMentors] = useState<Mentor[] | null>(null);
@@ -40,7 +43,7 @@ export default function SubmitModal({
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    if (!open || mentors || contest) return;
+    if (!open || mentors || fixed) return;
     submissionApi
       .aiStatus()
       .then((r) => {
@@ -58,21 +61,21 @@ export default function SubmitModal({
         setMentors([]);
         setMentorsError(errorMessage(e, "Mentorlar ro'yxatini yuklab bo'lmadi"));
       });
-  }, [open, mentors, task.track, contest]);
+  }, [open, mentors, task.track, fixed]);
 
   const submit = async () => {
     if (!task.submissionId) return;
-    if (!contest && method === "mentor" && !mentorId) return toast.error("Tekshiruvchi mentorni tanlang");
+    if (!fixed && method === "mentor" && !mentorId) return toast.error("Tekshiruvchi mentorni tanlang");
     setSending(true);
     try {
-      await submissionApi.submit(task.submissionId, {
+      const r = await submissionApi.submit(task.submissionId, {
         code,
         testResults: tested ? { passed, total } : undefined,
         notes: notes.trim() || undefined,
-        reviewMethod: contest ? "ai" : method,
-        mentorId: !contest && method === "mentor" ? mentorId : undefined,
+        reviewMethod: fixed ? "ai" : method,
+        mentorId: !fixed && method === "mentor" ? mentorId : undefined,
       });
-      toast.success(contest ? "Yechim musobaqaga qabul qilindi" : method === "mentor" ? "Yechim mentorga yuborildi" : "AI tekshiruvi boshlandi");
+      toast.success(contest ? "Yechim musobaqaga qabul qilindi" : group ? (r.reviewMethod === "teacher" ? "Yechim o'qituvchiga yuborildi" : "AI tekshiruvi boshlandi") : method === "mentor" ? "Yechim mentorga yuborildi" : "AI tekshiruvi boshlandi");
       onSubmitted();
     } catch (err) {
       toast.error(errorMessage(err));
@@ -87,7 +90,7 @@ export default function SubmitModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={contest ? "Musobaqaga yuborish" : "Yechimni yuborish"}
+      title={contest ? "Musobaqaga yuborish" : group ? "O'qituvchiga yuborish" : "Yechimni yuborish"}
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>
@@ -113,6 +116,16 @@ export default function SubmitModal({
           </div>
         )}
 
+        {group && task.assignment && (
+          <p className="text-[13px] text-ink-2 leading-relaxed">
+            Guruh topshirig'i ({task.assignment.groupName}).{" "}
+            {task.assignment.reviewMode === "teacher"
+              ? "Yechimni o'qituvchingiz ko'rib, ball va izoh qo'yadi."
+              : "Yechimni AI darhol baholaydi, o'qituvchingiz natijani ko'radi."}{" "}
+            Rad etilsa, muddat ichida qayta urinishingiz mumkin.
+          </p>
+        )}
+
         {contest && (
           <p className="text-[13px] text-ink-2 leading-relaxed">
             Musobaqada bitta urinish bor: yuborgandan keyin kodni o'zgartirib bo'lmaydi. Reytingdagi o'rin testlar soni va sarflangan vaqt bo'yicha aniqlanadi, yechimni AI
@@ -120,7 +133,7 @@ export default function SubmitModal({
           </p>
         )}
 
-        {!contest && (
+        {!fixed && (
           <div className="flex flex-col gap-2">
             <span className="text-xs font-semibold text-ink-2">Kim tekshirsin?</span>
             <div className="grid grid-cols-2 gap-2">
@@ -147,7 +160,7 @@ export default function SubmitModal({
           </div>
         )}
 
-        {!contest &&
+        {!fixed &&
           method === "mentor" &&
           (mentors === null ? (
             <PageLoader label="Mentorlar..." />

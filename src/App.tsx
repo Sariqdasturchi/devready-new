@@ -14,6 +14,7 @@ const NotFound = lazy(() => import("./pages/landing/NotFound"));
 const PublicTasks = lazy(() => import("./pages/landing/Tasks"));
 const Contests = lazy(() => import("./pages/landing/Contests"));
 const PublicProfile = lazy(() => import("./pages/landing/PublicProfile"));
+const Join = lazy(() => import("./pages/landing/Join"));
 const TryWorkspace = lazy(() => import("./components/sandbox/TryWorkspace"));
 const Register = lazy(() => import("./pages/auth/Register"));
 const Login = lazy(() => import("./pages/auth/Login"));
@@ -30,6 +31,12 @@ const Leaderboard = lazy(() => import("./pages/userDashboard/Leaderboard"));
 const Achievements = lazy(() => import("./pages/userDashboard/Achievements"));
 const UserPlans = lazy(() => import("./pages/userDashboard/Plans"));
 const UserSettings = lazy(() => import("./pages/userDashboard/Settings"));
+const UserGroups = lazy(() => import("./pages/userDashboard/Groups"));
+
+// O'quv markazi (ega va o'qituvchi — oddiy foydalanuvchi yoki mentor)
+const TeachLayout = lazy(() => import("./pages/teach/TeachLayout"));
+const TeachHome = lazy(() => import("./pages/teach/TeachHome"));
+const TeachGroup = lazy(() => import("./pages/teach/GroupPage"));
 
 // Mentor
 const MentorDashboardLayout = lazy(() => import("./pages/mentorDashboard/MentorDashboardLayout"));
@@ -51,6 +58,7 @@ const SuperadminPayments = lazy(() => import("./pages/superadminDashboard/Paymen
 const SuperadminPayouts = lazy(() => import("./pages/superadminDashboard/Payouts"));
 const SuperadminPromos = lazy(() => import("./pages/superadminDashboard/Promos"));
 const SuperadminContests = lazy(() => import("./pages/superadminDashboard/Contests"));
+const SuperadminOrgs = lazy(() => import("./pages/superadminDashboard/Orgs"));
 const SuperadminPlans = lazy(() => import("./pages/superadminDashboard/Plans"));
 const SuperadminBlogs = lazy(() => import("./pages/superadminDashboard/Blogs"));
 const SuperadminQuestions = lazy(() => import("./pages/superadminDashboard/Questions"));
@@ -111,6 +119,7 @@ export default function App() {
             <Route path="/blogs" element={<BlogPage />} />
             <Route path="/blogs/:id" element={<BlogView />} />
             <Route path="/u/:username" element={<PublicProfile />} />
+            <Route path="/join/:code" element={<Join />} />
             <Route path="*" element={<NotFound />} />
           </Route>
 
@@ -133,8 +142,16 @@ export default function App() {
               <Route path="/dashboard/achievements" element={<Suspense fallback={<PageLoader />}><Achievements /></Suspense>} />
               <Route path="/dashboard/plans" element={<Suspense fallback={<PageLoader />}><UserPlans /></Suspense>} />
               <Route path="/dashboard/settings" element={<Suspense fallback={<PageLoader />}><UserSettings /></Suspense>} />
+              <Route path="/dashboard/groups" element={<Suspense fallback={<PageLoader />}><UserGroups /></Suspense>} />
             </Route>
             <Route path="/dashboard/tasks/:id/code" element={<Suspense fallback={<PageLoader />}><SandboxWorkspace /></Suspense>} />
+          </Route>
+
+          <Route element={<ProtectedRoute roles={["user", "mentor", "superadmin"]} />}>
+            <Route element={<TeachLayout />}>
+              <Route path="/teach" element={<Suspense fallback={<PageLoader />}><TeachHome /></Suspense>} />
+              <Route path="/teach/groups/:id" element={<Suspense fallback={<PageLoader />}><TeachGroup /></Suspense>} />
+            </Route>
           </Route>
 
           <Route element={<ProtectedRoute roles={["mentor"]} />}>
@@ -159,6 +176,7 @@ export default function App() {
               <Route path="/superadmin/dashboard/payouts" element={<Suspense fallback={<PageLoader />}><SuperadminPayouts /></Suspense>} />
               <Route path="/superadmin/dashboard/promos" element={<Suspense fallback={<PageLoader />}><SuperadminPromos /></Suspense>} />
               <Route path="/superadmin/dashboard/contests" element={<Suspense fallback={<PageLoader />}><SuperadminContests /></Suspense>} />
+              <Route path="/superadmin/dashboard/orgs" element={<Suspense fallback={<PageLoader />}><SuperadminOrgs /></Suspense>} />
               <Route path="/superadmin/dashboard/plans" element={<Suspense fallback={<PageLoader />}><SuperadminPlans /></Suspense>} />
               <Route path="/superadmin/dashboard/blogs" element={<Suspense fallback={<PageLoader />}><SuperadminBlogs /></Suspense>} />
               <Route path="/superadmin/dashboard/questions" element={<Suspense fallback={<PageLoader />}><SuperadminQuestions /></Suspense>} />

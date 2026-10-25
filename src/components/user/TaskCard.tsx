@@ -23,7 +23,7 @@ export function TaskCard({ task }: { task: UserTask }) {
           <span className={`px-2 py-0.5 rounded-md border text-[11px] font-semibold ${diff.className}`}>{diff.label}</span>
           {task.sandbox?.enabled ? <Badge tone="violet">Brauzerda</Badge> : task.deliverable === "design" ? <Badge tone="violet">Dizayn</Badge> : null}
         </div>
-        <StatusBadge status={task.status} />
+        <StatusBadge status={task.status} reviewMethod={task.reviewMethod} />
       </div>
       <div className="flex-1">
         <h3 className="text-base font-bold text-ink group-hover:text-brand transition-colors line-clamp-2">{task.title}</h3>

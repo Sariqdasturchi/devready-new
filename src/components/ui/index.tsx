@@ -74,9 +74,11 @@ export function Badge({ tone = "neutral", children, className }: { tone?: Tone; 
   );
 }
 
-export function StatusBadge({ status }: { status: TaskStatus }) {
+export function StatusBadge({ status, reviewMethod }: { status: TaskStatus; reviewMethod?: string | null }) {
   const cfg = STATUS[status] || STATUS.not_started;
-  return <Badge tone={cfg.tone}>{cfg.label}</Badge>;
+  // Guruh topshirig'ini o'qituvchi tekshiradi
+  const label = status === "under_review" && reviewMethod === "teacher" ? "O'qituvchi tekshirmoqda" : cfg.label;
+  return <Badge tone={cfg.tone}>{label}</Badge>;
 }
 
 // ─── States ──────────────────────────────────────────────────────────────

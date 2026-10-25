@@ -68,7 +68,7 @@ export interface PublicProfileItem {
   task: { id: string; title: string; track: string; difficulty: Difficulty; tags: string[]; kind: "job" | "interview" | null };
   score: number;
   xp: number;
-  reviewedBy: "mentor" | "ai";
+  reviewedBy: "mentor" | "teacher" | "ai";
   review: string;
   strengths: string[];
   tests: { passed: number; total: number } | null;
@@ -252,7 +252,7 @@ export interface Submission {
   mentorId?: Ref<Pick<User, "_id" | "fullName" | "direction">>;
   reviewedBy?: Ref<Pick<User, "_id" | "fullName" | "role">>;
   status: SubmissionStatus;
-  reviewMethod?: "ai" | "mentor" | null;
+  reviewMethod?: "ai" | "mentor" | "teacher" | null;
   githubUrl?: string | null;
   liveDemoUrl?: string | null;
   notes?: string | null;
@@ -274,6 +274,10 @@ export interface Submission {
   timed?: boolean;
   aiFeedback?: AiFeedback;
   mentorFeedback?: MentorFeedback;
+  /** Guruh topshirig'i urinishi bo'lsa — topshiriq id si */
+  assignmentId?: string | null;
+  /** O'qituvchining qo'shimcha izohi (AI baholagan guruh yechimiga) */
+  teacherComment?: { text: string; at: string; by?: Ref<{ _id: string; fullName: string }> } | null;
   updatedAt?: string;
 }
 
@@ -289,6 +293,10 @@ export interface UserTask extends Task {
   tries: number;
   /** Musobaqa urinishi bo'lsa — musobaqa id si (AI avtomatik tekshiradi) */
   contestId?: string | null;
+  /** Guruh topshirig'i urinishi: muddat va tekshiruvni o'qituvchi belgilaydi */
+  assignmentId?: string | null;
+  reviewMethod?: "ai" | "mentor" | "teacher" | null;
+  assignment?: { id: string; dueAt: string; reviewMode: ReviewMode; note: string; groupName: string } | null;
   submission?: Submission | null;
   serverTime?: string;
 }
@@ -683,4 +691,169 @@ export interface AdminContest {
   submitted: number;
   resultsPublishedAt: string | null;
   disqualified: string[];
+}
+
+// ─── O'quv markazlari va guruhlar ────────────────────────────────────────
+export type ReviewMode = "ai" | "teacher";
+export type OrgRole = "owner" | "teacher";
+export type OrgStatus = "pilot" | "active" | "suspended";
+
+export interface OrgBrief {
+  id: string;
+  name: string;
+  status: OrgStatus;
+  activeUntil: string;
+  active: boolean;
+  seats: number;
+  usedSeats?: number;
+  role?: OrgRole;
+  groups?: number;
+}
+
+export interface OrgMember {
+  userId: string;
+  name: string;
+  phone?: string | null;
+  avatar?: string | null;
+  role: OrgRole;
+  addedAt?: string;
+  groups?: number;
+}
+
+export interface OrgGroupSummary {
+  id: string;
+  name: string;
+  description: string;
+  inviteCode: string;
+  inviteOpen: boolean;
+  archived: boolean;
+  students: number;
+  teachers: { id: string; name: string }[];
+  assignments: number;
+  openAssignments: number;
+  toReview: number;
+  createdAt: string;
+}
+
+export interface OrgDetail {
+  org: OrgBrief;
+  members: OrgMember[];
+  groups: OrgGroupSummary[];
+}
+
+export interface TaskBrief {
+  id: string;
+  title: string;
+  track: string;
+  difficulty: Difficulty;
+  xp: number;
+  estimatedTime: number;
+  kind: string;
+}
+
+export interface CatalogTask extends TaskBrief {
+  description: string;
+  tags: string[];
+}
+
+/** Nazorat jadvalidagi katak: talabaning shu topshiriq bo'yicha eng muhim urinishi */
+export type CellStatus = "not_started" | "missed" | "in_progress" | "checking" | "review" | "approved" | "rejected" | "expired";
+export interface ProgressCell {
+  status: CellStatus;
+  submissionId?: string;
+  score?: number | null;
+  passed?: number | null;
+  total?: number | null;
+  startedAt?: string;
+  submittedAt?: string | null;
+  tries?: number;
+  reviewMethod?: "ai" | "mentor" | "teacher" | null;
+  needsTeacher?: boolean;
+  hasDraft?: boolean;
+}
+
+export interface GroupAssignment {
+  id: string;
+  task: TaskBrief;
+  dueAt: string;
+  reviewMode: ReviewMode;
+  note: string;
+  createdAt: string;
+  remindedAt: string | null;
+  open: boolean;
+  stats: { students: number; started: number; submitted: number; approved: number; toReview: number; avgScore: number | null; avgTests: number | null };
+}
+
+export interface GroupStudent {
+  id: string;
+  name: string;
+  avatar: string | null;
+  username: string | null;
+  direction: string | null;
+  joinedAt: string;
+  lastActiveDate: string | null;
+}
+
+export interface GroupView {
+  group: {
+    id: string;
+    name: string;
+    description: string;
+    inviteCode: string;
+    inviteOpen: boolean;
+    archived: boolean;
+    teachers: { id: string; name: string; avatar: string | null }[];
+    createdAt: string;
+  };
+  org: OrgBrief;
+  role: OrgRole;
+  students: GroupStudent[];
+  assignments: GroupAssignment[];
+  cells: Record<string, Record<string, ProgressCell>>;
+  studentStats: Record<string, { approved: number; submitted: number; missed: number; avgScore: number | null; lastActivity: string | null }>;
+}
+
+export interface StaffSubmission {
+  submission: Submission & { reviewedBy?: Ref<{ _id: string; fullName: string; role: Role }> };
+  assignment: { id: string; dueAt: string; reviewMode: ReviewMode; note: string };
+  group: { id: string; name: string };
+  history: { id: string; status: SubmissionStatus; score: number; startedAt: string; submittedAt: string | null; try: number; testResults: { passed: number; total: number } | null }[];
+}
+
+export interface StudentAssignment {
+  id: string;
+  task: TaskBrief;
+  dueAt: string;
+  reviewMode: ReviewMode;
+  note: string;
+  open: boolean;
+  my: ProgressCell;
+}
+
+export interface StudentGroup {
+  id: string;
+  name: string;
+  description: string;
+  org: { name: string; active: boolean };
+  teachers: string[];
+  assignments: StudentAssignment[];
+}
+
+export interface JoinPreview {
+  group: { id: string; name: string; description: string; students: number };
+  org: { name: string };
+  teachers: string[];
+  member: boolean;
+  open: boolean;
+  reason: "ORG_INACTIVE" | "INVITE_CLOSED" | null;
+}
+
+export interface AdminOrg extends OrgBrief {
+  type: "school" | "company";
+  contactName: string;
+  contactPhone: string;
+  note: string;
+  createdAt: string;
+  members: { userId: string; name: string; phone: string | null; role: OrgRole }[];
+  stats: { groups: number; assignments: number; submissions: number; weekSubmissions: number };
 }

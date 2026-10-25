@@ -11,8 +11,9 @@ import {
   HiOutlinePlay,
   HiOutlineSparkles,
   HiOutlineUserGroup,
+  HiOutlineAcademicCap,
 } from "react-icons/hi2";
-import { errorCode, errorMessage, mentorApi, submissionApi, taskApi } from "../../api/api";
+import { errorCode, errorMessage, mentorApi, orgApi, submissionApi, taskApi } from "../../api/api";
 import type { DesignImage, Mentor, Submission, UserTask } from "../../types/type";
 import { DIFFICULTY, IN_REVIEW } from "../../lib/constants";
 import { formatCountdown, formatDate, formatDuration } from "../../lib/format";
@@ -45,6 +46,7 @@ export default function TaskDetails() {
   const [timed, setTimed] = useState(false);
   const [starting, setStarting] = useState(false);
   const [upgrade, setUpgrade] = useState<string | null>(null);
+  const [now] = useState(Date.now);
 
   const load = useCallback(async () => {
     try {
@@ -74,6 +76,24 @@ export default function TaskDetails() {
 
   const refreshLists = () => invalidateCache("user:tasks", "user:overview", "user:submissions");
 
+  // Guruh topshirig'ini qayta boshlash: muddat va tekshiruvni topshiriq belgilaydi
+  const restartAssignment = async () => {
+    if (!task?.assignment) return;
+    setStarting(true);
+    try {
+      await orgApi.start(task.assignment.id);
+      toast.success("Yangi urinish boshlandi. Oldingi kodingiz saqlangan");
+      invalidateCache("org:student");
+      refreshLists();
+      if (task.sandbox?.enabled) return navigate(`/dashboard/tasks/${id}/code`);
+      await load();
+    } catch (err) {
+      toast.error(errorMessage(err));
+    } finally {
+      setStarting(false);
+    }
+  };
+
   const start = async () => {
     setStarting(true);
     try {
@@ -97,8 +117,11 @@ export default function TaskDetails() {
   if (error || !task) return <ErrorState message={error || "Vazifa topilmadi"} onRetry={load} />;
 
   const diff = DIFFICULTY[task.difficulty] || DIFFICULTY.oson;
-  const canStart = ["not_started", "rejected", "expired"].includes(task.status);
   const submission = task.submission;
+  const assignment = task.assignment || null;
+  const assignmentOpen = !!assignment && new Date(assignment.dueAt).getTime() > now + offset;
+  const canStart = ["not_started", "rejected", "expired"].includes(task.status) && !assignment;
+  const canRestartGroup = !!assignment && ["rejected", "expired"].includes(task.status);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -114,7 +137,7 @@ export default function TaskDetails() {
               <TaskKindTag tags={task.tags} />
               <Badge>{task.track}</Badge>
               <span className={`px-2 py-0.5 rounded-md border text-[11px] font-semibold ${diff.className}`}>{diff.label}</span>
-              <StatusBadge status={task.status} />
+              <StatusBadge status={task.status} reviewMethod={task.submission?.reviewMethod} />
               {task.tries > 1 && <Badge tone="neutral">{task.tries}-urinish</Badge>}
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-ink leading-tight">{task.title}</h1>
@@ -182,6 +205,37 @@ export default function TaskDetails() {
 
         {/* O'ng: holat va harakatlar */}
         <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-5 lg:sticky lg:top-20">
+          {assignment && (
+            <Card className="p-5 flex flex-col gap-2 border-brand/30">
+              <div className="flex items-center gap-2 text-sm font-bold text-ink">
+                <HiOutlineAcademicCap className="text-brand" size={20} /> Guruh topshirig'i
+              </div>
+              <p className="text-[13px] text-ink-2">
+                {assignment.groupName} · muddat {formatDate(assignment.dueAt, true)} · {assignment.reviewMode === "teacher" ? "o'qituvchi baholaydi" : "AI baholaydi"}
+              </p>
+              {assignment.note && <p className="text-[13px] text-ink-2 whitespace-pre-line rounded-xl bg-mist p-3">O'qituvchi: {assignment.note}</p>}
+              <Link to="/dashboard/groups" className="text-[13px] font-semibold text-brand hover:underline self-start">
+                Barcha guruh topshiriqlari
+              </Link>
+            </Card>
+          )}
+
+          {canRestartGroup && (
+            <Card className="p-5 flex flex-col gap-3">
+              {task.status === "expired" ? (
+                <Alert tone="danger">Bu urinish muddatida yuborilmagan.</Alert>
+              ) : (
+                <Alert tone="warning">Yechim rad etilgan. Izohlarni o'qib, qayta urinib ko'ring.</Alert>
+              )}
+              {assignmentOpen ? (
+                <Button size="lg" onClick={restartAssignment} loading={starting}>
+                  <HiOutlinePlay size={18} /> Qayta urinish
+                </Button>
+              ) : (
+                <p className="text-[13px] text-muted">Topshiriq muddati tugagan. O'qituvchi muddatni uzaytirsa, qayta urinishingiz mumkin.</p>
+              )}
+            </Card>
+          )}
           {canStart && (
             <Card className="p-5 flex flex-col gap-4">
               {task.status === "expired" && <Alert tone="danger">Oldingi urinishda ajratilgan vaqt tugagan. Taskni qaytadan boshlashingiz mumkin.</Alert>}
@@ -257,15 +311,17 @@ export default function TaskDetails() {
               <Card className="p-5 flex flex-col gap-3">
                 <div className="flex items-center gap-2 text-sm font-bold text-ink">
                   {submission.reviewMethod === "ai" ? <HiOutlineCpuChip className="text-brand" size={20} /> : <HiOutlineUserGroup className="text-brand" size={20} />}
-                  {submission.reviewMethod === "ai" ? "AI tekshirmoqda" : "Mentor tekshirmoqda"}
+                  {submission.reviewMethod === "ai" ? "AI tekshirmoqda" : submission.reviewMethod === "teacher" ? "O'qituvchi tekshirmoqda" : "Mentor tekshirmoqda"}
                 </div>
                 <p className="text-xs text-muted">
                   {submission.reviewMethod === "ai"
                     ? "Yechimingiz tahlil qilinmoqda. Bu bir necha daqiqa olishi mumkin — sahifa avtomatik yangilanadi."
-                    : `Yechim ${typeof submission.mentorId === "object" && submission.mentorId ? submission.mentorId.fullName : "mentor"}ga yuborildi. Natija chiqqanda bildirishnoma keladi.`}
+                    : submission.reviewMethod === "teacher"
+                      ? "Yechim guruh o'qituvchisiga yuborildi. Baholagach bildirishnoma keladi."
+                      : `Yechim ${typeof submission.mentorId === "object" && submission.mentorId ? submission.mentorId.fullName : "mentor"}ga yuborildi. Natija chiqqanda bildirishnoma keladi.`}
                 </p>
                 <SubmissionLinks githubUrl={submission.githubUrl} liveDemoUrl={submission.liveDemoUrl} submittedAt={submission.submittedAt} />
-                {submission.reviewMethod !== "ai" && submission.status === "under_review" && submission.mentorId && (
+                {submission.reviewMethod === "mentor" && submission.status === "under_review" && submission.mentorId && (
                   <ReassignPanel submission={submission} track={task.track} onDone={() => { refreshLists(); load(); }} />
                 )}
               </Card>
@@ -275,7 +331,7 @@ export default function TaskDetails() {
           {submission && (submission.status === "approved" || submission.status === "rejected") && (
             <>
               <ReviewResult submission={submission} />
-              {submission.reviewMethod !== "ai" && <MentorFeedback submission={submission} />}
+              {submission.reviewMethod === "mentor" && <MentorFeedback submission={submission} />}
               <Card className="p-5">
                 <SubmissionLinks githubUrl={submission.githubUrl} liveDemoUrl={submission.liveDemoUrl} submittedAt={submission.submittedAt} />
               </Card>
@@ -347,6 +403,8 @@ function SubmitPanel({ task, submissionId, offset, onDone }: { task: UserTask; s
   const [aiAvailable, setAiAvailable] = useState(true);
   const isDesign = !task.sandbox?.enabled && task.deliverable === "design";
   const [images, setImages] = useState<DesignImage[]>(task.submission?.designImages || []);
+  // Guruh topshirig'i: tekshiruvni o'qituvchi belgilagan — mentor tanlanmaydi
+  const group = !!task.assignmentId;
 
   useEffect(() => {
     submissionApi
@@ -360,6 +418,7 @@ function SubmitPanel({ task, submissionId, offset, onDone }: { task: UserTask; s
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
+    if (group) return;
     mentorApi
       .list(task.track)
       .then((list) => {
@@ -370,7 +429,7 @@ function SubmitPanel({ task, submissionId, offset, onDone }: { task: UserTask; s
         setMentors([]);
         setMentorsError(errorMessage(e, "Mentorlar ro'yxatini yuklab bo'lmadi"));
       });
-  }, [task.track]);
+  }, [task.track, group]);
 
   // Vaqt tugaganda serverdan yangi holatni olamiz (task "bajarilmagan"ga o'tadi)
   useEffect(() => {
@@ -382,7 +441,10 @@ function SubmitPanel({ task, submissionId, offset, onDone }: { task: UserTask; s
   }, [expired, onDone, toast]);
 
   // Erkin rejimda muddat 7 kun (taymer task vaqti emas)
-  const total = (task.submission?.timed === false ? Math.max(task.estimatedTime, 7 * 24 * 60) : task.estimatedTime) * 60;
+  const total =
+    group && task.dueAt && task.startedAt
+      ? Math.max(60, (new Date(task.dueAt).getTime() - new Date(task.startedAt).getTime()) / 1000)
+      : (task.submission?.timed === false ? Math.max(task.estimatedTime, 7 * 24 * 60) : task.estimatedTime) * 60;
   const pct = total ? Math.min(100, (left / total) * 100) : 0;
   const urgent = left < Math.min(600, total * 0.15);
   const aiAllowed = useMemo(() => (isDesign ? images.length > 0 : isGitHub(githubUrl)), [isDesign, images.length, githubUrl]);
@@ -395,8 +457,8 @@ function SubmitPanel({ task, submissionId, offset, onDone }: { task: UserTask; s
       if (url && !/^https?:\/\/\S+$/.test(url)) return toast.error("Havola noto'g'ri (https://...)");
     } else if (!/^https?:\/\/\S+$/.test(url)) return toast.error("Yechim havolasini to'g'ri kiriting (https://...)");
     if (liveDemoUrl && !/^https?:\/\/\S+$/.test(liveDemoUrl.trim())) return toast.error("Demo havolasi noto'g'ri");
-    if (method === "mentor" && !mentorId) return toast.error("Tekshiruvchi mentorni tanlang");
-    if (method === "ai" && !aiAllowed)
+    if (!group && method === "mentor" && !mentorId) return toast.error("Tekshiruvchi mentorni tanlang");
+    if (!group && method === "ai" && !aiAllowed)
       return toast.error(isDesign ? "AI dizaynni ko'rishi uchun maket rasmlarini yuklang" : "AI tekshiruvi uchun GitHub repozitoriy havolasi kerak");
     setSending(true);
     try {
@@ -404,10 +466,10 @@ function SubmitPanel({ task, submissionId, offset, onDone }: { task: UserTask; s
         githubUrl: githubUrl.trim() || undefined,
         liveDemoUrl: liveDemoUrl.trim() || undefined,
         notes: notes.trim() || undefined,
-        reviewMethod: method,
-        mentorId: method === "mentor" ? mentorId : undefined,
+        reviewMethod: group ? "ai" : method,
+        mentorId: !group && method === "mentor" ? mentorId : undefined,
       });
-      toast.success(method === "mentor" ? "Yechim mentorga yuborildi" : "AI tekshiruvi boshlandi");
+      toast.success(group ? "Yechim yuborildi" : method === "mentor" ? "Yechim mentorga yuborildi" : "AI tekshiruvi boshlandi");
       onDone();
     } catch (err) {
       toast.error(errorMessage(err));
@@ -454,6 +516,11 @@ function SubmitPanel({ task, submissionId, offset, onDone }: { task: UserTask; s
             <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Mentor uchun qo'shimcha ma'lumot..." className="min-h-[70px]" />
           </Field>
 
+          {group ? (
+            <p className="text-[12px] text-muted">
+              Guruh topshirig'i: {task.assignment?.reviewMode === "teacher" ? "yechimni o'qituvchingiz baholaydi" : "AI baholaydi (GitHub bo'lmagan havolani o'qituvchi ko'radi)"}.
+            </p>
+          ) : (
           <div className="flex flex-col gap-2">
             <span className="text-xs font-semibold text-ink-2">Kim tekshirsin?</span>
             <div className="grid grid-cols-2 gap-2">
@@ -481,13 +548,15 @@ function SubmitPanel({ task, submissionId, offset, onDone }: { task: UserTask; s
             </div>
           </div>
 
-          {method === "mentor" &&
+          )}
+
+          {!group && method === "mentor" &&
             (mentors === null ? (
               <PageLoader label="Mentorlar..." />
             ) : mentorsError ? (
               <Alert tone="danger">{mentorsError}</Alert>
             ) : <MentorSelector mentors={mentors} selectedId={mentorId} onSelect={setMentorId} />)}
-          {method === "ai" && !aiAllowed && (isDesign ? <Alert tone="warning">AI baholashi uchun kamida bitta maket rasmini yuklang.</Alert> : githubUrl && <Alert tone="warning">AI faqat GitHub repozitoriy havolasini tekshira oladi.</Alert>)}
+          {!group && method === "ai" && !aiAllowed && (isDesign ? <Alert tone="warning">AI baholashi uchun kamida bitta maket rasmini yuklang.</Alert> : githubUrl && <Alert tone="warning">AI faqat GitHub repozitoriy havolasini tekshira oladi.</Alert>)}
 
           <Button type="submit" size="lg" loading={sending} disabled={expired}>
             Tekshirishga yuborish

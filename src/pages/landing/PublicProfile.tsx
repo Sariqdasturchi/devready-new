@@ -317,7 +317,7 @@ function WorkRow({ item, onOpen, opening }: { item: PublicProfileItem; onOpen: (
               </span>
             )}
             {item.language && item.language !== "sql" && <span>{LANG_LABEL[item.language as CodeLang] || item.language}</span>}
-            <span>{item.reviewedBy === "mentor" ? "Mentor tekshirgan" : "AI tekshirgan"}</span>
+            <span>{item.reviewedBy === "mentor" ? "Mentor tekshirgan" : item.reviewedBy === "teacher" ? "O'qituvchi tekshirgan" : "AI tekshirgan"}</span>
             <span>{formatDate(item.date)}</span>
           </p>
           {item.review && <blockquote className="mt-3 pl-3 border-l-2 border-line text-[14px] text-ink-2 leading-relaxed">{item.review}</blockquote>}

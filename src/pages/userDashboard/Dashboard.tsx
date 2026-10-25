@@ -14,6 +14,7 @@ import { useCachedQuery } from "../../hooks/useCachedQuery";
 import { getStoredUser } from "../../lib/auth";
 import { Badge, Card, CardHeader, EmptyState, ErrorState, PageHeader, PageLoader, ProgressBar, StatCard, StatusBadge, Tabs } from "../../components/ui";
 import ActivityCalendar from "../../components/user/ActivityCalendar";
+import GroupDeadlines from "../../components/user/GroupDeadlines";
 import { formatDate, limitLabel, timeAgo } from "../../lib/format";
 import type { Overview } from "../../types/type";
 import { useChartColors } from "../../lib/theme";
@@ -57,6 +58,8 @@ export default function UserDashboard() {
         <StatCard label="Bajarilgan" value={o.completedTasks} icon={<HiOutlineCheckCircle />} tone="success" hint={`${o.statusCounts.inReview} ta tekshiruvda`} />
         <StatCard label="Streak" value={`${o.streak} kun`} icon={<HiOutlineFire />} tone="danger" hint="Ketma-ket faol kunlar" />
       </div>
+
+      <GroupDeadlines />
 
       {o.statusCounts.approved > 0 && <PublicProfileBanner approved={o.statusCounts.approved} />}
 
