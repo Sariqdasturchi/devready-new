@@ -3,7 +3,7 @@ import { HiOutlineTrophy } from "react-icons/hi2";
 import { leaderboardApi } from "../../api/api";
 import { useCachedQuery } from "../../hooks/useCachedQuery";
 import { Avatar, Button, Card, EmptyState, ErrorState, PageHeader, PageLoader, Select, Table, Tabs, cx } from "../../components/ui";
-import { TRACKS } from "../../lib/constants";
+import { ACTIVE_TRACKS } from "../../lib/constants";
 import { getStoredUser } from "../../lib/auth";
 import type { LeaderboardRow } from "../../types/type";
 
@@ -45,7 +45,7 @@ export default function Leaderboard() {
             />
             <Select value={track} onChange={(e) => setTrack(e.target.value)} className="w-44">
               <option value="">Barcha yo'nalishlar</option>
-              {TRACKS.map((t) => (
+              {ACTIVE_TRACKS.map((t) => (
                 <option key={t} value={t}>
                   {t}
                 </option>

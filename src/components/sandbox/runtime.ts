@@ -103,6 +103,7 @@ const esc = (s: string) => s.replace(/<\/script/gi, "<\\/script");
 /**
  * Fullstack: server.js dagi handle(request) funksiyasi — fetch("/api/...") so'rovlari shu yerga tushadi.
  * Server kodi alohida doirada (IIFE) ishlaydi; holat (massivlar) sahifa yangilanguncha saqlanadi.
+ * Javob: { status, body, headers? } — headers javobga qo'shiladi (masalan Retry-After, ETag).
  */
 function serverScript(code: string) {
   // "export function handle" ham ishlasin — oddiy skriptda export bo'lmaydi
@@ -132,18 +133,33 @@ ${esc(code)}
     var query = {};
     url.searchParams.forEach(function (v, k) { query[k] = v; });
     var req = { method: method, path: url.pathname, query: query, headers: headers, body: body === undefined ? null : body };
-    var res;
-    try {
-      if (!handler) throw new Error("handle(request) topilmadi");
-      res = await handler(req);
-      if (!res || typeof res.status !== "number") throw new Error("handle() { status, body } qaytarishi kerak");
-    } catch (e) {
-      console.error("server.js: " + (e && e.message ? e.message : e));
-      res = { status: 500, body: { error: "server_error" } };
-    }
+    // AbortController: haqiqiy fetch kabi — bekor qilinsa AbortError bilan rad etiladi (server ishi davom etadi)
+    var signal = init.signal || (input && input.signal) || null;
+    var aborted = function () { return new DOMException("The operation was aborted.", "AbortError"); };
+    if (signal && signal.aborted) throw aborted();
+    var work = (async function () {
+      try {
+        if (!handler) throw new Error("handle(request) topilmadi");
+        var r = await handler(req);
+        if (!r || typeof r.status !== "number") throw new Error("handle() { status, body } qaytarishi kerak");
+        return r;
+      } catch (e) {
+        console.error("server.js: " + (e && e.message ? e.message : e));
+        return { status: 500, body: { error: "server_error" } };
+      }
+    })();
+    var res = signal
+      ? await new Promise(function (resolve, reject) {
+          var onAbort = function () { reject(aborted()); };
+          signal.addEventListener("abort", onAbort, { once: true });
+          work.then(function (v) { signal.removeEventListener("abort", onAbort); resolve(v); });
+        })
+      : await work;
     console.info("→ " + method + " " + url.pathname + url.search + "  " + res.status);
     var noBody = res.status === 204 || res.body === undefined || res.body === null;
-    return new Response(noBody ? null : JSON.stringify(res.body), { status: res.status, headers: { "content-type": "application/json" } });
+    var outHeaders = { "content-type": "application/json" };
+    if (res.headers && typeof res.headers === "object") Object.keys(res.headers).forEach(function (k) { outHeaders[k] = String(res.headers[k]); });
+    return new Response(noBody ? null : JSON.stringify(res.body), { status: res.status, headers: outHeaders });
   };
 })();
 //# sourceURL=server.js

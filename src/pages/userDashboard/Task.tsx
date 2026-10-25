@@ -41,7 +41,7 @@ export default function UserTasks() {
 
   if (query.loading) return <PageLoader label="Vazifalar yuklanmoqda..." />;
   if (query.error) return <ErrorState message={query.error} onRetry={query.refetch} />;
-  if (query.data?.needsDirection) return <DirectionPicker onSaved={query.refetch} />;
+  if (query.data?.needsDirection) return <DirectionPicker onSaved={query.refetch} closed={query.data.closedDirection} />;
 
   return (
     <div className="flex flex-col gap-5">

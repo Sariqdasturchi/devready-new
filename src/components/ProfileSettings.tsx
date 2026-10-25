@@ -2,7 +2,7 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { HiOutlineCamera } from "react-icons/hi2";
 import { errorMessage, profileApi } from "../api/api";
 import { updateStoredUser } from "../lib/auth";
-import { TRACKS } from "../lib/constants";
+import { ACTIVE_TRACKS } from "../lib/constants";
 import { formatDate } from "../lib/format";
 import { invalidateCache } from "../hooks/useCachedQuery";
 import type { User } from "../types/type";
@@ -118,7 +118,7 @@ export default function ProfileSettings() {
                 <option value="" disabled>
                   Tanlang
                 </option>
-                {TRACKS.map((t) => (
+                {ACTIVE_TRACKS.map((t) => (
                   <option key={t} value={t}>
                     {t}
                   </option>

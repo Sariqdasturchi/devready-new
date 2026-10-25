@@ -100,6 +100,8 @@ export interface PublicProfile {
   };
   skills: { name: string; count: number }[];
   items: PublicProfileItem[];
+  /** Haftalik musobaqada sovrinli o'rinlar */
+  contestWins?: { id: string; title: string; place: number | null; date: string }[];
 }
 
 export interface PublicWork {
@@ -133,6 +135,8 @@ export interface Task {
   designTemplates?: DesignTemplate[];
   tags?: string[];
   isActive: boolean;
+  /** contest — musobaqa tugaguncha katalogda ko'rinmaydi */
+  visibility?: "public" | "contest";
   createdAt?: string;
   submissionsCount?: number;
   approvedCount?: number;
@@ -283,6 +287,8 @@ export interface UserTask extends Task {
   reviewScore: number;
   earnedXP: number;
   tries: number;
+  /** Musobaqa urinishi bo'lsa — musobaqa id si (AI avtomatik tekshiradi) */
+  contestId?: string | null;
   submission?: Submission | null;
   serverTime?: string;
 }
@@ -610,4 +616,71 @@ export interface PromoCheck {
   price: number;
   discount: number;
   amount: number;
+}
+
+// ─── Haftalik musobaqa ─────────────────────────────────────────────────────
+export type ContestStatus = "draft" | "upcoming" | "live" | "ended" | "finished";
+
+export interface ContestWinner {
+  place: number;
+  name: string;
+  username: string | null;
+  passed: number;
+  total: number;
+  durationMin: number;
+}
+
+export interface Contest {
+  id: string;
+  title: string;
+  description: string;
+  startAt: string;
+  endAt: string;
+  timeLimitMin: number;
+  status: ContestStatus;
+  participants: number;
+  task: { id: string; title: string; track: string; difficulty: Difficulty; xp: number } | null;
+  myEntry: { submissionId: string; status: TaskStatus; startedAt: string; dueAt: string; submittedAt: string | null; testResults: { passed: number; total: number } | null } | null;
+  resultsPublishedAt: string | null;
+  winners: ContestWinner[];
+  serverTime?: string;
+}
+
+export interface ContestRow {
+  place: number | null;
+  userId: string;
+  name: string;
+  username: string | null;
+  avatar: string | null;
+  passed: number;
+  total: number;
+  durationMin: number;
+  // faqat superadmin
+  submissionId?: string;
+  status?: TaskStatus;
+  aiScore?: number | null;
+  disqualified?: boolean;
+}
+
+export interface ContestStandings {
+  started: number;
+  submitted: number;
+  rows: ContestRow[];
+}
+
+export interface AdminContest {
+  _id: string;
+  title: string;
+  description: string;
+  taskId: string | null;
+  task: { id: string; title: string; track: string; difficulty: Difficulty } | null;
+  startAt: string;
+  endAt: string;
+  timeLimitMin: number;
+  published: boolean;
+  status: ContestStatus;
+  started: number;
+  submitted: number;
+  resultsPublishedAt: string | null;
+  disqualified: string[];
 }

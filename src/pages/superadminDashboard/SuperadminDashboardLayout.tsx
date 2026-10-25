@@ -12,6 +12,7 @@ import {
   HiOutlineUsers,
   HiOutlineWallet,
   HiOutlineFunnel,
+  HiOutlineTrophy,
 } from "react-icons/hi2";
 import DashboardLayout, { type NavItem } from "../../components/layout/DashboardLayout";
 
@@ -21,6 +22,7 @@ const NAV: NavItem[] = [
   { to: "/superadmin/dashboard/users", label: "Foydalanuvchilar", icon: HiOutlineUsers },
   { to: "/superadmin/dashboard/mentors", label: "Mentorlar", icon: HiOutlineAcademicCap },
   { to: "/superadmin/dashboard/tasks", label: "Tasklar", icon: HiOutlineClipboardDocumentList },
+  { to: "/superadmin/dashboard/contests", label: "Musobaqalar", icon: HiOutlineTrophy },
   { to: "/superadmin/dashboard/submissions", label: "Topshiriqlar", icon: HiOutlineClipboardDocumentCheck },
   { to: "/superadmin/dashboard/payments", label: "To'lovlar", icon: HiOutlineBanknotes },
   { to: "/superadmin/dashboard/payouts", label: "Mentor to'lovlari", icon: HiOutlineWallet },

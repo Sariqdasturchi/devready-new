@@ -4,10 +4,10 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { PatternFormat } from "react-number-format";
 import { authApi, errorCode, errorMessage, quizApi } from "../../api/api";
 import { setSession, updateStoredUser } from "../../lib/auth";
-import { BOT_USERNAME, TRACKS } from "../../lib/constants";
+import { BOT_USERNAME, ACTIVE_TRACKS } from "../../lib/constants";
 import AuthShell, { AuthMessage } from "../../components/auth/AuthShell";
 import OtpInput from "../../components/auth/OtpInput";
-import { anonId, clearTryReturn, readTryReturn, source, track, trackVisit } from "../../lib/track";
+import { anonId, clearTryReturn, readTryReturn, source, takeReturnPath, track, trackVisit } from "../../lib/track";
 
 type Step = 1 | 2 | 3 | 4 | 5;
 type Q = { _id: string; q: string; options: string[]; correct: number };
@@ -64,7 +64,8 @@ export default function Register() {
   const finish = () => {
     const t = tried;
     clearTryReturn();
-    navigate(t ? `/dashboard/tasks/${t.taskId}` : "/dashboard", { replace: true });
+    const back = takeReturnPath();
+    navigate(t ? `/dashboard/tasks/${t.taskId}` : back || "/dashboard", { replace: true });
   };
 
   // Telegram'da tasdiqlanguncha 2.5 soniyada bir so'raymiz
@@ -452,7 +453,7 @@ export default function Register() {
             </p>
           )}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-            {TRACKS.map((t) => (
+            {ACTIVE_TRACKS.map((t) => (
               <button
                 key={t}
                 type="button"

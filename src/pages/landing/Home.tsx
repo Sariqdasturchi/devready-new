@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import HeroTask from "../../components/home/HeroTask";
 import PlansGrid from "../../components/home/pricingHome/PlansGrid";
-import { TRACKS } from "../../lib/constants";
+import { ACTIVE_TRACKS } from "../../lib/constants";
 import Seo from "../../components/Seo";
 import { SITE_URL } from "../../lib/seo";
 
@@ -98,10 +98,10 @@ export default function Home() {
       <section className="border-y border-line bg-mist">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 py-10 flex flex-col lg:flex-row lg:items-center gap-6">
           <p className="text-[15px] text-ink-2 lg:w-64 shrink-0">
-            {TRACKS.length} ta yo'nalish bo'yicha tasklar — o'zingiznikini tanlang.
+            {ACTIVE_TRACKS.length} ta yo'nalish bo'yicha tasklar — o'zingiznikini tanlang.
           </p>
           <ul className="flex flex-wrap gap-2">
-            {TRACKS.map((t) => (
+            {ACTIVE_TRACKS.map((t) => (
               <li key={t}>
                 <Link
                   to={`/tasks?track=${encodeURIComponent(t)}`}

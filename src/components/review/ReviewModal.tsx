@@ -12,6 +12,7 @@ import { Alert, Avatar, Badge, Button, Field, Modal, StatusBadge, Textarea } fro
 import { useToast } from "../ui/toast";
 import ReviewResult from "../user/ReviewResult";
 import { codeSummary } from "../sandbox/kinds";
+import { InlineCode } from "../TaskText";
 
 const QUICK = [40, 60, 75, 85, 95];
 const CodeReviewOverlay = lazy(() => import("../sandbox/CodeReviewOverlay"));
@@ -123,7 +124,9 @@ function ReviewModalBody({ submission: s, onClose, onReviewed }: { submission: S
             {!!task?.requirements?.length && (
               <ul className="mt-3 list-disc pl-5 text-xs text-ink-2 space-y-0.5">
                 {task.requirements.map((r, i) => (
-                  <li key={i}>{r}</li>
+                  <li key={i}>
+                    <InlineCode text={r} />
+                  </li>
                 ))}
               </ul>
             )}

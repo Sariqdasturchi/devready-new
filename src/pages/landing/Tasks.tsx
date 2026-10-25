@@ -59,7 +59,7 @@ export default function PublicTasks() {
     <main>
       <Seo
         title="Amaliy tasklar — ro'yxatdan o'tmasdan sinab ko'ring"
-        description="Frontend, Backend (JavaScript, TypeScript, Python), SQL, DevOps, QA va dizayn bo'yicha amaliy tasklar. Kod brauzerda ishlaydi va avtomatik testlanadi — hech narsa o'rnatish shart emas."
+        description="Frontend, Backend (JavaScript, TypeScript, Python), Fullstack va SQL bo'yicha suhbat topshiriqlari. Kod brauzerda ishlaydi va avtomatik testlanadi — hech narsa o'rnatish shart emas."
       />
       <section className="max-w-6xl mx-auto px-5 sm:px-8 pt-14 sm:pt-20 pb-10">
         <h1 className="text-[40px] sm:text-6xl font-extrabold tracking-[-0.045em] leading-[1.03] text-ink max-w-3xl text-balance">

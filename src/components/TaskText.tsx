@@ -33,7 +33,7 @@ export function TaskRequirements({ items, className }: { items?: string[]; class
 }
 
 /** `kod` qismlarini ajratib ko'rsatadi (talablar ro'yxati uchun) */
-function InlineCode({ text }: { text: string }) {
+export function InlineCode({ text }: { text: string }) {
   const parts = text.split(/(`[^`]+`)/g);
   return (
     <>

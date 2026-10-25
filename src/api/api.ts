@@ -1,5 +1,8 @@
 import axios, { AxiosError } from "axios";
 import type {
+  AdminContest,
+  Contest,
+  ContestStandings,
   AdminStats,
   Blogs,
   Mentor,
@@ -149,7 +152,7 @@ export const notificationApi = {
 // ─── USER: TASKS & SUBMISSIONS ────────────────────────────────────────────
 export const taskApi = {
   my: () =>
-    api.get<{ success: boolean; data: UserTask[]; needsDirection?: boolean }>("/tasks/my").then((r) => r.data),
+    api.get<{ success: boolean; data: UserTask[]; needsDirection?: boolean; closedDirection?: string | null }>("/tasks/my").then((r) => r.data),
   get: (id: string) => data<UserTask>(api.get(`/tasks/${id}`)),
   /** Ochiq: ro'yxatdan o'tmasdan */
   publicList: (track?: string) => data<Task[]>(api.get("/tasks/public", { params: { track } })),
@@ -278,6 +281,22 @@ export const promoApi = {
   create: (body: PromoPayload) => data<PromoCode>(api.post("/admin/promos", body)),
   update: (id: string, body: Partial<PromoPayload>) => data<PromoCode>(api.patch(`/admin/promos/${id}`, body)),
   remove: (id: string) => api.delete<{ message: string; data: { deleted?: boolean; deactivated?: boolean } }>(`/admin/promos/${id}`).then((r) => r.data),
+};
+
+// ─── HAFTALIK MUSOBAQA ────────────────────────────────────────────────────
+export type ContestPayload = { title: string; description: string; taskId: string; startAt: string; endAt: string; timeLimitMin: number; published: boolean };
+export const contestApi = {
+  list: () => data<{ current: Contest[]; past: Contest[]; serverTime: string }>(api.get("/contests")),
+  get: (id: string) => data<Contest>(api.get(`/contests/${id}`)),
+  leaderboard: (id: string) => data<ContestStandings>(api.get(`/contests/${id}/leaderboard`)),
+  start: (id: string) => data<{ submissionId: string; taskId: string; dueAt: string }>(api.post(`/contests/${id}/start`)),
+  // superadmin
+  adminList: () => data<AdminContest[]>(api.get("/contests/admin/all")),
+  create: (body: ContestPayload) => data<AdminContest>(api.post("/contests", body)),
+  update: (id: string, body: Partial<ContestPayload>) => data<AdminContest>(api.put(`/contests/${id}`, body)),
+  remove: (id: string) => api.delete<{ message: string }>(`/contests/${id}`).then((r) => r.data),
+  disqualify: (id: string, userId: string, value: boolean) => api.post<{ message: string }>(`/contests/${id}/disqualify`, { userId, value }).then((r) => r.data),
+  publishResults: (id: string) => api.post<{ message: string }>(`/contests/${id}/results`).then((r) => r.data),
 };
 
 // ─── MENTOR TO'LOVLARI ───────────────────────────────────────────────────

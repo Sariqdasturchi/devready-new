@@ -12,6 +12,7 @@ const BlogPage = lazy(() => import("./pages/landing/Blog"));
 const BlogView = lazy(() => import("./pages/landing/BlogView"));
 const NotFound = lazy(() => import("./pages/landing/NotFound"));
 const PublicTasks = lazy(() => import("./pages/landing/Tasks"));
+const Contests = lazy(() => import("./pages/landing/Contests"));
 const PublicProfile = lazy(() => import("./pages/landing/PublicProfile"));
 const TryWorkspace = lazy(() => import("./components/sandbox/TryWorkspace"));
 const Register = lazy(() => import("./pages/auth/Register"));
@@ -49,6 +50,7 @@ const SuperadminSubmissions = lazy(() => import("./pages/superadminDashboard/Sub
 const SuperadminPayments = lazy(() => import("./pages/superadminDashboard/Payments"));
 const SuperadminPayouts = lazy(() => import("./pages/superadminDashboard/Payouts"));
 const SuperadminPromos = lazy(() => import("./pages/superadminDashboard/Promos"));
+const SuperadminContests = lazy(() => import("./pages/superadminDashboard/Contests"));
 const SuperadminPlans = lazy(() => import("./pages/superadminDashboard/Plans"));
 const SuperadminBlogs = lazy(() => import("./pages/superadminDashboard/Blogs"));
 const SuperadminQuestions = lazy(() => import("./pages/superadminDashboard/Questions"));
@@ -103,6 +105,7 @@ export default function App() {
           <Route element={<LandingLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/tasks" element={<PublicTasks />} />
+            <Route path="/contests" element={<Contests />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/mentors" element={<BecomeMentor />} />
             <Route path="/blogs" element={<BlogPage />} />
@@ -155,6 +158,7 @@ export default function App() {
               <Route path="/superadmin/dashboard/payments" element={<Suspense fallback={<PageLoader />}><SuperadminPayments /></Suspense>} />
               <Route path="/superadmin/dashboard/payouts" element={<Suspense fallback={<PageLoader />}><SuperadminPayouts /></Suspense>} />
               <Route path="/superadmin/dashboard/promos" element={<Suspense fallback={<PageLoader />}><SuperadminPromos /></Suspense>} />
+              <Route path="/superadmin/dashboard/contests" element={<Suspense fallback={<PageLoader />}><SuperadminContests /></Suspense>} />
               <Route path="/superadmin/dashboard/plans" element={<Suspense fallback={<PageLoader />}><SuperadminPlans /></Suspense>} />
               <Route path="/superadmin/dashboard/blogs" element={<Suspense fallback={<PageLoader />}><SuperadminBlogs /></Suspense>} />
               <Route path="/superadmin/dashboard/questions" element={<Suspense fallback={<PageLoader />}><SuperadminQuestions /></Suspense>} />

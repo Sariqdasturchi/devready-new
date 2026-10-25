@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-const REQUIREMENTS = ["Figma maketga moslik", "Mobil va planshet versiya", "Komponentlarga ajratilgan kod"];
-const START = 5 * 3600 + 42 * 60 + 17;
+const REQUIREMENTS = ["Qidiruv debounce bilan: bitta so'rov", "Saralash va aria-sort", "Server tomonda sahifalash"];
+const START = 3 * 3600 + 42 * 60 + 17;
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const clock = (s: number) => `${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`;
@@ -33,21 +33,21 @@ export default function HeroTask() {
             <span className="px-2 py-0.5 rounded-md bg-surface border border-line font-medium text-ink-2">Frontend</span>
             <span className="px-2 py-0.5 rounded-md bg-surface border border-line font-medium text-ink-2">O'rta</span>
           </div>
-          <span className="text-[13px] font-semibold text-brand">200 XP</span>
+          <span className="text-[13px] font-semibold text-brand">220 XP</span>
         </div>
 
         <div className="px-5 pt-5 pb-6">
-          <p className="text-[19px] font-bold tracking-[-0.02em] leading-snug text-ink">Analitika dashboardi — Figma maket asosida</p>
+          <p className="text-[19px] font-bold tracking-[-0.02em] leading-snug text-ink">Xodimlar jadvali: qidiruv, saralash va sahifalash</p>
 
           <div className="mt-5 flex items-end justify-between gap-4">
             <div>
               <p className="text-[13px] text-muted">Qolgan vaqt</p>
               <p className="font-mono text-[34px] leading-none font-medium tracking-tight text-ink mt-1.5 tabular-nums">{clock(left)}</p>
             </div>
-            <span className="text-[13px] text-muted pb-1">6 soatdan</span>
+            <span className="text-[13px] text-muted pb-1">4 soatdan</span>
           </div>
           <div className="mt-3 h-1.5 rounded-full bg-mist overflow-hidden">
-            <div className="h-full bg-brand rounded-full transition-[width] duration-1000 ease-linear" style={{ width: `${(left / (6 * 3600)) * 100}%` }} />
+            <div className="h-full bg-brand rounded-full transition-[width] duration-1000 ease-linear" style={{ width: `${(left / (4 * 3600)) * 100}%` }} />
           </div>
 
           <ul className="mt-6 flex flex-col gap-2.5">

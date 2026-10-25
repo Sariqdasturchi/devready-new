@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { errorMessage, profileApi } from "../../api/api";
 import { updateStoredUser } from "../../lib/auth";
-import { TRACKS } from "../../lib/constants";
+import { ACTIVE_TRACKS } from "../../lib/constants";
 import { Card } from "../ui";
 import { useToast } from "../ui/toast";
 
 /** Yo'nalish tanlanmagan foydalanuvchi uchun */
-export default function DirectionPicker({ onSaved }: { onSaved: () => void }) {
+export default function DirectionPicker({ onSaved, closed }: { onSaved: () => void; closed?: string | null }) {
   const toast = useToast();
   const [saving, setSaving] = useState<string | null>(null);
 
@@ -26,10 +26,14 @@ export default function DirectionPicker({ onSaved }: { onSaved: () => void }) {
 
   return (
     <Card className="p-6 sm:p-8 text-center max-w-2xl mx-auto">
-      <h2 className="text-lg font-bold text-ink">Avval yo'nalishingizni tanlang</h2>
-      <p className="text-sm text-muted mt-1">Tasklar tanlangan yo'nalish bo'yicha beriladi</p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mt-6">
-        {TRACKS.map((t) => (
+      <h2 className="text-lg font-bold text-ink">{closed ? "Yangi yo'nalish tanlang" : "Avval yo'nalishingizni tanlang"}</h2>
+      <p className="text-sm text-muted mt-1">
+        {closed
+          ? `${closed} yo'nalishi hozircha yopildi — platforma dasturlash yo'nalishlariga jamlandi. Bajarilgan ishlaringiz va XP saqlanadi.`
+          : "Tasklar tanlangan yo'nalish bo'yicha beriladi"}
+      </p>
+      <div className="grid grid-cols-2 gap-2.5 mt-6">
+        {ACTIVE_TRACKS.map((t) => (
           <button
             key={t}
             type="button"

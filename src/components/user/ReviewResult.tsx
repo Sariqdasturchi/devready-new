@@ -2,6 +2,7 @@ import { HiCheckCircle, HiMinusCircle, HiXCircle } from "react-icons/hi2";
 import type { AiFeedback, Submission } from "../../types/type";
 import { formatDate } from "../../lib/format";
 import { Card, StatusBadge, cx } from "../ui";
+import { InlineCode } from "../TaskText";
 
 const CRITERIA = [
   { key: "requirements", label: "Talablarga moslik", max: 40 },
@@ -61,7 +62,9 @@ function AiBreakdown({ ai }: { ai: AiFeedback }) {
                 <li key={i} className="flex gap-2 text-sm">
                   <s.Icon size={18} className={cx("shrink-0 mt-0.5", s.cls)} aria-label={s.label} />
                   <span className="min-w-0">
-                    <span className="text-ink">{r.text}</span>
+                    <span className="text-ink">
+                      <InlineCode text={r.text} />
+                    </span>
                     {r.note && <span className="block text-[12px] text-muted">{r.note}</span>}
                   </span>
                 </li>

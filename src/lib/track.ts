@@ -104,6 +104,21 @@ export function readTryReturn(): { taskId: string; track: string } | null {
 export function setTryReturn(taskId: string, track: string) {
   write(TRY_RETURN_KEY, JSON.stringify({ taskId, track }));
 }
+/** Kirish/ro'yxatdan o'tishdan keyin qaytiladigan sahifa (masalan, /contests) */
+export const RETURN_PATH_KEY = "dr_return_path";
+export function setReturnPath(path: string) {
+  write(RETURN_PATH_KEY, path);
+}
+/** Bir martalik: o'qilgach o'chiriladi. Faqat sayt ichidagi yo'l qabul qilinadi */
+export function takeReturnPath(): string | null {
+  const v = read(RETURN_PATH_KEY);
+  try {
+    localStorage.removeItem(RETURN_PATH_KEY);
+  } catch {
+    // e'tiborsiz
+  }
+  return v && v.startsWith("/") && !v.startsWith("//") ? v : null;
+}
 export function clearTryReturn() {
   try {
     localStorage.removeItem(TRY_RETURN_KEY);

@@ -8,6 +8,7 @@ import {
   HiOutlineLink,
   HiOutlineCog6Tooth,
   HiOutlineShieldCheck,
+  HiOutlineTrophy,
 } from "react-icons/hi2";
 import { FaGithub, FaLinkedin, FaTelegram } from "react-icons/fa6";
 import { errorMessage, publicProfileApi } from "../../api/api";
@@ -145,6 +146,21 @@ export default function PublicProfile() {
             </p>
             {p.bio && <p className="mt-4 text-[16px] text-ink-2 leading-relaxed max-w-2xl whitespace-pre-line">{p.bio}</p>}
             <ProfileLinksRow links={p.links} />
+            {!!p.contestWins?.length && (
+              <ul className="mt-5 flex flex-wrap gap-2" aria-label="Haftalik musobaqa natijalari">
+                {p.contestWins.map((w) => (
+                  <li key={w.id}>
+                    <Link
+                      to={`/contests?id=${w.id}`}
+                      className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-brand-tint text-brand text-[13px] font-semibold hover:bg-brand-100"
+                    >
+                      <HiOutlineTrophy size={15} aria-hidden="true" />
+                      {w.place}-o'rin · {w.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </section>
@@ -155,7 +171,7 @@ export default function PublicProfile() {
           <h2 id="work-title" className="text-[22px] font-bold tracking-[-0.02em] text-ink">
             Tekshirilgan yechimlar
           </h2>
-          <p className="mt-1 text-[14px] text-muted">Real ishdagi ticketlar va kompaniyalar suhbatda beradigan topshiriqlar.</p>
+          <p className="mt-1 text-[14px] text-muted">Ishdagi tasklar va suhbat topshiriqlari — har biri AI yoki mentor tekshiruvidan o'tgan.</p>
 
           {p.items.length === 0 ? (
             <div className="mt-6 rounded-2xl border border-dashed border-line p-8 text-center">

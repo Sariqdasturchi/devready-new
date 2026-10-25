@@ -12,6 +12,9 @@ export const TRACKS = [
   "QA",
 ] as const;
 
+/** Hozir faol yo'nalishlar — ro'yxatdan o'tish, yo'nalish tanlash va bosh sahifada faqat shular */
+export const ACTIVE_TRACKS = ["Frontend", "Backend", "Fullstack", "Database"] as const;
+
 export const LEVELS = ["Beginner", "Junior", "Strong Junior", "Middle"] as const;
 
 export const DIFFICULTY: Record<Difficulty, { label: string; className: string; minutes: number }> = {

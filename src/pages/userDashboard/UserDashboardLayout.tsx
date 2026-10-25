@@ -8,6 +8,7 @@ import {
   HiOutlineSparkles,
   HiOutlineStar,
   HiOutlineTrophy,
+  HiOutlineFlag,
 } from "react-icons/hi2";
 import DashboardLayout, { type NavItem } from "../../components/layout/DashboardLayout";
 import { analyticsApi } from "../../api/api";
@@ -18,6 +19,7 @@ const NAV: NavItem[] = [
   { to: "/dashboard/completed", label: "Natijalarim", icon: HiOutlineCheckCircle },
   { to: "/dashboard/points", label: "Ballarim", icon: HiOutlineStar },
   { to: "/dashboard/leaderboard", label: "Liderboard", icon: HiOutlineTrophy },
+  { to: "/contests", label: "Musobaqa", icon: HiOutlineFlag },
   { to: "/dashboard/achievements", label: "Yutuqlar", icon: HiOutlineSparkles },
   { to: "/dashboard/plans", label: "Tarif", icon: HiOutlineCreditCard },
   { to: "/dashboard/settings", label: "Sozlamalar", icon: HiOutlineCog6Tooth },

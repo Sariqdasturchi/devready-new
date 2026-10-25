@@ -74,7 +74,12 @@ export function show(v: unknown, max = 160): string {
 }
 
 /** camelCase → snake_case (Python funksiya nomlari uchun) */
-export const snake = (name: string) => name.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
+/** camelCase → snake_case (Python nomlari): "topKFrequent" → "top_k_frequent", "addNum" → "add_num" */
+export const snake = (name: string) =>
+  name
+    .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
+    .replace(/([A-Z])([A-Z][a-z])/g, "$1_$2")
+    .toLowerCase();
 
 /** SQL qiymatlarini taqqoslash uchun: raqamli satrlar → raqam, sana → ISO satr */
 export function sqlCell(v: unknown): unknown {

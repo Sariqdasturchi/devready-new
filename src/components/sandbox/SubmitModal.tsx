@@ -29,6 +29,8 @@ export default function SubmitModal({
   onExpired: () => void;
 }) {
   const toast = useToast();
+  // Musobaqa urinishi: yechimni AI avtomatik tekshiradi, mentor tanlanmaydi
+  const contest = !!task.contestId;
   const [method, setMethod] = useState<"mentor" | "ai">("mentor");
   const [mentorId, setMentorId] = useState("");
   const [mentors, setMentors] = useState<Mentor[] | null>(null);
@@ -38,7 +40,7 @@ export default function SubmitModal({
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    if (!open || mentors) return;
+    if (!open || mentors || contest) return;
     submissionApi
       .aiStatus()
       .then((r) => {
@@ -56,21 +58,21 @@ export default function SubmitModal({
         setMentors([]);
         setMentorsError(errorMessage(e, "Mentorlar ro'yxatini yuklab bo'lmadi"));
       });
-  }, [open, mentors, task.track]);
+  }, [open, mentors, task.track, contest]);
 
   const submit = async () => {
     if (!task.submissionId) return;
-    if (method === "mentor" && !mentorId) return toast.error("Tekshiruvchi mentorni tanlang");
+    if (!contest && method === "mentor" && !mentorId) return toast.error("Tekshiruvchi mentorni tanlang");
     setSending(true);
     try {
       await submissionApi.submit(task.submissionId, {
         code,
         testResults: tested ? { passed, total } : undefined,
         notes: notes.trim() || undefined,
-        reviewMethod: method,
-        mentorId: method === "mentor" ? mentorId : undefined,
+        reviewMethod: contest ? "ai" : method,
+        mentorId: !contest && method === "mentor" ? mentorId : undefined,
       });
-      toast.success(method === "mentor" ? "Yechim mentorga yuborildi" : "AI tekshiruvi boshlandi");
+      toast.success(contest ? "Yechim musobaqaga qabul qilindi" : method === "mentor" ? "Yechim mentorga yuborildi" : "AI tekshiruvi boshlandi");
       onSubmitted();
     } catch (err) {
       toast.error(errorMessage(err));
@@ -85,23 +87,21 @@ export default function SubmitModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Yechimni yuborish"
+      title={contest ? "Musobaqaga yuborish" : "Yechimni yuborish"}
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>
             Bekor qilish
           </Button>
           <Button onClick={submit} loading={sending}>
-            Tekshirishga yuborish
+            {contest ? "Yakuniy yechimni yuborish" : "Tekshirishga yuborish"}
           </Button>
         </>
       }
     >
       <div className="flex flex-col gap-4">
         {!tested ? (
-          <Alert tone="warning">
-            Testlar hali ishga tushirilmagan. Yuborishdan oldin "Tekshirish" tugmasini bosib ko'ring — natija tekshiruvchiga ham ko'rinadi.
-          </Alert>
+          <Alert tone="warning">Testlar hali ishga tushirilmagan. Yuborishdan oldin "Tekshirish" tugmasini bosib ko'ring — natija tekshiruvchiga ham ko'rinadi.</Alert>
         ) : allPassed ? (
           <Alert tone="success">Barcha {total} ta test o'tdi. Yechimingiz tekshiruvchiga kod va natija bilan birga boradi.</Alert>
         ) : (
@@ -113,34 +113,42 @@ export default function SubmitModal({
           </div>
         )}
 
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-semibold text-ink-2">Kim tekshirsin?</span>
-          <div className="grid grid-cols-2 gap-2">
-            {(["mentor", "ai"] as const).map((m) => {
-              const off = m === "ai" && !aiAvailable;
-              return (
-                <button
-                  key={m}
-                  type="button"
-                  disabled={off}
-                  onClick={() => setMethod(m)}
-                  className={cx(
-                    "p-3 rounded-xl border text-left",
-                    off ? "border-line opacity-50 cursor-not-allowed" : "cursor-pointer",
-                    method === m ? "border-brand bg-brand-tint" : !off && "border-line hover:border-ink-2",
-                  )}
-                >
-                  <span className="block text-sm font-semibold text-ink">{m === "mentor" ? "Mentor" : "AI"}</span>
-                  <span className="block text-[11px] text-muted">
-                    {m === "mentor" ? "Batafsil code review" : off ? "Hozircha mavjud emas" : "Bir necha daqiqada natija"}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        {contest && (
+          <p className="text-[13px] text-ink-2 leading-relaxed">
+            Musobaqada bitta urinish bor: yuborgandan keyin kodni o'zgartirib bo'lmaydi. Reytingdagi o'rin testlar soni va sarflangan vaqt bo'yicha aniqlanadi, yechimni AI
+            tekshiradi.
+          </p>
+        )}
 
-        {method === "mentor" &&
+        {!contest && (
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold text-ink-2">Kim tekshirsin?</span>
+            <div className="grid grid-cols-2 gap-2">
+              {(["mentor", "ai"] as const).map((m) => {
+                const off = m === "ai" && !aiAvailable;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    disabled={off}
+                    onClick={() => setMethod(m)}
+                    className={cx(
+                      "p-3 rounded-xl border text-left",
+                      off ? "border-line opacity-50 cursor-not-allowed" : "cursor-pointer",
+                      method === m ? "border-brand bg-brand-tint" : !off && "border-line hover:border-ink-2",
+                    )}
+                  >
+                    <span className="block text-sm font-semibold text-ink">{m === "mentor" ? "Mentor" : "AI"}</span>
+                    <span className="block text-[11px] text-muted">{m === "mentor" ? "Batafsil code review" : off ? "Hozircha mavjud emas" : "Bir necha daqiqada natija"}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {!contest &&
+          method === "mentor" &&
           (mentors === null ? (
             <PageLoader label="Mentorlar..." />
           ) : mentorsError ? (

@@ -6,7 +6,7 @@ import { homeForRole, setSession } from "../../lib/auth";
 import AuthShell, { AuthMessage } from "../../components/auth/AuthShell";
 import OtpInput from "../../components/auth/OtpInput";
 import { BOT_USERNAME } from "../../lib/constants";
-import { clearTryReturn, readTryReturn } from "../../lib/track";
+import { clearTryReturn, readTryReturn, takeReturnPath } from "../../lib/track";
 
 const RESEND_SECONDS = 60;
 
@@ -64,7 +64,9 @@ export default function Login() {
       // Ro'yxatdan o'tmasdan sinab ko'rilgan task — o'sha taskka qaytamiz
       const tried = res.user.role === "user" ? readTryReturn() : null;
       clearTryReturn();
-      navigate(tried ? `/dashboard/tasks/${tried.taskId}` : from && from.startsWith(home) ? from : home, { replace: true });
+      // Masalan, musobaqa sahifasidan "Qatnashish" bosib kelgan bo'lsa — o'sha yerga
+      const back = res.user.role === "user" ? takeReturnPath() : null;
+      navigate(tried ? `/dashboard/tasks/${tried.taskId}` : back || (from && from.startsWith(home) ? from : home), { replace: true });
     } catch (err) {
       setCode("");
       setMsg({ text: errorMessage(err), tone: "error" });
