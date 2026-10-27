@@ -235,6 +235,8 @@ export interface AiFeedback {
   suggestions?: string[];
   checkedAt?: string;
   error?: string;
+  /** Texnik sabab (superadmin uchun) */
+  errorDetail?: string;
 }
 
 export interface MentorFeedback {

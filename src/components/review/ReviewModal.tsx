@@ -44,7 +44,10 @@ function ReviewModalBody({ submission: s, onClose, onReviewed }: { submission: S
   const contract = useCachedQuery("mentor:contract", earningApi.contract, { staleTime: 60_000, enabled: isMentor });
   const student = typeof s.userId === "object" ? s.userId : null;
   const task = typeof s.taskId === "object" ? s.taskId : null;
-  const canReview = s.status === "under_review" || (s.status === "pending" && s.reviewMethod !== "ai");
+  const isSuperadmin = getStoredUser()?.role === "superadmin";
+  // AI tekshira olmagan yechimni superadmin qo'lda baholashi mumkin — talaba kutib qolmasin
+  const aiFailed = s.reviewMethod === "ai" && s.status === "pending" && !!s.aiFeedback?.error;
+  const canReview = s.status === "under_review" || (s.status === "pending" && s.reviewMethod !== "ai") || (isSuperadmin && aiFailed);
   const usedMinutes = s.submittedAt ? Math.round((new Date(s.submittedAt).getTime() - new Date(s.startedAt).getTime()) / 60000) : null;
   const minLen = isMentor ? contract.data?.settings.minCommentLength || 0 : 0;
   const pay = isMentor && canReview ? payHint(contract.data, task?.difficulty, s.assignedAt || s.submittedAt) : null;
@@ -183,6 +186,7 @@ function ReviewModalBody({ submission: s, onClose, onReviewed }: { submission: S
             {s.notes && <Alert tone="neutral">Talaba izohi: {s.notes}</Alert>}
           </div>
 
+          {canReview && aiFailed && <AiStuckPanel submission={s} isSuperadmin={isSuperadmin} onRetried={onReviewed} />}
           {canReview ? (
             <div className="flex flex-col gap-4">
               <Field label={`Ball: ${score} / 100`}>
@@ -220,7 +224,7 @@ function ReviewModalBody({ submission: s, onClose, onReviewed }: { submission: S
           ) : (
             <>
               {s.reviewMethod === "ai" && (s.status === "pending" || s.status === "ai_checking") && (
-                <AiStuckPanel submission={s} isSuperadmin={getStoredUser()?.role === "superadmin"} onRetried={onReviewed} />
+                <AiStuckPanel submission={s} isSuperadmin={isSuperadmin} onRetried={onReviewed} />
               )}
               <ReviewResult submission={s} />
             </>
@@ -270,6 +274,8 @@ function AiStuckPanel({ submission: s, isSuperadmin, onRetried }: { submission: 
       {s.status === "pending" && s.aiFeedback?.error ? (
         <Alert tone="danger">
           AI tekshiruvi bajarilmadi{s.aiAttempts ? ` (${s.aiAttempts}-urinish)` : ""}: {s.aiFeedback.error}
+          {isSuperadmin && s.aiFeedback.errorDetail && <span className="block mt-1 text-xs opacity-80 break-words">Texnik sabab: {s.aiFeedback.errorDetail}</span>}
+          {isSuperadmin && <span className="block mt-1 text-xs">Kutdirmaslik uchun pastda o'zingiz baholashingiz mumkin.</span>}
         </Alert>
       ) : stuck ? (
         <Alert tone="warning">AI {formatDuration(minutes || 0)} dan beri tekshirmoqda — jarayon uzilgan bo'lishi mumkin. Tizim 12 daqiqadan keyin o'zi qayta uradi.</Alert>
