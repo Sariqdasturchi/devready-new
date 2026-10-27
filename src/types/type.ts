@@ -279,6 +279,15 @@ export interface Submission {
   /** O'qituvchining qo'shimcha izohi (AI baholagan guruh yechimiga) */
   teacherComment?: { text: string; at: string; by?: Ref<{ _id: string; fullName: string }> } | null;
   updatedAt?: string;
+  /** AI tekshiruvi urinishlari soni va joriy urinish boshlangan vaqt */
+  aiAttempts?: number;
+  aiStartedAt?: string | null;
+}
+
+/** GET /submissions/ai-health — superadmin diagnostikasi */
+export interface AiHealth {
+  configured: boolean;
+  providers: { provider: string; configured: boolean; ok: boolean; model?: string; ms?: number; status?: number | null; error?: string }[];
 }
 
 /** /tasks/my va /tasks/:id javobi — task + foydalanuvchi holati */

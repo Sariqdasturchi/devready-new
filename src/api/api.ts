@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import type {
+import type { AiHealth,
   AdminContest,
   Contest,
   ContestStandings,
@@ -214,6 +214,8 @@ export const submissionApi = {
   retryAi: (id: string) => api.post(`/submissions/${id}/ai-check`).then((r) => r.data),
   toMentor: (id: string, mentorId: string) => data<Submission>(api.post(`/submissions/${id}/to-mentor`, { mentorId })),
   aiStatus: () => data<{ available: boolean }>(api.get("/submissions/ai-status")),
+  /** Superadmin: har bir AI provayderini sinab ko'rish */
+  aiHealth: () => data<AiHealth>(api.get("/submissions/ai-health")),
   review: (id: string, body: { status: "approved" | "rejected"; score: number; comment: string }) =>
     api
       .patch<{ data: Submission; earning: { amount: number; percent: number; rate: number } | null }>(`/submissions/${id}/review`, {

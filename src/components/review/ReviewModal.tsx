@@ -7,7 +7,7 @@ import { formatPrice, mediaUrl } from "../../lib/format";
 import ContractModal from "../payout/ContractModal";
 import type { Submission } from "../../types/type";
 import { formatDate, formatDuration } from "../../lib/format";
-import type { MentorContract } from "../../types/type";
+import type { AiHealth, MentorContract } from "../../types/type";
 import { Alert, Avatar, Badge, Button, Field, Modal, StatusBadge, Textarea } from "../ui";
 import { useToast } from "../ui/toast";
 import ReviewResult from "../user/ReviewResult";
@@ -218,10 +218,95 @@ function ReviewModalBody({ submission: s, onClose, onReviewed }: { submission: S
               {task?.xp ? <p className="text-xs text-muted">Qabul qilinsa talaba {Math.round((task.xp * score) / 100)} XP oladi.</p> : null}
             </div>
           ) : (
-            <ReviewResult submission={s} />
+            <>
+              {s.reviewMethod === "ai" && (s.status === "pending" || s.status === "ai_checking") && (
+                <AiStuckPanel submission={s} isSuperadmin={getStoredUser()?.role === "superadmin"} onRetried={onReviewed} />
+              )}
+              <ReviewResult submission={s} />
+            </>
           )}
         </div>
       </Modal>
     </>
+  );
+}
+
+/** AI tekshiruvi kutilayotgan / xato bilan qolgan yechim: sabab, qayta ishga tushirish va provayderlar holati */
+function AiStuckPanel({ submission: s, isSuperadmin, onRetried }: { submission: Submission; isSuperadmin: boolean; onRetried: () => void }) {
+  const toast = useToast();
+  const [busy, setBusy] = useState<"retry" | "health" | null>(null);
+  const [health, setHealth] = useState<AiHealth | null>(null);
+  const [openedAt] = useState(() => Date.now());
+  const since = s.aiStartedAt || s.updatedAt || s.submittedAt;
+  const minutes = since ? Math.round((openedAt - new Date(since).getTime()) / 60000) : null;
+  const stuck = s.status === "ai_checking" && minutes !== null && minutes >= 2;
+
+  const retry = async () => {
+    setBusy("retry");
+    try {
+      await submissionApi.retryAi(s._id);
+      toast.success("AI tekshiruvi qayta ishga tushirildi");
+      onRetried();
+    } catch (err) {
+      toast.error(errorMessage(err));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const checkHealth = async () => {
+    setBusy("health");
+    try {
+      setHealth(await submissionApi.aiHealth());
+    } catch (err) {
+      toast.error(errorMessage(err));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      {s.status === "pending" && s.aiFeedback?.error ? (
+        <Alert tone="danger">
+          AI tekshiruvi bajarilmadi{s.aiAttempts ? ` (${s.aiAttempts}-urinish)` : ""}: {s.aiFeedback.error}
+        </Alert>
+      ) : stuck ? (
+        <Alert tone="warning">AI {formatDuration(minutes || 0)} dan beri tekshirmoqda — jarayon uzilgan bo'lishi mumkin. Tizim 12 daqiqadan keyin o'zi qayta uradi.</Alert>
+      ) : (
+        <Alert tone="neutral">Yechim AI navbatida. Natija bir necha daqiqada chiqadi.</Alert>
+      )}
+      {isSuperadmin && (
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" loading={busy === "retry"} disabled={!!busy || (s.status === "ai_checking" && !stuck)} onClick={retry}>
+            AI bilan qayta tekshirish
+          </Button>
+          <Button variant="ghost" loading={busy === "health"} disabled={!!busy} onClick={checkHealth}>
+            AI holatini tekshirish
+          </Button>
+        </div>
+      )}
+      {health && (
+        <div className="rounded-xl border border-line divide-y divide-line text-xs">
+          {!health.providers.length && <p className="p-3 text-muted">AI_PROVIDERS ro'yxati bo'sh</p>}
+          {health.providers.map((p) => (
+            <div key={p.provider} className="p-3 flex flex-col gap-0.5">
+              <div className="flex items-center gap-2">
+                <span className={p.ok ? "text-emerald-700 font-semibold" : "text-red-700 font-semibold"}>{p.ok ? "Ishlayapti" : "Ishlamayapti"}</span>
+                <span className="font-semibold text-ink">{p.provider}</span>
+                {p.model && <span className="text-muted">{p.model}</span>}
+                {p.ms !== undefined && <span className="text-muted">· {(p.ms / 1000).toFixed(1)} s</span>}
+              </div>
+              {p.error && (
+                <span className="text-ink-2 break-words">
+                  {p.status ? `${p.status}: ` : ""}
+                  {p.error}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
