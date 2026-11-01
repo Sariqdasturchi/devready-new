@@ -30,7 +30,10 @@ export interface User {
   _id: string;
   id?: string;
   fullName: string;
-  phone: string;
+  /** Google/GitHub orqali kirganlarda bo'lmasligi mumkin */
+  phone?: string | null;
+  email?: string | null;
+  authProvider?: "telegram" | "google" | "github";
   telegramId?: string | null;
   role: Role;
   direction?: string | null;
@@ -467,13 +470,21 @@ export interface Pagination {
   pages: number;
 }
 
+export type QuestionLang = "" | "js" | "jsx" | "ts" | "sql" | "css" | "html" | "bash" | "json" | "python";
+
 export interface Question {
   _id: string;
   direction: string;
+  /** Savol matni. `backtick` ichidagi qism inline kod bo'lib chiqadi */
   q: string;
   options: string[];
   correct: number;
+  /** Savoldagi kod — alohida blokda ko'rsatiladi */
+  code?: string;
+  lang?: QuestionLang;
 }
+
+export type QuizQuestion = Pick<Question, "_id" | "q" | "options" | "correct" | "code" | "lang">;
 
 export interface Blogs {
   _id: string;
