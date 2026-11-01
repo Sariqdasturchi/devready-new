@@ -1,4 +1,5 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import TelegramConnect from "./user/TelegramConnect";
 import { HiOutlineCamera } from "react-icons/hi2";
 import { errorMessage, profileApi } from "../api/api";
 import { updateStoredUser } from "../lib/auth";
@@ -106,12 +107,24 @@ export default function ProfileSettings() {
           <Field label="Ism va familiya" className="sm:col-span-2">
             <Input value={fullName} onChange={(e) => setFullName(e.target.value)} />
           </Field>
-          <Field label="Telefon raqam" hint="Kirish uchun ishlatiladi — o'zgartirish uchun administratorga murojaat qiling">
-            <Input value={user.phone} disabled />
-          </Field>
-          <Field label="Telegram ID" hint="Tasdiqlash kodlari shu akkauntga keladi">
-            <Input value={user.telegramId || "—"} disabled />
-          </Field>
+          {user.phone ? (
+            <Field label="Telefon raqam" hint="Kirish uchun ishlatiladi — o'zgartirish uchun administratorga murojaat qiling">
+              <Input value={user.phone} disabled />
+            </Field>
+          ) : (
+            <Field label="Kirish usuli" hint={user.email || undefined}>
+              <Input value={user.authProvider === "github" ? "GitHub" : user.authProvider === "google" ? "Google" : "—"} disabled />
+            </Field>
+          )}
+          {user.telegramId ? (
+            <Field label="Telegram ID" hint="Tasdiqlash kodlari shu akkauntga keladi">
+              <Input value={user.telegramId} disabled />
+            </Field>
+          ) : (
+            <div className="sm:col-span-2">
+              <TelegramConnect variant="inline" />
+            </div>
+          )}
           {user.role === "user" && (
             <Field label="Yo'nalish" hint="O'zgartirilsa, tasklar yangi yo'nalish bo'yicha ko'rsatiladi" className="sm:col-span-2">
               <Select value={direction} onChange={(e) => setDirection(e.target.value)}>

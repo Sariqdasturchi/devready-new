@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { HiOutlineClock, HiOutlineCodeBracket, HiOutlinePaintBrush, HiOutlineArrowTopRightOnSquare } from "react-icons/hi2";
 import { errorMessage, taskApi } from "../../api/api";
-import type { Task } from "../../types/type";
+import type { Difficulty, Task } from "../../types/type";
 import { DIFFICULTY, TRACKS } from "../../lib/constants";
 import { formatDuration } from "../../lib/format";
 import { setTryReturn, track, trackVisit } from "../../lib/track";
@@ -23,6 +23,7 @@ export default function PublicTasks() {
   const [error, setError] = useState("");
   const [open, setOpen] = useState<Task | null>(null);
   const active = params.get("track") || "";
+  const level = (params.get("level") || "") as Difficulty | "";
 
   useEffect(() => {
     trackVisit();
@@ -40,15 +41,20 @@ export default function PublicTasks() {
   }, [params, tasks]);
 
   const tracks = useMemo(() => TRACKS.filter((t) => tasks?.some((x) => x.track === t)), [tasks]);
-  const visible = useMemo(() => (tasks || []).filter((t) => !active || t.track === active), [tasks, active]);
+  // Tartib serverdan keladi: Frontend birinchi, keyin "Boshlang'ich" va oson tasklar
+  const visible = useMemo(
+    () => (tasks || []).filter((t) => (!active || t.track === active) && (!level || t.difficulty === level)),
+    [tasks, active, level],
+  );
 
-  const setTrack = (t: string) => {
+  const setParam = (key: "track" | "level", v: string) => {
     const next = new URLSearchParams(params);
-    if (t) next.set("track", t);
-    else next.delete("track");
+    if (v) next.set(key, v);
+    else next.delete(key);
     next.delete("open");
     setParams(next, { replace: true });
   };
+  const setTrack = (t: string) => setParam("track", t);
 
   const startWithAccount = (t: Task) => {
     setTryReturn(t._id, t.track);
@@ -89,6 +95,23 @@ export default function PublicTasks() {
             </button>
           ))}
         </div>
+        <div className="flex flex-wrap items-center gap-2 -mt-4 mb-8" role="group" aria-label="Qiyinlik">
+          <span className="text-[14px] text-muted mr-1">Qiyinlik:</span>
+          {(["", "oson", "orta", "qiyin"] as const).map((d) => (
+            <button
+              key={d || "any"}
+              type="button"
+              aria-pressed={level === d}
+              onClick={() => setParam("level", d)}
+              className={cx(
+                "h-8 px-3 rounded-full text-[14px] cursor-pointer border transition-colors",
+                level === d ? "bg-ink text-paper border-ink" : "bg-surface text-ink-2 border-line hover:border-ink",
+              )}
+            >
+              {d ? DIFFICULTY[d].label : "Har qanday"}
+            </button>
+          ))}
+        </div>
 
         {error ? (
           <ErrorState message={error} />
@@ -102,6 +125,9 @@ export default function PublicTasks() {
               return (
                 <li key={t._id} className="flex flex-col rounded-2xl border border-line bg-surface p-5">
                   <div className="flex flex-wrap items-center gap-2 text-[12px]">
+                    {t.tags?.includes("Boshlang'ich") && (
+                      <span className="px-2 py-0.5 rounded-md bg-brand-tint text-brand-deep font-semibold">Boshlang'ich</span>
+                    )}
                     <TaskKindTag tags={t.tags} />
                     <span className="font-semibold text-ink-2">{t.track}</span>
                     <span className={`px-2 py-0.5 rounded-md border font-semibold ${diff.className}`}>{diff.label}</span>

@@ -5,6 +5,7 @@ import { authApi, errorCode, errorMessage } from "../../api/api";
 import { homeForRole, setSession } from "../../lib/auth";
 import AuthShell, { AuthMessage } from "../../components/auth/AuthShell";
 import OtpInput from "../../components/auth/OtpInput";
+import SocialAuth from "../../components/auth/SocialAuth";
 import { BOT_USERNAME } from "../../lib/constants";
 import { clearTryReturn, readTryReturn, takeReturnPath } from "../../lib/track";
 
@@ -81,9 +82,11 @@ export default function Login() {
         <div>
           <h1 className="text-[32px] font-extrabold tracking-[-0.035em] leading-tight text-ink">{step === 1 ? "Tizimga kirish" : "Kodni kiriting"}</h1>
           <p className="text-[15px] text-ink-2 mt-2 leading-relaxed">
-            {step === 1 ? "Telefon raqamingizni kiriting — kod Telegram botga keladi" : `+998 ${phone} raqamiga bog'langan Telegramga kod yuborildi`}
+            {step === 1 ? "Google, GitHub yoki telefon raqam orqali — kod Telegram botga keladi" : `+998 ${phone} raqamiga bog'langan Telegramga kod yuborildi`}
           </p>
         </div>
+
+        {step === 1 && <SocialAuth returnTo={from || null} />}
 
         <AuthMessage {...msg} />
         {notRegistered && (
@@ -104,7 +107,6 @@ export default function Login() {
                 onValueChange={(v) => setPhone(v.value)}
                 className="w-full h-12 px-4 text-[16px] text-ink focus:outline-none bg-transparent placeholder:text-muted/60 tabular-nums tracking-wide"
                 placeholder="(__) ___-__-__"
-                autoFocus
                 inputMode="tel"
               />
             </div>

@@ -22,7 +22,7 @@ export default function SuperadminMentors() {
     setEditing("new");
   };
   const openEdit = (m: Mentor) => {
-    setForm({ fullName: m.fullName, phone: m.phone, telegramId: m.telegramId || "", direction: m.direction || "Frontend", status: m.status, bio: m.bio || "" });
+    setForm({ fullName: m.fullName, phone: m.phone || "", telegramId: m.telegramId || "", direction: m.direction || "Frontend", status: m.status, bio: m.bio || "" });
     setEditing(m);
   };
 

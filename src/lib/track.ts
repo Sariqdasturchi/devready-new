@@ -14,7 +14,10 @@ export type TrackEvent =
   | "register_info"
   | "register_tg_open"
   | "register_manual"
-  | "quiz_skip";
+  | "quiz_skip"
+  | "register_google"
+  | "register_github"
+  | "try_handoff";
 
 export type Source = "instagram" | "telegram" | "google" | "youtube" | "facebook" | "direct" | "other";
 
@@ -52,7 +55,26 @@ function classify(raw: string): Source {
   return "other";
 }
 
-/** Birinchi kelgan manba saqlanadi: ?utm_source=... yoki referrer */
+/**
+ * Ilova ichidagi brauzerlar referrer yubormaydi — ular "to'g'ridan-to'g'ri" bo'lib ko'rinardi
+ * (voronkada 154 tadan 131 tasi shunday edi). Telegram o'z brauzeriga TelegramWebviewProxy qo'shadi,
+ * Instagram/Facebook esa user-agent'da o'zini aytadi.
+ */
+function inAppSource(): Source | null {
+  try {
+    const w = window as unknown as { TelegramWebviewProxy?: unknown; TelegramWebviewProxyProto?: unknown };
+    if (w.TelegramWebviewProxy || w.TelegramWebviewProxyProto) return "telegram";
+    const ua = navigator.userAgent || "";
+    if (/Telegram/i.test(ua)) return "telegram";
+    if (/Instagram/i.test(ua)) return "instagram";
+    if (/FBAN|FBAV|FB_IAB|FBIOS/i.test(ua)) return "facebook";
+  } catch {
+    /* e'tiborsiz */
+  }
+  return null;
+}
+
+/** Birinchi kelgan manba saqlanadi: ?utm_source=..., referrer, yoki ilova ichidagi brauzer */
 export function source(): Source {
   const saved = read("dr_src") as Source | null;
   if (saved) return saved;
@@ -62,6 +84,7 @@ export function source(): Source {
     const utm = p.get("utm_source") || p.get("ref") || (p.get("fbclid") ? "facebook" : "");
     if (utm) src = classify(utm);
     else if (document.referrer && !document.referrer.startsWith(window.location.origin)) src = classify(new URL(document.referrer).hostname);
+    else src = inAppSource() || "direct";
   } catch {
     /* e'tiborsiz */
   }
@@ -69,8 +92,37 @@ export function source(): Source {
   return src;
 }
 
+/**
+ * Jamoa (superadmin, mentor) brauzerlari voronkaga yozilmaydi — o'z kirishlarimiz statistikani buzmasin.
+ * Shu brauzerda bir marta jamoa a'zosi kirgan bo'lsa, belgi qoladi (chiqib ketgandan keyin ham).
+ * Qo'lda: devready.uz/?notrack=1 (yoqish) yoki ?notrack=0 (o'chirish).
+ */
+export function markStaffBrowser(on = true) {
+  if (on) write("dr_staff", "1");
+  else {
+    try {
+      localStorage.removeItem("dr_staff");
+    } catch {
+      /* e'tiborsiz */
+    }
+  }
+}
+function isStaffBrowser() {
+  try {
+    const q = new URLSearchParams(window.location.search).get("notrack");
+    if (q === "1") markStaffBrowser(true);
+    if (q === "0") markStaffBrowser(false);
+    if (read("dr_staff") === "1") return true;
+    const u = JSON.parse(read("user") || "null");
+    return Boolean(u && u.role && u.role !== "user");
+  } catch {
+    return false;
+  }
+}
+
 export function track(name: TrackEvent, extra: { taskId?: string } = {}) {
   try {
+    if (isStaffBrowser()) return;
     const body = JSON.stringify({ name, anonId: anonId(), source: source(), ...extra });
     const url = `${API_URL}/events`;
     // text/plain — CORS'da oldindan so'rovsiz ("simple request") ketadi, sahifa yopilsa ham yetib boradi

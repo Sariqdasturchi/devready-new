@@ -82,7 +82,20 @@ export default function Funnel() {
             <span>
               Kirish testini o'tkazib yubordi: <b className="text-ink tabular-nums">{data.methods.quizSkipped}</b>
             </span>
+            <span>
+              Google tugmasi: <b className="text-ink tabular-nums">{data.methods.google ?? 0}</b>
+            </span>
+            <span>
+              GitHub tugmasi: <b className="text-ink tabular-nums">{data.methods.github ?? 0}</b>
+            </span>
+            <span>
+              Google/GitHub orqali yangi akkaunt: <b className="text-ink tabular-nums">{data.methods.oauthUsers ?? 0}</b>
+            </span>
+            <span>
+              Telefondan "kompyuterda davom ettirish": <b className="text-ink tabular-nums">{data.methods.handoff ?? 0}</b>
+            </span>
           </Card>
+          <UtmBuilder />
         </div>
       )}
     </div>
@@ -205,6 +218,63 @@ function Daily({ data }: { data: FunnelData }) {
       <div className="mt-2 flex justify-between text-[11px] text-muted tabular-nums">
         <span>{data.daily[0]?.date}</span>
         <span>{data.daily[data.daily.length - 1]?.date}</span>
+      </div>
+    </Card>
+  );
+}
+
+/**
+ * Reklama/post havolasi yasash: utm bo'lmasa Telegram va Instagram ichidagi brauzerdan kelganlar
+ * "to'g'ridan-to'g'ri" bo'lib qoladi. Har bir post uchun alohida campaign — qaysi post ishlaganini ko'rasiz.
+ */
+function UtmBuilder() {
+  const [src, setSrc] = useState("telegram");
+  const [campaign, setCampaign] = useState("");
+  const [path, setPath] = useState("/");
+  const [copied, setCopied] = useState(false);
+  const url = useMemo(() => {
+    const p = new URLSearchParams({ utm_source: src });
+    if (campaign.trim()) p.set("utm_campaign", campaign.trim().toLowerCase().replace(/\s+/g, "-"));
+    const clean = path.startsWith("/") ? path : `/${path}`;
+    return `${window.location.origin}${clean}?${p.toString()}`;
+  }, [src, campaign, path]);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* e'tiborsiz */
+    }
+  };
+  return (
+    <Card className="p-5 flex flex-col gap-3">
+      <div>
+        <p className="text-[15px] font-semibold text-ink">Post uchun havola</p>
+        <p className="text-[13px] text-muted mt-0.5">Har bir post va reklamaga shu havolani qo'ying — "To'g'ridan-to'g'ri" o'rniga aniq manba ko'rinadi.</p>
+      </div>
+      <div className="grid sm:grid-cols-3 gap-2">
+        <select value={src} onChange={(e) => setSrc(e.target.value)} className="h-10 px-3 rounded-xl border border-line bg-surface text-[14px] text-ink">
+          {["telegram", "instagram", "youtube", "facebook", "google"].map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+        <input value={campaign} onChange={(e) => setCampaign(e.target.value)} placeholder="Kampaniya (masalan, kanal-1-noyabr)" className="h-10 px-3 rounded-xl border border-line bg-surface text-[14px] text-ink" />
+        <select value={path} onChange={(e) => setPath(e.target.value)} className="h-10 px-3 rounded-xl border border-line bg-surface text-[14px] text-ink">
+          <option value="/">Bosh sahifa</option>
+          <option value="/tasks">Tasklar katalogi</option>
+          <option value="/tasks?track=Frontend">Frontend tasklari</option>
+          <option value="/register">Ro'yxatdan o'tish</option>
+          <option value="/contests">Musobaqa</option>
+        </select>
+      </div>
+      <div className="flex items-center gap-2">
+        <code className="flex-1 min-w-0 truncate px-3 h-10 leading-10 rounded-xl bg-mist text-[13px] text-ink font-mono">{url}</code>
+        <button type="button" onClick={copy} className="h-10 px-4 rounded-xl bg-brand text-white text-[14px] font-semibold cursor-pointer shrink-0">
+          {copied ? "Nusxalandi" : "Nusxalash"}
+        </button>
       </div>
     </Card>
   );

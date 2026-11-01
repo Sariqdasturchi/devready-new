@@ -23,6 +23,14 @@ export function getStoredUser(): User | null {
 
 export function setSession(token: string, user: User) {
   invalidateAllCache();
+  // Jamoa a'zosi kirgan brauzer voronka statistikasiga yozilmaydi
+  if (user.role && user.role !== "user") {
+    try {
+      localStorage.setItem("dr_staff", "1");
+    } catch {
+      /* ignore */
+    }
+  }
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(USER_KEY, JSON.stringify(user));
   window.dispatchEvent(new Event("devready:user"));

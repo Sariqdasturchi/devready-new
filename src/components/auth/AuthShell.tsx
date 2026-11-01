@@ -17,11 +17,11 @@ export default function AuthShell({ children, wide }: { children: ReactNode; wid
           <p className="text-4xl xl:text-5xl font-extrabold tracking-[-0.045em] leading-[1.05] text-balance">Har bir task — portfoliongizdagi yana bitta ish.</p>
           <ul className="mt-10 flex flex-col gap-4 text-white/85 text-[17px]">
             <li>Real loyihalarga o'xshash vazifalar</li>
-            <li>Har bir taskga aniq muddat</li>
+            <li>Kod brauzerda — hech narsa o'rnatish shart emas</li>
             <li>Mentordan ball va batafsil izoh</li>
           </ul>
         </div>
-        <p className="text-sm text-white/70">Kodlar Telegram bot orqali keladi — parol eslab qolish shart emas.</p>
+        <p className="text-sm text-white/70">Google, GitHub yoki Telegram orqali — parol eslab qolish shart emas.</p>
       </aside>
     </main>
   );

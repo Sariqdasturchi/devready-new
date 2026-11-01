@@ -2,15 +2,33 @@ import { useEffect, useState, type FormEvent } from "react";
 import { FiExternalLink } from "react-icons/fi";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { PatternFormat } from "react-number-format";
-import { authApi, errorCode, errorMessage, quizApi } from "../../api/api";
-import { setSession, updateStoredUser } from "../../lib/auth";
+import { authApi, errorCode, errorMessage, quizApi, taskApi, type RecommendedTask } from "../../api/api";
+import { getStoredUser, getToken, setSession, updateStoredUser } from "../../lib/auth";
+import SocialAuth from "../../components/auth/SocialAuth";
+import CodeView from "../../components/CodeView";
+import { MdInline } from "../../components/Markdown";
+import type { QuizQuestion } from "../../types/type";
 import { BOT_USERNAME, ACTIVE_TRACKS } from "../../lib/constants";
 import AuthShell, { AuthMessage } from "../../components/auth/AuthShell";
 import OtpInput from "../../components/auth/OtpInput";
 import { anonId, clearTryReturn, readTryReturn, source, takeReturnPath, track, trackVisit } from "../../lib/track";
 
 type Step = 1 | 2 | 3 | 4 | 5;
-type Q = { _id: string; q: string; options: string[]; correct: number };
+type Q = QuizQuestion;
+
+const formatMinutes = (m?: number) => {
+  if (!m) return "";
+  if (m < 60) return `${m} daqiqa`;
+  const h = Math.floor(m / 60);
+  const r = m % 60;
+  return r ? `${h} soat ${r} daq` : `${h} soat`;
+};
+
+/** Google/GitHub yoki Telegram orqali kirgan, lekin yo'nalish tanlamagan talaba */
+const needsOnboarding = () => {
+  const u = getStoredUser();
+  return Boolean(getToken() && u && u.role === "user" && !u.direction);
+};
 
 const STEPS = ["Ma'lumotlar", "Telegram", "Tasdiqlash", "Yo'nalish", "Test"];
 const RESEND_SECONDS = 60;
@@ -25,7 +43,7 @@ function levelFor(score: number, total: number) {
 
 export default function Register() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<Step>(1);
+  const [step, setStep] = useState<Step>(() => (needsOnboarding() ? 4 : 1));
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [telegramId, setTelegramId] = useState("");
@@ -45,6 +63,7 @@ export default function Register() {
   const [linkState, setLinkState] = useState<"idle" | "waiting" | "expired">(params.get("link") ? "waiting" : "idle");
   const [manual, setManual] = useState(false);
   const [tried] = useState(readTryReturn);
+  const [firstTask, setFirstTask] = useState<RecommendedTask | null>(null);
 
   useEffect(() => {
     trackVisit();
@@ -61,11 +80,15 @@ export default function Register() {
     if (dir) finish();
     else setStep(4);
   };
-  const finish = () => {
+  /** Sinab ko'rilgan task → o'sha task; aks holda tavsiya etilgan birinchi task (aktivatsiya); bo'lmasa kabinet */
+  const finish = (toDashboard = false) => {
     const t = tried;
     clearTryReturn();
     const back = takeReturnPath();
-    navigate(t ? `/dashboard/tasks/${t.taskId}` : back || "/dashboard", { replace: true });
+    if (t) return navigate(`/dashboard/tasks/${t.taskId}`, { replace: true });
+    if (back) return navigate(back, { replace: true });
+    if (!toDashboard && firstTask) return navigate(`/dashboard/tasks/${firstTask._id}`, { replace: true });
+    navigate("/dashboard", { replace: true });
   };
 
   // Telegram'da tasdiqlanguncha 2.5 soniyada bir so'raymiz
@@ -192,6 +215,8 @@ export default function Register() {
   const saveResult = async (dir: string, level: string) => {
     const user = await quizApi.saveResult({ direction: dir, level });
     updateStoredUser(user);
+    // Natija ekranida "birinchi task" darhol ko'rinsin — ro'yxatdan o'tganlarning 69% i task boshlamay ketayotgan edi
+    if (!tried) await taskApi.recommended().then(setFirstTask).catch(() => undefined);
     setResult(level);
   };
 
@@ -247,18 +272,33 @@ export default function Register() {
           <div className="h-10 px-5 inline-flex items-center rounded-full bg-brand text-white font-semibold">
             {result}
           </div>
-          <p className="text-[15px] text-ink-2 leading-relaxed">
-            {tried
-              ? "Sinab ko'rgan taskingiz ochiladi — yozgan kodingiz o'z joyida. Free tarifda 10 ta task bajarishingiz mumkin."
-              : "Vazifalar yo'nalishingiz bo'yicha taqdim etiladi. Free tarifda 10 ta task bajarishingiz mumkin."}
-          </p>
+          {tried ? (
+            <p className="text-[15px] text-ink-2 leading-relaxed">Sinab ko'rgan taskingiz ochiladi — yozgan kodingiz o'z joyida.</p>
+          ) : firstTask ? (
+            <div className="w-full rounded-2xl border border-line bg-surface p-5">
+              <p className="text-[13px] font-semibold text-brand">Birinchi taskingiz</p>
+              <p className="mt-1.5 text-[17px] font-bold text-ink leading-snug">{firstTask.title}</p>
+              <p className="mt-1.5 text-[14px] text-ink-2 leading-relaxed line-clamp-3">{firstTask.description}</p>
+              <p className="mt-3 text-[13px] text-muted">
+                {firstTask.difficulty === "oson" ? "Oson" : firstTask.difficulty === "orta" ? "O'rta" : "Qiyin"}
+                {firstTask.estimatedTime ? ` · ${formatMinutes(firstTask.estimatedTime)}` : ""} · {firstTask.xp} XP · kod brauzerda yoziladi
+              </p>
+            </div>
+          ) : (
+            <p className="text-[15px] text-ink-2 leading-relaxed">Vazifalar yo'nalishingiz bo'yicha taqdim etiladi.</p>
+          )}
           <button
             type="button"
-            onClick={finish}
+            onClick={() => finish()}
             className="w-full h-12 bg-brand hover:bg-brand-deep text-white font-semibold rounded-full flex items-center justify-center gap-2 text-[15px] cursor-pointer transition-colors disabled:opacity-50"
           >
-            {tried ? "Taskni davom ettirish" : "Kabinetga o'tish"} 
+            {tried ? "Taskni davom ettirish" : firstTask ? "Birinchi taskni boshlash" : "Kabinetga o'tish"}
           </button>
+          {!tried && firstTask && (
+            <button type="button" onClick={() => finish(true)} className="self-center text-[14px] text-muted hover:text-ink cursor-pointer">
+              Keyinroq — kabinetga o'tish
+            </button>
+          )}
         </div>
       </AuthShell>
     );
@@ -289,13 +329,13 @@ export default function Register() {
             <h1 className="text-[32px] font-extrabold tracking-[-0.035em] leading-tight text-ink">Hisob yarating</h1>
             <p className="text-[15px] text-ink-2 mt-2 leading-relaxed">Amaliy tasklar orqali real loyihalarga tayyorlaning</p>
           </div>
+          <SocialAuth />
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-ink">Ism va familiya</span>
             <input
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Ali Valiyev"
-              autoFocus
               className="w-full h-12 px-4 bg-surface border border-line rounded-xl text-[16px] text-ink focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 placeholder:text-muted/60"
             />
           </label>
@@ -476,8 +516,11 @@ export default function Register() {
             <span className="text-[14px] text-muted tabular-nums">
               Savol {index + 1} / {questions.length}
             </span>
-            <h2 className="text-2xl font-bold tracking-[-0.02em] text-ink mt-2">{questions[index].q}</h2>
+            <h2 className="text-[22px] font-bold tracking-[-0.02em] leading-snug text-ink mt-2">
+              <MdInline text={questions[index].q} />
+            </h2>
           </div>
+          {questions[index].code && <CodeView code={questions[index].code!} lang={questions[index].lang} />}
           <div className="flex flex-col gap-2.5">
             {questions[index].options.map((opt, i) => (
               <button
@@ -488,7 +531,9 @@ export default function Register() {
                 className="w-full p-4 rounded-xl border border-line bg-surface hover:border-ink text-left text-[15px] text-ink flex items-center gap-3 cursor-pointer disabled:opacity-50 transition-colors"
               >
                 <span className="w-7 h-7 rounded-full bg-mist text-[13px] font-semibold text-ink-2 flex items-center justify-center shrink-0">{i + 1}</span>
-                {opt}
+                <span className="min-w-0 break-words">
+                  <MdInline text={opt} compact />
+                </span>
               </button>
             ))}
           </div>

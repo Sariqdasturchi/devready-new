@@ -73,6 +73,11 @@ function inline(text: string, key: string, codeClass = CODE_ARTICLE): ReactNode[
   return out;
 }
 
+/** Bir qatorli matn: **qalin**, `kod`, [havola](https://...) — savol va variantlar uchun */
+export function MdInline({ text, compact = false }: { text: string; compact?: boolean }) {
+  return <>{inline(text, "i", compact ? CODE_COMPACT : CODE_ARTICLE)}</>;
+}
+
 const CODE_ARTICLE = "px-1.5 py-0.5 rounded-md bg-mist border border-line font-mono text-[0.88em] text-ink";
 const CODE_COMPACT = "px-1 py-px rounded bg-mist font-mono text-[0.86em] text-ink [box-decoration-break:clone]";
 

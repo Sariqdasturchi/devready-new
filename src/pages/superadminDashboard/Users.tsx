@@ -118,7 +118,7 @@ export default function SuperadminUsers() {
                     <Avatar name={u.fullName} src={u.avatar} size={32} />
                     <span>
                       <span className="block font-semibold text-ink whitespace-nowrap">{u.fullName}</span>
-                      <span className="block text-xs text-muted">{u.phone}</span>
+                      <span className="block text-xs text-muted">{u.phone || u.email || (u.authProvider === "github" ? "GitHub" : u.authProvider === "google" ? "Google" : "")}</span>
                     </span>
                   </button>
                 </td>
@@ -193,7 +193,7 @@ function UserDetailModal({ id, plans, onClose, onChanged }: { id: string | null;
       .user(id)
       .then((u) => {
         setUser(u);
-        setForm({ fullName: u.fullName, phone: u.phone, direction: u.direction || "", degree: u.degree || "" });
+        setForm({ fullName: u.fullName, phone: u.phone || "", direction: u.direction || "", degree: u.degree || "" });
         const p = typeof u.plan === "object" && u.plan ? u.plan._id : "";
         const active = p && (!u.planExpireDate || new Date(u.planExpireDate) > new Date());
         setPlanId(active ? p : "");
@@ -210,7 +210,7 @@ function UserDetailModal({ id, plans, onClose, onChanged }: { id: string | null;
     if (!user) return;
     setSaving(true);
     try {
-      await adminApi.updateUser(user._id, { fullName: form.fullName, phone: form.phone, direction: form.direction || null, degree: form.degree || null });
+      await adminApi.updateUser(user._id, { fullName: form.fullName, ...(form.phone ? { phone: form.phone } : {}), direction: form.direction || null, degree: form.degree || null });
       const currentPlan = typeof user.plan === "object" && user.plan ? user.plan._id : "";
       if (planId !== currentPlan) await adminApi.setPlan(user._id, planId || null);
       toast.success("Saqlandi");

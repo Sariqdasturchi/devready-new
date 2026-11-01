@@ -15,6 +15,8 @@ import { getStoredUser } from "../../lib/auth";
 import { Badge, Card, CardHeader, EmptyState, ErrorState, PageHeader, PageLoader, ProgressBar, StatCard, StatusBadge, Tabs } from "../../components/ui";
 import ActivityCalendar from "../../components/user/ActivityCalendar";
 import GroupDeadlines from "../../components/user/GroupDeadlines";
+import FirstTaskCard from "../../components/user/FirstTaskCard";
+import TelegramConnect from "../../components/user/TelegramConnect";
 import { formatDate, limitLabel, timeAgo } from "../../lib/format";
 import type { Overview } from "../../types/type";
 import { useChartColors } from "../../lib/theme";
@@ -50,6 +52,10 @@ export default function UserDashboard() {
           </Link>
         }
       />
+
+      {/* Hali task boshlamagan bo'lsa — birinchi qadam yuqorida */}
+      {o.periods.monthly.started === 0 && o.completedTasks === 0 && <FirstTaskCard />}
+      <TelegramConnect />
 
       {/* Umumiy ko'rsatkichlar */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">

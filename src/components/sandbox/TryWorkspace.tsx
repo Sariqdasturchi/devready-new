@@ -9,6 +9,7 @@ import Seo from "../Seo";
 import CodeWorkspace from "./CodeWorkspace";
 import WebWorkspace from "./WebWorkspace";
 import { kindOf } from "./kinds";
+import MobileHandoff from "./MobileHandoff";
 
 /** Ro'yxatdan o'tmasdan sinab ko'rish: /try/:id — kod muhiti to'liq ishlaydi, yuborishda ro'yxatdan o'tish so'raladi */
 export default function TryWorkspace() {
@@ -42,6 +43,7 @@ export default function TryWorkspace() {
     <>
       <Seo title={`${task.title} — sinab ko'rish`} description={task.description} />
       {kindOf(task.sandbox) === "web" ? <WebWorkspace guest task={task} offset={0} /> : <CodeWorkspace guest task={task} offset={0} />}
+      <MobileHandoff taskId={task._id} title={task.title} />
     </>
   );
 }

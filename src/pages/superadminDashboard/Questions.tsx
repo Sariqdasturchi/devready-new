@@ -2,13 +2,27 @@ import { useState } from "react";
 import { HiOutlinePlus, HiOutlineTrash } from "react-icons/hi2";
 import { errorMessage, quizApi } from "../../api/api";
 import { useCachedQuery } from "../../hooks/useCachedQuery";
-import { Badge, Button, Card, ConfirmModal, EmptyState, ErrorState, Field, Input, Modal, PageHeader, PageLoader, Select, cx } from "../../components/ui";
+import { Badge, Button, Card, ConfirmModal, EmptyState, ErrorState, Field, Input, Modal, PageHeader, PageLoader, Select, Textarea, cx } from "../../components/ui";
+import CodeView from "../../components/CodeView";
+import { MdInline } from "../../components/Markdown";
 import { useToast } from "../../components/ui/toast";
 import { TRACKS } from "../../lib/constants";
-import type { Question } from "../../types/type";
+import type { Question, QuestionLang } from "../../types/type";
 
 type Form = Omit<Question, "_id">;
-const EMPTY: Form = { direction: "Frontend", q: "", options: ["", "", ""], correct: 0 };
+const EMPTY: Form = { direction: "Frontend", q: "", options: ["", "", ""], correct: 0, code: "", lang: "" };
+const LANGS: { value: QuestionLang; label: string }[] = [
+  { value: "", label: "Kod yo'q" },
+  { value: "js", label: "JavaScript" },
+  { value: "jsx", label: "React (JSX)" },
+  { value: "ts", label: "TypeScript" },
+  { value: "sql", label: "SQL" },
+  { value: "css", label: "CSS" },
+  { value: "html", label: "HTML" },
+  { value: "python", label: "Python" },
+  { value: "bash", label: "Shell / .env" },
+  { value: "json", label: "JSON" },
+];
 
 /** Ro'yxatdan o'tishdagi daraja aniqlash testi savollari */
 export default function SuperadminQuestions() {
@@ -25,7 +39,7 @@ export default function SuperadminQuestions() {
     if (!form.q.trim() || options.some((o) => !o)) return toast.error("Savol va barcha variantlarni to'ldiring");
     setSaving(true);
     try {
-      const payload = { ...form, q: form.q.trim(), options };
+      const payload = { ...form, q: form.q.trim(), options, code: (form.code || "").replace(/\s+$/, ""), lang: (form.code?.trim() ? form.lang || "js" : "") as QuestionLang };
       if (editing === "new") await quizApi.create(payload);
       else if (editing) await quizApi.update(editing._id, payload);
       toast.success("Savol saqlandi");
@@ -88,11 +102,14 @@ export default function SuperadminQuestions() {
                   <div className="flex items-center gap-2 mb-1">
                     <Badge>{q.direction}</Badge>
                   </div>
-                  <p className="text-sm font-semibold text-ink">{q.q}</p>
+                  <p className="text-sm font-semibold text-ink">
+                    <MdInline text={q.q} compact />
+                  </p>
+                  {q.code && <CodeView code={q.code} lang={q.lang} className="mt-2 text-[12.5px]" />}
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {q.options.map((o, i) => (
                       <span key={i} className={cx("text-xs px-2 py-0.5 rounded-md border", i === q.correct ? "border-brand/30 text-brand" : "border-line text-muted")}>
-                        {o}
+                        <MdInline text={o} compact />
                       </span>
                     ))}
                   </div>
@@ -102,7 +119,7 @@ export default function SuperadminQuestions() {
                     size="sm"
                     variant="secondary"
                     onClick={() => {
-                      setForm({ direction: q.direction, q: q.q, options: q.options, correct: q.correct });
+                      setForm({ direction: q.direction, q: q.q, options: q.options, correct: q.correct, code: q.code || "", lang: q.lang || "" });
                       setEditing(q);
                     }}
                   >
@@ -141,9 +158,30 @@ export default function SuperadminQuestions() {
               ))}
             </Select>
           </Field>
-          <Field label="Savol">
+          <Field label="Savol" hint="Matn ichidagi kod: `backtick` bilan — masalan `req.body`">
             <Input value={form.q} onChange={(e) => setForm({ ...form, q: e.target.value })} />
           </Field>
+          <Field label="Kod (ixtiyoriy)" hint="Ko'p qatorli kod alohida blokda, ranglar bilan chiqadi — savol matniga bir qatorga yozmang">
+            <Textarea
+              rows={5}
+              value={form.code || ""}
+              onChange={(e) => setForm({ ...form, code: e.target.value })}
+              className="font-mono text-[13px]"
+              spellCheck={false}
+              placeholder={"console.log(1);\nsetTimeout(() => console.log(2));"}
+            />
+          </Field>
+          {form.code?.trim() && (
+            <Field label="Kod tili">
+              <Select value={form.lang || "js"} onChange={(e) => setForm({ ...form, lang: e.target.value as QuestionLang })}>
+                {LANGS.filter((l) => l.value).map((l) => (
+                  <option key={l.value} value={l.value}>
+                    {l.label}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          )}
           <div className="flex flex-col gap-2">
             <span className="text-xs font-semibold text-ink-2">Variantlar (to'g'risini belgilang)</span>
             {form.options.map((o, i) => (

@@ -29,8 +29,9 @@ export default function Header() {
       <nav className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between gap-6">
         <Logo />
 
-        <ul className="hidden md:flex items-center gap-8">
-          {menuList.map((item) => (
+        {/* Keng ekranda: logotip bosh sahifaga olib boradi, "Bosh sahifa" bandi ortiqcha. 768–1024px da menyu sig'mas edi (ikki qatorga bo'linardi) */}
+        <ul className="hidden lg:flex items-center gap-6 xl:gap-8 whitespace-nowrap">
+          {menuList.filter((item) => item.path !== "/").map((item) => (
             <li key={item.id}>
               <NavLink to={item.path} end={item.path === "/"} className={linkCls}>
                 {item.name}
@@ -39,7 +40,7 @@ export default function Header() {
           ))}
         </ul>
 
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden lg:flex items-center gap-2 whitespace-nowrap">
           <ThemeToggle />
           {cabinet ? (
             <Link to={cabinet} className="h-10 px-5 inline-flex items-center rounded-full bg-brand text-white text-sm font-semibold hover:bg-brand-deep transition-colors">
@@ -57,7 +58,7 @@ export default function Header() {
           )}
         </div>
 
-        <div className="md:hidden flex items-center gap-1 -mr-2">
+        <div className="lg:hidden flex items-center gap-1 -mr-2">
         <ThemeToggle />
         <button
           type="button"
@@ -72,7 +73,7 @@ export default function Header() {
       </nav>
 
       {open && (
-        <div className="md:hidden border-t border-line bg-surface px-5 pb-6 pt-2">
+        <div className="lg:hidden border-t border-line bg-surface px-5 pb-6 pt-2">
           <ul className="flex flex-col">
             {menuList.map((item) => (
               <li key={item.id}>

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { HiOutlineCheckCircle } from "react-icons/hi2";
+import { HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineXCircle } from "react-icons/hi2";
 import type { UserTask } from "../../types/type";
 import { setTryReturn } from "../../lib/track";
 import { Button, Modal } from "../ui";
@@ -40,14 +40,29 @@ export default function GuestSubmitModal({
       }
     >
       <div className="flex flex-col gap-4 text-[14px] text-ink-2 leading-relaxed">
-        {tested && (
+        {tested ? (
+          // Belgi natijaga mos: hammasi o'tdi — yashil ✓, qisman — sariq !, hech biri — qizil ✕ (avval 0/7 da ham ✓ chiqardi)
           <p className="flex items-center gap-2 font-semibold text-ink">
-            <HiOutlineCheckCircle size={18} className={passed === total ? "text-emerald-600" : "text-brand"} />
-            {passed === total ? `Barcha ${total} ta test o'tdi` : `${total} ta testdan ${passed} tasi o'tdi`}
+            {passed === total && total > 0 ? (
+              <HiOutlineCheckCircle size={18} className="text-emerald-600" />
+            ) : passed > 0 ? (
+              <HiOutlineExclamationCircle size={18} className="text-amber-500" />
+            ) : (
+              <HiOutlineXCircle size={18} className="text-rose-600" />
+            )}
+            {passed === total && total > 0 ? `Barcha ${total} ta test o'tdi` : `${total} ta testdan ${passed} tasi o'tdi`}
+          </p>
+        ) : (
+          <p className="flex items-center gap-2 font-semibold text-ink">
+            <HiOutlineExclamationCircle size={18} className="text-amber-500" />
+            Testlar hali ishga tushirilmagan
           </p>
         )}
+        {tested && passed < total && (
+          <p>Hamma testlar o'tmasa ham yuborishingiz mumkin — mentor yoki AI nima yetishmayotganini tushuntirib beradi.</p>
+        )}
         <p>
-          Kodingiz shu brauzerda saqlandi. Uni mentor yoki AI tekshirishi, XP va daraja olishingiz uchun ro'yxatdan o'ting — bu 1 daqiqa: ism, telefon va Telegram'da bitta tugma.
+          Kodingiz shu brauzerda saqlandi. Uni mentor yoki AI tekshirishi, XP va daraja olishingiz uchun ro'yxatdan o'ting — bir daqiqa: Google, GitHub yoki telefon va Telegram.
         </p>
         <p>Ro'yxatdan o'tgach shu task ochiladi va yozgan kodingiz o'z joyida bo'ladi.</p>
       </div>
