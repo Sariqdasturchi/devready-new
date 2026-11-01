@@ -82,10 +82,10 @@ export default function HeroTask() {
         aria-hidden={!reviewed}
       >
         <div className="flex items-center gap-3">
-          <span className="w-9 h-9 rounded-full bg-brand text-white flex items-center justify-center text-[13px] font-bold">JM</span>
+          <span className="w-9 h-9 rounded-full bg-brand text-white flex items-center justify-center text-[13px] font-bold" aria-hidden>M</span>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold">Jasur, mentor</p>
-            <p className="text-[12px] text-muted">Yechimni tekshirdi</p>
+            <p className="text-sm font-semibold">Mentor izohi</p>
+            <p className="text-[12px] text-muted">Namuna — tekshiruv shunday ko'rinadi</p>
           </div>
           <p className="text-[22px] font-bold tracking-tight">
             86<span className="text-muted text-sm font-medium">/100</span>

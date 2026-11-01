@@ -18,6 +18,7 @@ const Join = lazy(() => import("./pages/landing/Join"));
 const TryWorkspace = lazy(() => import("./components/sandbox/TryWorkspace"));
 const Register = lazy(() => import("./pages/auth/Register"));
 const Login = lazy(() => import("./pages/auth/Login"));
+const AuthCallback = lazy(() => import("./pages/auth/AuthCallback"));
 
 // Talaba
 const UserDashboardLayout = lazy(() => import("./pages/userDashboard/UserDashboardLayout"));
@@ -66,6 +67,11 @@ const SuperadminSettings = lazy(() => import("./pages/superadminDashboard/Settin
 
 type AppRole = "user" | "mentor" | "superadmin";
 
+function BlogSlugRedirect() {
+  const { pathname } = useLocation();
+  return <Navigate to={pathname.replace(/^\/blog\//, "/blogs/")} replace />;
+}
+
 function ProtectedRoute({ roles }: { roles: AppRole[] }) {
   const user = getStoredUser();
   const location = useLocation();
@@ -88,8 +94,10 @@ function ProtectedRoute({ roles }: { roles: AppRole[] }) {
 function GuestOnly() {
   const user = getStoredUser();
   const { pathname } = useLocation();
-  if (getToken() && user && user.role !== "admin") return <Navigate to={homeForRole(user.role)} replace />;
   const register = pathname.startsWith("/register");
+  // Google/GitHub yoki Telegram orqali kirgan, lekin yo'nalish tanlamagan talaba — ro'yxatdan o'tishning yo'nalish qadamiga
+  const onboarding = register && user?.role === "user" && !user.direction;
+  if (getToken() && user && user.role !== "admin" && !onboarding) return <Navigate to={homeForRole(user.role)} replace />;
   return (
     <>
       {register ? (
@@ -118,6 +126,9 @@ export default function App() {
             <Route path="/mentors" element={<BecomeMentor />} />
             <Route path="/blogs" element={<BlogPage />} />
             <Route path="/blogs/:id" element={<BlogView />} />
+            {/* Eski/xato yozilgan manzillar (Vercel'da ham 301) */}
+            <Route path="/blog" element={<Navigate to="/blogs" replace />} />
+            <Route path="/blog/:id" element={<BlogSlugRedirect />} />
             <Route path="/u/:username" element={<PublicProfile />} />
             <Route path="/join/:code" element={<Join />} />
             <Route path="*" element={<NotFound />} />
@@ -125,6 +136,8 @@ export default function App() {
 
           {/* Ro'yxatdan o'tmasdan sinab ko'rish */}
           <Route path="/try/:id" element={<Suspense fallback={<PageLoader />}><TryWorkspace /></Suspense>} />
+
+          <Route path="/auth/callback" element={<Suspense fallback={<PageLoader />}><AuthCallback /></Suspense>} />
 
           <Route element={<GuestOnly />}>
             <Route path="/login" element={<Login />} />

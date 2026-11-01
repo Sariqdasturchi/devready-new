@@ -127,10 +127,10 @@ export default function Contests() {
     [data],
   );
   const selectedId = params.get("id");
+  // Asosiy joyda faqat hozirgi yoki kelgusi musobaqa. O'tgan musobaqa — faqat arxivdan tanlansa
   const featured = data
     ? data.current.find((c) => c.status === "live") ||
       data.current[0] ||
-      data.past[0] ||
       null
     : null;
   const selected =
@@ -147,16 +147,17 @@ export default function Contests() {
     <main>
       <Seo
         title="Haftalik musobaqa"
-        description="Har hafta bitta amaliy task: shanba 10:00 dan yakshanba 22:00 gacha. Natija avtomatik testlar va vaqt bo'yicha, g'oliblar profilida belgi oladi. Ishtirok bepul."
+        description="Dam olish kunlari bitta amaliy task: natija avtomatik testlar va vaqt bo'yicha, g'oliblar profilida belgi oladi. Ishtirok bepul."
       />
       <section className="max-w-6xl mx-auto px-5 sm:px-8 pt-14 sm:pt-20 pb-10">
         <h1 className="text-[40px] sm:text-6xl font-extrabold tracking-[-0.045em] leading-[1.03] text-ink max-w-3xl text-balance">
           Har hafta bitta task. Eng to'g'ri va tez yechim yutadi.
         </h1>
         <p className="mt-5 text-lg text-ink-2 max-w-2xl leading-relaxed">
-          Musobaqa shanba 10:00 dan yakshanba 22:00 gacha ochiq. Taskni
-          ochganingizdan boshlab 3 soat vaqtingiz bor. Ishtirok bepul, g'oliblar
-          ochiq profilida belgi oladi.
+          Musobaqa odatda dam olish kunlari ochiq bo'ladi — aniq vaqt va
+          ishtirokchiga beriladigan vaqt musobaqa kartasida. Taymer taskni
+          ochganingizda boshlanadi. Ishtirok bepul, g'oliblar ochiq profilida
+          belgi oladi.
         </p>
       </section>
 

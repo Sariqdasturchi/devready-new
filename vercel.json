@@ -1,4 +1,21 @@
 {
+  "redirects": [
+    {
+      "source": "/blog",
+      "destination": "/blogs",
+      "permanent": true
+    },
+    {
+      "source": "/blog/:slug",
+      "destination": "/blogs/:slug",
+      "permanent": true
+    },
+    {
+      "source": "/signup",
+      "destination": "/register",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/sitemap.xml",

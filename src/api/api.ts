@@ -15,6 +15,7 @@ import type { AiHealth,
   PaymentInfo,
   Plan,
   Question,
+  QuizQuestion,
   SandboxCode,
   DesignImage,
   PayoutSettings,
@@ -110,11 +111,43 @@ export const authApi = {
   loginVerify: (body: { phone: string; code: string }) =>
     api.post<AuthResponse>("/auth/login/verify", body).then((r) => r.data),
   me: () => data<User>(api.get("/auth/me")),
+  /** Google / GitHub — qaysilari serverda sozlangan */
+  oauthProviders: () => data<OAuthProvider[]>(api.get("/auth/oauth/providers")),
+  /** Provayderdan qaytgan bir martalik kodni sessiyaga almashtirish */
+  oauthExchange: (code: string) =>
+    api
+      .post<AuthResponse & { firstLogin: boolean; returnTo: string | null }>("/auth/oauth/exchange", { code })
+      .then((r) => r.data),
+  /** Kirgan foydalanuvchiga Telegram ulash havolasi (eslatma va natijalar botga kelishi uchun) */
+  telegramConnect: () =>
+    api.post<{ success: boolean; linkToken?: string; alreadyConnected?: boolean }>("/auth/telegram/connect").then((r) => r.data),
 };
+
+export type OAuthProvider = "google" | "github";
+
+export interface RecommendedTask {
+  _id: string;
+  title: string;
+  description: string;
+  track: string;
+  difficulty: "oson" | "orta" | "qiyin";
+  xp: number;
+  estimatedTime?: number;
+  tags?: string[];
+}
+
+/** Brauzerni provayderga yo'naltiradigan manzil (backend redirect qiladi) */
+export function oauthStartUrl(provider: OAuthProvider, extra: { source?: string; anonId?: string; returnTo?: string | null } = {}) {
+  const p = new URLSearchParams({ origin: window.location.origin });
+  if (extra.source) p.set("source", extra.source);
+  if (extra.anonId) p.set("anonId", extra.anonId);
+  if (extra.returnTo) p.set("returnTo", extra.returnTo);
+  return `${API_URL}/auth/oauth/${provider}?${p.toString()}`;
+}
 
 export const quizApi = {
   questions: (direction: string) =>
-    data<{ _id: string; q: string; options: string[]; correct: number }[]>(api.get("/quiz/questions", { params: { direction } })),
+    data<QuizQuestion[]>(api.get("/quiz/questions", { params: { direction } })),
   saveResult: (body: { direction: string; level: string }) => data<User>(api.post("/quiz/save-result", body)),
   // superadmin
   list: (direction?: string) => data<Question[]>(api.get("/quiz", { params: { direction } })),
@@ -146,6 +179,16 @@ export const profileApi = {
   },
 };
 
+/** Mentor bo'lish sahifasi: stavkalar va qoidalar (superadmin "Mentor to'lovlari"da o'zgartiradi) */
+export interface MentorTerms {
+  rates: { oson: number; orta: number; qiyin: number };
+  slaHours: number;
+  payoutDay: number;
+  minPayout: number;
+  bonusPct: number;
+}
+export const mentorTermsApi = { get: () => data<MentorTerms>(api.get("/public/mentor-terms")) };
+
 /** Ochiq profil — ro'yxatdan o'tmasdan */
 export const publicProfileApi = {
   get: (username: string, count = false) => data<PublicProfile>(api.get(`/public/users/${encodeURIComponent(username)}`, { params: count ? { count: 1 } : undefined })),
@@ -161,6 +204,8 @@ export const notificationApi = {
 
 // ─── USER: TASKS & SUBMISSIONS ────────────────────────────────────────────
 export const taskApi = {
+  /** Ro'yxatdan o'tgandan keyingi birinchi task: yo'nalishdagi eng oson, hali boshlanmagan */
+  recommended: () => data<RecommendedTask | null>(api.get("/tasks/recommended")),
   my: () =>
     api.get<{ success: boolean; data: UserTask[]; needsDirection?: boolean; closedDirection?: string | null }>("/tasks/my").then((r) => r.data),
   get: (id: string) => data<UserTask>(api.get(`/tasks/${id}`)),
@@ -232,7 +277,15 @@ export type FunnelData = {
   steps: FunnelStep[];
   bySource: { source: string; visitors: number; registered: number; started: number; paid: number }[];
   daily: { date: string; visits: number; registrations: number }[];
-  methods: { telegramLink: number; manualId: number; quizSkipped: number };
+  methods: {
+    telegramLink: number;
+    manualId: number;
+    quizSkipped: number;
+    google?: number;
+    github?: number;
+    handoff?: number;
+    oauthUsers?: number;
+  };
   tracking: boolean;
 };
 

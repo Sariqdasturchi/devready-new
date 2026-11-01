@@ -12,39 +12,43 @@ const STEPS = [
   },
   {
     title: "Ro'yxatdan o'ting",
-    text: "Ism, telefon va Telegram'da bitta tugma — bir daqiqa. Yozgan kodingiz o'z joyida qoladi.",
+    text: "Google, GitHub yoki telefon raqam bilan — bir daqiqa. Yozgan kodingiz o'z joyida qoladi.",
   },
   {
     title: "Mentorga yuboring",
-    text: "Yechimni mentor yoki AI tekshiruviga yuborasiz. Xohlasangiz taymer bilan — xuddi suhbatdagidek.",
+    text: "Yechimni mentor yoki AI tekshiruviga yuborasiz. O'z tempingizda (7 kun) yoki taymer bilan — xuddi suhbatdagidek.",
   },
   {
     title: "Baho va izoh oling",
-    text: "Ball, batafsil izoh va XP. Vaqtida yuborilmagan task bajarilmagan hisoblanadi — xuddi ishdagidek.",
+    text: "Ball, nima yaxshi va nimani tuzatish kerakligi haqida izoh, XP. Qabul qilingan yechimlar ochiq profilingizga — rezyumega qo'yadigan havolaga tushadi.",
   },
 ];
 
 const VALUES = [
   {
-    title: "Muddat bilan ishlash",
-    text: "Har bir taskning qiyinligiga qarab vaqti bor. Vaqtni rejalashtirish ko'nikmasi kod yozish bilan birga shakllanadi.",
+    title: "Kursdan keyingi birinchi qadam",
+    text: "Boshlang'ich tasklardan suhbat savollarigacha: fetch va forma validatsiyasidan LRU cache va SQL window funksiyalarigacha. Osonidan boshlaysiz.",
   },
   {
     title: "Haqiqiy kod review",
     text: "Mentor yechimingizni jamoadagi hamkasbdek ko'rib chiqadi: nima yaxshi, nimani tuzatish kerak va nima uchun.",
   },
   {
-    title: "Ko'rinadigan o'sish",
-    text: "Kunlik, haftalik va oylik statistika, XP va liderboard. Suhbatda ko'rsatish uchun bajarilgan ishlar to'planadi.",
+    title: "Ish beruvchiga ko'rsatadigan isbot",
+    text: "Har bir qabul qilingan yechim — baho, test natijasi va izoh bilan ochiq profilingizda. Rezyumeingizga bitta havola qo'yasiz.",
   },
 ];
 
-// Faollik kalendari namunasi (bezak uchun, deterministik)
-const HEAT = Array.from({ length: 7 * 18 }, (_, i) => {
-  const v = (i * 37 + (i % 7) * 11) % 10;
-  return v > 7 ? 3 : v > 5 ? 2 : v > 2 ? 1 : 0;
-});
-const HEAT_CLS = ["bg-line", "bg-brand/35", "bg-brand/65", "bg-brand"];
+// "Todo ro'yxat" taskining haqiqiy testlari — kod muhitida aynan shunday ko'rinadi (soxta statistika o'rniga)
+const DEMO_TESTS: { t: string; ok: boolean; err?: string }[] = [
+  { t: "Boshlang'ich 2 ta vazifa va hisob", ok: true },
+  { t: "Qo'shish: trim va input tozalanadi", ok: true },
+  { t: "Bo'sh matn qo'shilmaydi", ok: true },
+  { t: "Checkbox → done va hisob", ok: true },
+  { t: "O'chirish faqat shu vazifani", ok: true },
+  { t: "Bajarilganlarni o'chirish", ok: false, err: "#clear-done bajarilgan vazifa yo'qligida disabled emas" },
+  { t: "Matn HTML sifatida talqin qilinmaydi", ok: false, err: "<b>salom</b> qalin bo'lib chiqdi — innerHTML ishlatilgan (XSS)" },
+];
 
 export default function Home() {
   return (
@@ -69,8 +73,8 @@ export default function Home() {
               Dars ko'rish yetarli. Endi task bajaring.
             </h1>
             <p className="mt-6 text-lg sm:text-xl leading-relaxed text-ink-2 max-w-[34rem]">
-              DevReady — real loyihalarga o'xshash vazifalar platformasi. Har bir taskga vaqt beriladi, yechimingizni tajribali mentor tekshiradi va siz
-              texnik suhbatga tayyor holda chiqasiz.
+              Kurs tugadi, endi amaliyot kerak. Ishda va texnik suhbatlarda beriladigan tasklarni brauzerda yozasiz, testlar darhol natija ko'rsatadi,
+              yechimni mentor yoki AI tekshiradi.
             </p>
             <div className="mt-9 flex flex-col sm:flex-row gap-3">
               <Link
@@ -154,41 +158,31 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Kabinet namunasi */}
-            <div className="rounded-[22px] border border-line bg-surface p-5 sm:p-7 shadow-[0_30px_70px_-40px_rgba(11,16,32,0.35)]" aria-label="Kabinet namunasi">
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { k: "Jami XP", v: "2 340" },
-                  { k: "Reyting", v: "#4" },
-                  { k: "Streak", v: "12 kun" },
-                ].map((s) => (
-                  <div key={s.k} className="rounded-2xl bg-mist p-3.5 sm:p-4">
-                    <p className="text-[12px] sm:text-[13px] text-muted">{s.k}</p>
-                    <p className="mt-1 text-xl sm:text-2xl font-bold tracking-tight text-ink">{s.v}</p>
-                  </div>
-                ))}
+            {/* Kod muhiti namunasi: haqiqiy taskning testlari */}
+            <div className="rounded-[22px] border border-line bg-surface shadow-[0_30px_70px_-40px_rgba(11,16,32,0.35)] overflow-hidden" aria-label="Test natijalari namunasi">
+              <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-line bg-mist/60">
+                <p className="text-[14px] font-semibold text-ink truncate">Todo ro'yxat — testlar</p>
+                <span className="text-[13px] font-semibold text-ink tabular-nums shrink-0">5 / 7 o'tdi</span>
               </div>
-              <div className="mt-6">
-                <p className="text-[13px] text-muted mb-3">So'nggi 18 hafta faolligi</p>
-                <div className="grid grid-flow-col grid-rows-7 gap-[4px] w-fit">
-                  {HEAT.map((h, i) => (
-                    <span key={i} className={`w-[11px] h-[11px] sm:w-[14px] sm:h-[14px] rounded-[3px] ${HEAT_CLS[h]}`} />
-                  ))}
+              <ul className="px-5 py-4 flex flex-col gap-2.5">
+                {DEMO_TESTS.map((r) => (
+                  <li key={r.t} className="flex items-start gap-2.5 text-[14px]">
+                    <span className={`mt-0.5 w-4 h-4 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold text-white ${r.ok ? "bg-emerald-600" : "bg-rose-600"}`} aria-hidden>
+                      {r.ok ? "✓" : "✕"}
+                    </span>
+                    <span className="min-w-0">
+                      <span className={r.ok ? "text-ink" : "text-ink font-medium"}>{r.t}</span>
+                      {r.err && <span className="block text-[13px] text-rose-600 font-mono break-words">{r.err}</span>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <div className="px-5 pb-5">
+                <div className="rounded-2xl bg-brand-tint p-4 text-[14px] leading-relaxed text-ink">
+                  <p className="text-[12px] font-semibold text-brand-deep mb-1">Tekshiruv izohi (namuna)</p>
+                  Foydalanuvchi matnini <code className="font-mono text-[13px]">textContent</code> orqali chiqaring — <code className="font-mono text-[13px]">innerHTML</code> XSS'ga
+                  yo'l ochadi. Suhbatda aynan shu so'raladi.
                 </div>
-              </div>
-              <div className="mt-6 flex flex-col divide-y divide-line">
-                {[
-                  { t: "REST API: kutubxona", s: "Qabul qilindi", x: "+212 XP", ok: true },
-                  { t: "Kanban board drag & drop", s: "Mentor tekshirmoqda", x: "", ok: false },
-                ].map((r) => (
-                  <div key={r.t} className="flex items-center justify-between gap-3 py-3">
-                    <div className="min-w-0">
-                      <p className="text-[15px] font-medium truncate text-ink">{r.t}</p>
-                      <p className={`text-[13px] ${r.ok ? "text-brand" : "text-muted"}`}>{r.s}</p>
-                    </div>
-                    {r.x && <span className="text-[14px] font-semibold shrink-0 text-brand">{r.x}</span>}
-                  </div>
-                ))}
               </div>
             </div>
           </div>

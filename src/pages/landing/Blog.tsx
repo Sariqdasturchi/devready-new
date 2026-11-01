@@ -112,7 +112,7 @@ export default function BlogPage() {
                 {formatDate(b.createdAt)}
               </p>
               <h2 className="mt-2 text-xl font-bold tracking-[-0.02em] leading-snug text-ink group-hover:text-brand transition-colors">{b.title}</h2>
-              <p className="mt-2 text-[15px] text-ink-2 leading-relaxed line-clamp-3">{stripMarkdown(b.text)}</p>
+              <p className="mt-2 text-[15px] text-ink-2 leading-relaxed line-clamp-3">{stripMarkdown(b.text).slice(0, 320)}</p>
             </Link>
           ))}
         </div>
